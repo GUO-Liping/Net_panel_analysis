@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 # Analytical method 1st Edition
 # 计算环形网片顶破力、顶破位移、耗能能力
-# v1.3
+# v1.3版本
 
 import numpy as np
 import matplotlib.pyplot as plt
