@@ -1,2 +1,0 @@
-This is second file for testing
-这里创建了第二个分支，是一个新的分支，是以主分支为基础建立的
