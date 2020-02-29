@@ -109,27 +109,27 @@ def func_ringChianDataFit(nw,sigma_y):
     lN0 = 0.3*3
 
     nw_array = np.array([3,4,5,7,9,12,16,19],dtype='float')
-    FN2_array = np.array([17.57e3,31.12e3,44.94e3,69.72e3,80.55e3,110.53e3,177.66e3,209.39e3],dtype='float')
-    lN2_array = lN0 + 0.001*np.array([534.48,521.44,535.67,522.54,534.92,534.59,508.36,507.92,],dtype='float')
+    FN2_array = np.array([16.25e3,31.09e3,44.94e3,69.72e3,80.55e3,110.88e3,177.66e3,209.39e3],dtype='float')
+    delta_lN2_array = 0.001*np.array([517.36,543.68,507.92,521.44,535.67,522.54,534.92,534.59,],dtype='float')
+    
     dmin = 0.003
     Area_array = nw_array*np.pi*dmin**2/4 
     gamaMax_array = FN2_array/(sigma_y*2*Area_array)
 
     poly_FN2_func = np.polyfit(nw_array, FN2_array,1)
-    poly_lN2_func = np.polyfit(nw_array, lN2_array,1)
+    poly_delta_lN2_func = np.polyfit(nw_array, delta_lN2_array,1)
     poly_gamaMax_func = np.polyfit(nw_array, gamaMax_array,1)
 
     after_fit_FN2 = np.polyval(poly_FN2_func, nw)
-    after_fit_lN2 = np.polyval(poly_lN2_func, nw)
+    after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
+    after_fit_lN2 = lN0 + after_fit_delta_lN2
     after_fit_gamaMax = np.polyval(poly_gamaMax_func, nw)
- 
-    after_fit_FN1 = after_fit_FN2*0.2
-    after_fit_lN1 = after_fit_lN2*0.8
 
-    print('after_fit_FN2=', after_fit_FN2)
-    print('after_fit_lN2=', after_fit_lN2)
+    after_fit_FN1 = after_fit_FN2*0.15
+    after_fit_lN1 = lN0 + after_fit_delta_lN2*0.85
+    after_fit_gamaN1 = after_fit_gamaMax * 0.15
 
-    return after_fit_FN1, after_fit_FN2, lN0, after_fit_lN1, after_fit_lN2, after_fit_gamaMax
+    return after_fit_FN1, after_fit_FN2, lN0, after_fit_lN1, after_fit_lN2, after_fit_gamaN1, after_fit_gamaMax
 
 def func_round(number):
     if number % 1 == 0.5:
@@ -145,15 +145,15 @@ if __name__ == '__main__':
     nw = 7
     d = 0.3
     Rp = 0.5 
-    wx = 2.95  
-    wy = 2.95
     dmin = 0.003
-
-    ks = 5000000000  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!计算会有问题，待修正
+    wx_origin = 2.95
+    wy_origin = 2.95
+    sigma_y = 1770e6
+    ks = 10000000000000  # 弹簧刚度，指代卸扣边界（刚体）
     ls0 = 0.05
 
-    sigma_y = 1770e6
-    Rs = 2.4 * Rp
+    wx = wx_origin - ls0  
+    wy = wy_origin - ls0
 
     A = nw * np.pi*dmin**2/4  # 单肢截面面积
     
@@ -164,12 +164,9 @@ if __name__ == '__main__':
     my = func_round(Rp/ay)
     
     # 环链试验----------------------------------------------------------------------------------- #
-    FN1, FN2, lN0, lN1, lN2, gama_N2 = func_ringChianDataFit(nw, sigma_y)
+    FN1, FN2, lN0, lN1, lN2, gama_N1, gama_N2 = func_ringChianDataFit(nw, sigma_y)
     Ef1 = FN1*lN0/(2*A*(lN1 - lN0))
     Ef2 = (FN2-FN1)*lN0 / (2*A*(lN2 - lN1))
-
-    # 轴向力发展程度
-    gama_N1 = gama_N2*0.1
 
     L0_x = np.array(func_vector(ax, ay, Rp, wx, mx, 0))
     L0_y = np.array(func_vector(ax, ay, Rp, wy, my, 0))
@@ -238,10 +235,12 @@ if __name__ == '__main__':
     displacement = H2
 
     # 修正了加载区域边缘直线钢丝束如实际网曲面切线方向的差异（按修正30°考虑）
-    Force = 4* np.sum(F2_x * np.cos(np.arccos(H2 / L2_x)), axis=0) + 4* np.sum(F2_y * np.cos(np.arccos(H2 / L2_y)),axis=0)
+    Force = 4* np.sum(F2_x * H2 / L2_x, axis=0) + 4* np.sum(F2_y * H2 / L2_y,axis=0)
     Energy = 4*np.sum(E2_x, axis=0) + 4*np.sum(E2_y, axis=0)
 
     print('nw=', nw)
+    print('gama_N2=', gama_N2)
+    print('F2_y=', F2_y)
     print('Force = ', Force)
     print('displacement = ', displacement)
     print('Energy = ', Energy)
