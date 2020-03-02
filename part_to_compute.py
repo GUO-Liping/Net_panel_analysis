@@ -4,7 +4,7 @@
 '''
 Name： NetPanelAnalysis
 Function: 计算环形网片顶破力、顶破位移、耗能能力
-Note: 采用国际单位制
+Note: 国际单位制
 Version: 1.0.2
 Author: Liping GUO
 Date: 2020/3/2
@@ -14,7 +14,6 @@ Remark: 影响计算结果的因素还有：
 '''
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 def func_vector_x_direction(para_wx, para_mx, para_ax, para_wy, para_h):
     index_xi = np.linspace(1, para_mx, para_mx, endpoint=True)
@@ -61,7 +60,6 @@ def func_ringChianDataFit(nw,sigma_y):
     after_fit_gamaMax = np.polyval(poly_gamaMax_func, nw)
 
     after_fit_lN2 = lN0 + after_fit_delta_lN2
-
     after_fit_FN1 = after_fit_FN2*0.15
     after_fit_lN1 = lN0 + after_fit_delta_lN2*0.85
     after_fit_gamaN1 = after_fit_gamaMax * 0.15
@@ -82,8 +80,34 @@ def func_choose_dmin(para_nw):
 		para_dmin = 0.003
 	return para_dmin
 
+def func_correct_gamaAndForce(mx, gama_N2_x, gama_N1, F2_x, K1_x, L2_x, L0_x, sigma_y, A):
+
+	for i in range(mx):
+		if gama_N2_x[i] < gama_N1:
+			F2_x[i] = K1_x[i] * (L2_x[i] - L0_x[i])
+			gama_N2_x[i] = F2_x[i] / (sigma_y*A)
+		else:
+			pass
+	return F2_x, gama_N2_x
+
+def compute_height(L0_x,K1_x,K2_x,gama_N1,gama_N2,sigma_y,A):
+	min_L0_x = min(L0_x)
+	max_K1_x = max(K1_x)
+	max_K2_x = max(K2_x)
+	min_L1_x = min_L0_x + gama_N1*sigma_y*A/max_K1_x
+	min_L2_x = min_L1_x + (gama_N2*sigma_y*A - max_K1_x*(min_L1_x-min_L0_x))/max_K2_x
+
+	min_L0 = min_L0_x
+	min_L1 = min_L1_x
+	min_L2 = min_L2_x
+
+	height1 = np.sqrt(min_L1**2 - min_L0**2)
+	height2 = np.sqrt(min_L2**2 - min_L0**2)
+
+	return height1, height2
+
 def func_inputData():
-	nw = 7
+	nw = 19
 	d = 0.3
 	Rp = 0.5 
 	wx_origin = 2.95
@@ -118,7 +142,7 @@ if __name__ == '__main__':
 	
 	L0_x = func_vector_x_direction(wx, mx, ax, wy, 0)
 	L0_y = func_vector_y_direction(wy, my, ay, wx, 0)
-	   
+
 	lf0_x = L0_x - ls0
 	lf0_y = L0_y - ls0
 	
@@ -127,55 +151,41 @@ if __name__ == '__main__':
 	K1_y = 1 / (lf0_y/(Ef1*A)+1/ks)
 	K2_y = 1 / (lf0_y/(Ef2*A)+1/ks)
 
-	min_L0_x = min(L0_x)
-	K1_xmax = max(K1_x)
-	K2_xmax = max(K2_x)
-	min_L1_x = min_L0_x + gama_N1*sigma_y*A/K1_xmax
-	min_L2_x = min_L1_x + (gama_N2*sigma_y*A - K1_xmax*(min_L1_x-min_L0_x))/K2_xmax
-
-	min_L0 = min_L0_x
-	min_L1 = min_L1_x
-	min_L2 = min_L2_x
-
-	h1 = np.sqrt(min_L1**2 - min_L0**2)
-	h2 = np.sqrt(min_L2**2 - min_L0**2)
+	h1, h2 = compute_height(L0_x,K1_x,K2_x,gama_N1,gama_N2,sigma_y,A)
 
 	# 计算变形----------------------------------------------------------------------------------- #
 
 	L1_x = func_vector_x_direction(wx, mx, ax, wy, h1)
-	L2_x = func_vector_x_direction(wx, mx, ax, wy, h2)
 	L1_y = func_vector_x_direction(wy, my, ay, wx, h1)
+	ls1_x = (Ef1*A*(L1_x-lf0_x)+ks*ls0*lf0_x) / (ks*lf0_x+Ef1*A)
+	ls1_y = (Ef1*A*(L1_y-lf0_y)+ks*ls0*lf0_y) / (ks*lf0_y+Ef1*A)
+	lf1_x = (ks*lf0_x*(L1_x-ls0)+Ef1*A*lf0_x) / (ks*lf0_x+Ef1*A)
+	lf1_y = (ks*lf0_y*(L1_y-ls0)+Ef1*A*lf0_y) / (ks*lf0_y+Ef1*A)
+
+
+	L2_x = func_vector_x_direction(wx, mx, ax, wy, h2)
 	L2_y = func_vector_x_direction(wy, my, ay, wx, h2)
+	ls2_x = (Ef2*A/lf0_x*(L2_x-lf1_x)+ks*ls1_x) / (ks+Ef2*A/lf0_x)
+	ls2_y = (Ef2*A/lf0_y*(L2_y-lf1_y)+ks*ls1_y) / (ks+Ef2*A/lf0_y)
+	lf2_x = (ks*(L2_x-ls1_x)+lf1_x*Ef2*A/lf0_x) / (ks+Ef2*A/lf0_x)
+	lf2_y = (ks*(L2_y-ls1_y)+lf1_y*Ef2*A/lf0_y) / (ks+Ef2*A/lf0_y)
 
 	# 计算顶破力----------------------------------------------------------------------------------- #
 
 	F1_x = K1_x * (L1_x - L0_x)
-	F2_x = K1_x * (L1_x - L0_x) + K2_x*(L2_x-L1_x)
-	F1_y = K1_y * (L1_y - L0_y)
-	F2_y = K1_y * (L1_y - L0_y) + K2_y*(L2_y-L1_y)
-
-	# 计算轴向应力发展程度----------------------------------------------------------------------------------- #
-
 	gama_N1_x = F1_x/(A*sigma_y)
-	gama_N2_x = F2_x/(A*sigma_y)
+
+	F1_y = K1_y * (L1_y - L0_y)
 	gama_N1_y = F1_y/(A*sigma_y)
-	gama_N2_y = F2_y/(A*sigma_y)
 
-	# 修正单元轴力、轴向应力发展程度系数错误值----------------------------------------------------------------------------------- #
+	# 初始化并修正单元轴力、轴向应力发展程度系数----------------------------------------------------------- #
+	init_F2_x = F1_x + K2_x*(L2_x-L1_x)
+	init_gama_N2_x = init_F2_x/(A*sigma_y)
+	F2_x, gama_N2_x = func_correct_gamaAndForce(mx, init_gama_N2_x, gama_N1, init_F2_x, K1_x, L2_x, L0_x, sigma_y, A)
 
-	for i in range(mx):
-		if gama_N2_x[i] < gama_N1:
-			F2_x[i] = K1_x[i] * (L2_x[i] - L0_x[i])
-			gama_N2_x[i] = F2_x[i] / (sigma_y*A)
-		else:
-			pass
-
-	for i in range(my):
-		if gama_N2_y[i] < gama_N1:
-			F2_y[i] = K1_y[i] * (L2_y[i] - L0_y[i])
-			gama_N2_y[i] = F2_y[i] / (sigma_y*A)
-		else:
-			pass
+	init_F2_y = F1_y + K2_y*(L2_y-L1_y)
+	init_gama_N2_y = init_F2_y/(A*sigma_y)
+	F2_y, gama_N2_y = func_correct_gamaAndForce(my, init_gama_N2_y, gama_N1, init_F2_y, K1_y, L2_y, L0_y, sigma_y, A)
 
 	print('gama_N1_x=', gama_N1_x)
 	print('gama_N2_x=', gama_N2_x)
@@ -193,6 +203,12 @@ if __name__ == '__main__':
 
 	print('nw=', nw)
 	print('gama_N2=', gama_N2)
+	print('L1_x = ', L1_x)
+	print('lf1_x = ', lf1_x)
+	print('ls1_x = ', ls1_x)
+	print('L2_x = ', L2_x)
+	print('lf2_x = ', lf2_x)
+	print('ls2_x = ', ls2_x)
 	print('Force = ', Force)
 	print('displacement = ', displacement)
 	print('Energy = ', Energy)
