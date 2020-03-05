@@ -1,26 +1,16 @@
 # -*- coding: utf-8 -*-
+# -*- coding: UTF-8 -*-
+# NetPanelAnalysis_V1_0_2界面
 
-# Form implementation generated from reading ui file 'NetPanelAnalysis_V1_1.ui'
-#
-# Created by: PyQt5 UI code generator 5.10.1
-#
-# WARNING! All changes made in this file will be lost!
-
-from PyQt5 import QtCore, QtGui, QtWidgets
 import numpy as np
-
+from PyQt5.QtCore import pyqtSignal
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(object):
 
-    def __init__(self):
-        super(Ui_MainWindow, self).__init__()
-
-        self.setupUi(self)
-
-
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1000, 800)
+        MainWindow.resize(995, 793)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -31,7 +21,6 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.centralwidget)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.tabWidget_all = QtWidgets.QTabWidget(self.centralwidget)
-        
         font = QtGui.QFont()
         font.setFamily("等线")
         font.setPointSize(9)
@@ -39,7 +28,6 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.tabWidget_all.setFont(font)
         self.tabWidget_all.setObjectName("tabWidget_all")
-        
         self.tab_RingNet = QtWidgets.QWidget()
         self.tab_RingNet.setObjectName("tab_RingNet")
         self.gridLayout = QtWidgets.QGridLayout(self.tab_RingNet)
@@ -47,13 +35,12 @@ class Ui_MainWindow(object):
         self.splitter_horizontal = QtWidgets.QSplitter(self.tab_RingNet)
         self.splitter_horizontal.setOrientation(QtCore.Qt.Horizontal)
         self.splitter_horizontal.setObjectName("splitter_horizontal")
-        self.widget = QtWidgets.QWidget(self.splitter_horizontal)
-        self.widget.setObjectName("widget")
-        self.verticalLayout_input_output = QtWidgets.QVBoxLayout(self.widget)
+        self.layoutWidget = QtWidgets.QWidget(self.splitter_horizontal)
+        self.layoutWidget.setObjectName("layoutWidget")
+        self.verticalLayout_input_output = QtWidgets.QVBoxLayout(self.layoutWidget)
         self.verticalLayout_input_output.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_input_output.setObjectName("verticalLayout_input_output")
-        
-        self.groupBox_input = QtWidgets.QGroupBox(self.widget)
+        self.groupBox_input = QtWidgets.QGroupBox(self.layoutWidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -72,7 +59,6 @@ class Ui_MainWindow(object):
         self.formLayout_input.setContentsMargins(0, -1, -1, -1)
         self.formLayout_input.setSpacing(10)
         self.formLayout_input.setObjectName("formLayout_input")
-        
         self.label_input_width = QtWidgets.QLabel(self.groupBox_input)
         font = QtGui.QFont()
         font.setFamily("等线")
@@ -83,7 +69,6 @@ class Ui_MainWindow(object):
         self.label_input_width.setFont(font)
         self.label_input_width.setObjectName("label_input_width")
         self.formLayout_input.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.label_input_width)
-        
         self.value_input_width = QtWidgets.QLineEdit(self.groupBox_input)
         font = QtGui.QFont()
         font.setPointSize(9)
@@ -92,7 +77,6 @@ class Ui_MainWindow(object):
         self.value_input_width.setFont(font)
         self.value_input_width.setObjectName("value_input_width")
         self.formLayout_input.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.value_input_width)
-        
         self.label_input_height = QtWidgets.QLabel(self.groupBox_input)
         font = QtGui.QFont()
         font.setFamily("等线")
@@ -103,7 +87,6 @@ class Ui_MainWindow(object):
         self.label_input_height.setFont(font)
         self.label_input_height.setObjectName("label_input_height")
         self.formLayout_input.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_input_height)
-        
         self.value_input_height = QtWidgets.QLineEdit(self.groupBox_input)
         font = QtGui.QFont()
         font.setPointSize(9)
@@ -112,7 +95,6 @@ class Ui_MainWindow(object):
         self.value_input_height.setFont(font)
         self.value_input_height.setObjectName("value_input_height")
         self.formLayout_input.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.value_input_height)
-        
         self.label_input_nw = QtWidgets.QLabel(self.groupBox_input)
         font = QtGui.QFont()
         font.setFamily("等线")
@@ -123,7 +105,6 @@ class Ui_MainWindow(object):
         self.label_input_nw.setFont(font)
         self.label_input_nw.setObjectName("label_input_nw")
         self.formLayout_input.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.label_input_nw)
-        
         self.value_input_nw = QtWidgets.QSpinBox(self.groupBox_input)
         font = QtGui.QFont()
         font.setPointSize(9)
@@ -131,9 +112,7 @@ class Ui_MainWindow(object):
         font.setWeight(50)
         self.value_input_nw.setFont(font)
         self.value_input_nw.setObjectName("value_input_nw")
-        self.value_input_nw.setValue(3)
         self.formLayout_input.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.value_input_nw)
-        
         self.label_input_D = QtWidgets.QLabel(self.groupBox_input)
         font = QtGui.QFont()
         font.setFamily("等线")
@@ -144,7 +123,6 @@ class Ui_MainWindow(object):
         self.label_input_D.setFont(font)
         self.label_input_D.setObjectName("label_input_D")
         self.formLayout_input.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.label_input_D)
-        
         self.value_input_D = QtWidgets.QLineEdit(self.groupBox_input)
         font = QtGui.QFont()
         font.setPointSize(9)
@@ -153,27 +131,24 @@ class Ui_MainWindow(object):
         self.value_input_D.setFont(font)
         self.value_input_D.setObjectName("value_input_D")
         self.formLayout_input.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.value_input_D)
-        
-        self.label_input_Dmin = QtWidgets.QLabel(self.groupBox_input)
+        self.label_input_ks = QtWidgets.QLabel(self.groupBox_input)
         font = QtGui.QFont()
         font.setFamily("等线")
         font.setPointSize(9)
         font.setBold(False)
         font.setUnderline(False)
         font.setWeight(50)
-        self.label_input_Dmin.setFont(font)
-        self.label_input_Dmin.setObjectName("label_input_Dmin")
-        self.formLayout_input.setWidget(4, QtWidgets.QFormLayout.LabelRole, self.label_input_Dmin)
-        
-        self.value_input_Dmin = QtWidgets.QLineEdit(self.groupBox_input)
+        self.label_input_ks.setFont(font)
+        self.label_input_ks.setObjectName("label_input_ks")
+        self.formLayout_input.setWidget(4, QtWidgets.QFormLayout.LabelRole, self.label_input_ks)
+        self.value_input_ks = QtWidgets.QLineEdit(self.groupBox_input)
         font = QtGui.QFont()
         font.setPointSize(9)
         font.setBold(False)
         font.setWeight(50)
-        self.value_input_Dmin.setFont(font)
-        self.value_input_Dmin.setObjectName("value_input_Dmin")
-        self.formLayout_input.setWidget(4, QtWidgets.QFormLayout.FieldRole, self.value_input_Dmin)
-       
+        self.value_input_ks.setFont(font)
+        self.value_input_ks.setObjectName("value_input_ks")
+        self.formLayout_input.setWidget(4, QtWidgets.QFormLayout.FieldRole, self.value_input_ks)
         self.label_input_Rp = QtWidgets.QLabel(self.groupBox_input)
         font = QtGui.QFont()
         font.setFamily("等线")
@@ -184,7 +159,6 @@ class Ui_MainWindow(object):
         self.label_input_Rp.setFont(font)
         self.label_input_Rp.setObjectName("label_input_Rp")
         self.formLayout_input.setWidget(5, QtWidgets.QFormLayout.LabelRole, self.label_input_Rp)
-
         self.value_input_Rp = QtWidgets.QLineEdit(self.groupBox_input)
         font = QtGui.QFont()
         font.setPointSize(9)
@@ -195,8 +169,7 @@ class Ui_MainWindow(object):
         self.formLayout_input.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.value_input_Rp)
         self.horizontalLayout_3.addLayout(self.formLayout_input)
         self.verticalLayout_input_output.addWidget(self.groupBox_input)
-        
-        self.pushButton = QtWidgets.QPushButton(self.widget)
+        self.pushButton = QtWidgets.QPushButton(self.layoutWidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -209,8 +182,7 @@ class Ui_MainWindow(object):
         self.pushButton.setFont(font)
         self.pushButton.setObjectName("pushButton")
         self.verticalLayout_input_output.addWidget(self.pushButton)
-        
-        self.groupBox_output = QtWidgets.QGroupBox(self.widget)
+        self.groupBox_output = QtWidgets.QGroupBox(self.layoutWidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -229,7 +201,6 @@ class Ui_MainWindow(object):
         self.formLayout_output.setHorizontalSpacing(35)
         self.formLayout_output.setVerticalSpacing(10)
         self.formLayout_output.setObjectName("formLayout_output")
-       
         self.label_output1 = QtWidgets.QLabel(self.groupBox_output)
         font = QtGui.QFont()
         font.setFamily("等线")
@@ -240,7 +211,6 @@ class Ui_MainWindow(object):
         self.label_output1.setFont(font)
         self.label_output1.setObjectName("label_output1")
         self.formLayout_output.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.label_output1)
-        
         self.value_output1 = QtWidgets.QLineEdit(self.groupBox_output)
         font = QtGui.QFont()
         font.setPointSize(9)
@@ -249,7 +219,6 @@ class Ui_MainWindow(object):
         self.value_output1.setFont(font)
         self.value_output1.setObjectName("value_output1")
         self.formLayout_output.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.value_output1)
-        
         self.label_output2 = QtWidgets.QLabel(self.groupBox_output)
         font = QtGui.QFont()
         font.setFamily("等线")
@@ -260,7 +229,6 @@ class Ui_MainWindow(object):
         self.label_output2.setFont(font)
         self.label_output2.setObjectName("label_output2")
         self.formLayout_output.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_output2)
-       
         self.value_output2 = QtWidgets.QLineEdit(self.groupBox_output)
         font = QtGui.QFont()
         font.setPointSize(9)
@@ -269,7 +237,6 @@ class Ui_MainWindow(object):
         self.value_output2.setFont(font)
         self.value_output2.setObjectName("value_output2")
         self.formLayout_output.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.value_output2)
-        
         self.label_output3 = QtWidgets.QLabel(self.groupBox_output)
         font = QtGui.QFont()
         font.setFamily("等线")
@@ -280,7 +247,6 @@ class Ui_MainWindow(object):
         self.label_output3.setFont(font)
         self.label_output3.setObjectName("label_output3")
         self.formLayout_output.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.label_output3)
-        
         self.value_output3 = QtWidgets.QSpinBox(self.groupBox_output)
         font = QtGui.QFont()
         font.setPointSize(9)
@@ -288,8 +254,8 @@ class Ui_MainWindow(object):
         font.setWeight(50)
         self.value_output3.setFont(font)
         self.value_output3.setObjectName("value_output3")
+        self.value_output3.setRange(1, 10000000)
         self.formLayout_output.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.value_output3)
-        
         self.label_output4 = QtWidgets.QLabel(self.groupBox_output)
         font = QtGui.QFont()
         font.setFamily("等线")
@@ -300,7 +266,6 @@ class Ui_MainWindow(object):
         self.label_output4.setFont(font)
         self.label_output4.setObjectName("label_output4")
         self.formLayout_output.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.label_output4)
-        
         self.value_output4 = QtWidgets.QLineEdit(self.groupBox_output)
         font = QtGui.QFont()
         font.setPointSize(9)
@@ -309,7 +274,6 @@ class Ui_MainWindow(object):
         self.value_output4.setFont(font)
         self.value_output4.setObjectName("value_output4")
         self.formLayout_output.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.value_output4)
-        
         self.label_output5 = QtWidgets.QLabel(self.groupBox_output)
         font = QtGui.QFont()
         font.setFamily("等线")
@@ -320,7 +284,6 @@ class Ui_MainWindow(object):
         self.label_output5.setFont(font)
         self.label_output5.setObjectName("label_output5")
         self.formLayout_output.setWidget(4, QtWidgets.QFormLayout.LabelRole, self.label_output5)
-        
         self.value_output5 = QtWidgets.QLineEdit(self.groupBox_output)
         font = QtGui.QFont()
         font.setPointSize(9)
@@ -329,7 +292,6 @@ class Ui_MainWindow(object):
         self.value_output5.setFont(font)
         self.value_output5.setObjectName("value_output5")
         self.formLayout_output.setWidget(4, QtWidgets.QFormLayout.FieldRole, self.value_output5)
-        
         self.label_output6 = QtWidgets.QLabel(self.groupBox_output)
         font = QtGui.QFont()
         font.setFamily("等线")
@@ -340,7 +302,6 @@ class Ui_MainWindow(object):
         self.label_output6.setFont(font)
         self.label_output6.setObjectName("label_output6")
         self.formLayout_output.setWidget(5, QtWidgets.QFormLayout.LabelRole, self.label_output6)
-        
         self.value_output6 = QtWidgets.QLineEdit(self.groupBox_output)
         font = QtGui.QFont()
         font.setPointSize(9)
@@ -351,7 +312,6 @@ class Ui_MainWindow(object):
         self.formLayout_output.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.value_output6)
         self.horizontalLayout_4.addLayout(self.formLayout_output)
         self.verticalLayout_input_output.addWidget(self.groupBox_output)
-        
         self.groupBox_drawing = QtWidgets.QGroupBox(self.splitter_horizontal)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(2)
@@ -361,7 +321,6 @@ class Ui_MainWindow(object):
         self.groupBox_drawing.setObjectName("groupBox_drawing")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.groupBox_drawing)
         self.horizontalLayout.setObjectName("horizontalLayout")
-
         self.stackedWidget_drawing = QtWidgets.QStackedWidget(self.groupBox_drawing)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(3)
@@ -372,24 +331,16 @@ class Ui_MainWindow(object):
         self.stackedWidget_drawing.setObjectName("stackedWidget_drawing")
 
         self.area = PaintArea()
-        self.stacked_page1 = QtWidgets.QWidget()
-        self.stacked_page1.setObjectName("stacked_page1")
         self.stackedWidget_drawing.addWidget(self.area)
 
-        self.stacked_page2 = QtWidgets.QWidget()
-        self.stacked_page2.setObjectName("stacked_page2")
-        self.stackedWidget_drawing.addWidget(self.stacked_page2)
         self.horizontalLayout.addWidget(self.stackedWidget_drawing)
         self.gridLayout.addWidget(self.splitter_horizontal, 0, 0, 1, 1)
         self.tabWidget_all.addTab(self.tab_RingNet, "")
-        
         self.tab_OtherNet = QtWidgets.QWidget()
         self.tab_OtherNet.setObjectName("tab_OtherNet")
         self.tabWidget_all.addTab(self.tab_OtherNet, "")
         self.horizontalLayout_2.addWidget(self.tabWidget_all)
-        
         MainWindow.setCentralWidget(self.centralwidget)
-        
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 995, 30))
         self.menubar.setObjectName("menubar")
@@ -405,23 +356,17 @@ class Ui_MainWindow(object):
         self.menuFile.setObjectName("menuFile")
         self.menuNew = QtWidgets.QMenu(self.menuFile)
         self.menuNew.setObjectName("menuNew")
-        
         MainWindow.setMenuBar(self.menubar)
-        
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
-        
         MainWindow.setStatusBar(self.statusbar)
-        
         self.toolBar = QtWidgets.QToolBar(MainWindow)
         font = QtGui.QFont()
         font.setFamily("等线")
         font.setPointSize(8)
         self.toolBar.setFont(font)
         self.toolBar.setObjectName("toolBar")
-        
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
-        
         self.action_Open = QtWidgets.QAction(MainWindow)
         self.action_Open.setObjectName("action_Open")
         self.actionSave = QtWidgets.QAction(MainWindow)
@@ -440,7 +385,6 @@ class Ui_MainWindow(object):
         self.actionPaste.setObjectName("actionPaste")
         self.actionPython = QtWidgets.QAction(MainWindow)
         self.actionPython.setObjectName("actionPython")
-        
         self.menuEdit.addAction(self.actionUndo)
         self.menuEdit.addAction(self.actionRedo)
         self.menuEdit.addAction(self.actionCut)
@@ -453,113 +397,80 @@ class Ui_MainWindow(object):
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
         self.menuFile.addSeparator()
-        
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
         self.menubar.addAction(self.menuSetting.menuAction())
         self.menubar.addAction(self.menuhelp.menuAction())
-        
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.action_Open)
         self.toolBar.addAction(self.actionSave)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionExit)
-  
+
+        self.value_input_nw.setValue(7)
+
+        self.retranslateUi(MainWindow)
         self.tabWidget_all.setCurrentIndex(0)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-        MainWindow.setWindowTitle("MainWindow")
-        
-        self.groupBox_input.setTitle("Input")
-        self.label_input_width.setText("width (m)")
-        self.value_input_width.setText("2.95")
-        self.label_input_height.setText("height(m)")
-        self.value_input_height.setText("2.95")
-        self.label_input_nw.setText("nw (1)")
-        self.label_input_D.setText("D (mm)")
-        self.value_input_D.setText("300")
-        self.label_input_Dmin.setText("Dmin (mm)")
-        self.value_input_Dmin.setText("3.0")
-        self.label_input_Rp.setText("Rp (m)")
-        self.value_input_Rp.setText("0.5")
-        self.pushButton.setText("Computing and Drawing")
-        self.groupBox_output.setTitle("Output")
-        self.label_output1.setText("output1")
-        self.value_output1.setText("value_output1")
-        self.label_output2.setText("output2")
-        self.value_output2.setText("value_output2")
-        self.label_output3.setText("output3")
-        self.label_output4.setText("output4")
-        self.value_output4.setText("value_output4")
-        self.label_output5.setText("output5")
-        self.value_output5.setText("value_output5")
-        self.label_output6.setText("output6")
-        self.value_output6.setText("value_output6")
-        self.groupBox_drawing.setTitle("Drawing")
-        self.tabWidget_all.setTabText(self.tabWidget_all.indexOf(self.tab_RingNet),  "Ring Net")
-        self.tabWidget_all.setTabText(self.tabWidget_all.indexOf(self.tab_OtherNet), "Other Net")
-        self.menuEdit.setTitle("Edit")
-        self.menuView.setTitle("View")
-        self.menuSetting.setTitle("Setting")
-        self.menuhelp.setTitle("help")
-        self.menuFile.setTitle("File")
-        self.menuNew.setTitle("New")
-        self.toolBar.setWindowTitle("toolBar")
-        self.action_Open.setText("Open")
-        self.action_Open.setShortcut("Ctrl+O")
-        self.actionSave.setText("Save")
-        self.actionExit.setText("Print")
-        self.actionUndo.setText("Undo")
-        self.actionRedo.setText("Redo")
-        self.actionCut.setText("Cut")
-        self.actionCopy.setText("Copy")
-        self.actionPaste.setText("Paste")
-        self.actionPython.setText("Python")
-
-        self.pushButton.clicked.connect(self.slot_compute)
-
-        self.value_input_height.textChanged.connect(self.slot_height_change)
-        self.value_input_width.textChanged.connect(self.slot_width_change)
-        self.value_input_nw.valueChanged.connect(self.slot_nw_change)
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "Net Panel Analysis V1.0.2"))
+        self.groupBox_input.setTitle(_translate("MainWindow", "Input"))
+        self.label_input_width.setText(_translate("MainWindow", "width (m)"))
+        self.value_input_width.setText(_translate("MainWindow", "2.95"))
+        self.label_input_height.setText(_translate("MainWindow", "height(m)"))
+        self.value_input_height.setText(_translate("MainWindow", "2.95"))
+        self.label_input_nw.setText(_translate("MainWindow", "nw (1)"))
 
 
-    def slot_height_change(self):
-        value = self.value_input_height.text()
-        try:
-            float(value)
-            self.area.setHeightValue(abs(float(value)))
-        except ValueError:
-            self.area.setHeightValue(1)
-
-    def slot_width_change(self):
-        value = self.value_input_width.text()
-        try:
-            float(value)
-            self.area.setWidthValue(abs(float(value)))
-        except ValueError:
-            self.area.setWidthValue(1)
-
-    def slot_nw_change(self):
-        value = self.value_input_nw.value()
-        self.area.setPenWidth(value)
-
-    def slot_compute(self):
-
-        a = float(self.value_input_width.text())
-        b = float(self.value_input_height.text())
-        c = a+b
-        self.value_output1.setText(str(float(c)))
-        self.value_output2.setText('2')
-        self.value_output3.setValue(3)
-        self.value_output4.setText('4')
-        self.value_output5.setText('5')
-        self.value_output6.setText('6')
+        self.label_input_D.setText(_translate("MainWindow", "D (mm)"))
+        self.value_input_D.setText(_translate("MainWindow", "300"))
+        self.label_input_ks.setText(_translate("MainWindow", "ks (N/m)"))
+        self.value_input_ks.setText(_translate("MainWindow", "10000000000"))
+        self.label_input_Rp.setText(_translate("MainWindow", "Rp (m)"))
+        self.value_input_Rp.setText(_translate("MainWindow", "0.5"))
+        self.pushButton.setText(_translate("MainWindow", "Computing and Drawing"))
+        self.groupBox_output.setTitle(_translate("MainWindow", "Output"))
+        self.label_output1.setText(_translate("MainWindow", "output1"))
+        self.value_output1.setText(_translate("MainWindow", "value_output1"))
+        self.label_output2.setText(_translate("MainWindow", "output2"))
+        self.value_output2.setText(_translate("MainWindow", "value_output2"))
+        self.label_output3.setText(_translate("MainWindow", "output3"))
+        self.label_output4.setText(_translate("MainWindow", "output4"))
+        self.value_output4.setText(_translate("MainWindow", "value_output4"))
+        self.label_output5.setText(_translate("MainWindow", "output5"))
+        self.value_output5.setText(_translate("MainWindow", "value_output5"))
+        self.label_output6.setText(_translate("MainWindow", "output6"))
+        self.value_output6.setText(_translate("MainWindow", "value_output6"))
+        self.groupBox_drawing.setTitle(_translate("MainWindow", "Drawing"))
+        self.tabWidget_all.setTabText(self.tabWidget_all.indexOf(self.tab_RingNet), _translate("MainWindow", "Ring Net"))
+        self.tabWidget_all.setTabText(self.tabWidget_all.indexOf(self.tab_OtherNet), _translate("MainWindow", "Other Net"))
+        self.menuEdit.setTitle(_translate("MainWindow", "Edit"))
+        self.menuView.setTitle(_translate("MainWindow", "View"))
+        self.menuSetting.setTitle(_translate("MainWindow", "Setting"))
+        self.menuhelp.setTitle(_translate("MainWindow", "help"))
+        self.menuFile.setTitle(_translate("MainWindow", "File"))
+        self.menuNew.setTitle(_translate("MainWindow", "New"))
+        self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
+        self.action_Open.setText(_translate("MainWindow", "Open"))
+        self.action_Open.setShortcut(_translate("MainWindow", "Ctrl+O"))
+        self.actionSave.setText(_translate("MainWindow", "Save"))
+        self.actionExit.setText(_translate("MainWindow", "Print"))
+        self.actionUndo.setText(_translate("MainWindow", "Undo"))
+        self.actionRedo.setText(_translate("MainWindow", "Redo"))
+        self.actionCut.setText(_translate("MainWindow", "Cut"))
+        self.actionCopy.setText(_translate("MainWindow", "Copy"))
+        self.actionPaste.setText(_translate("MainWindow", "Paste"))
+        self.actionPython.setText(_translate("MainWindow", "Python"))
 
 
 class PaintArea(QtWidgets.QWidget):
 
     def __init__(self):
         super(PaintArea, self).__init__()
+
         self.NetHeightValue = 3
         self.NetWidthValue = 3
 
@@ -570,17 +481,15 @@ class PaintArea(QtWidgets.QWidget):
         self.mybrush = QtGui.QBrush()
 
     def setHeightValue(self, value):
-        print(value)
         self.NetHeightValue = value
         self.update()
 
     def setWidthValue(self, value):
-        print(value)
         self.NetWidthValue = value
         self.update()
 
     def setPenWidth(self, value):
-        self.mypen.setWidth(round(value/2))
+        self.mypen.setWidth(round(value / 2))
         self.update()
 
     def paintEvent(self, QPaintEvent):
@@ -615,6 +524,3 @@ class PaintArea(QtWidgets.QWidget):
                                offset_h + (l - 1) * 2.6 * ring_radius + 1.3 * ring_radius, 2 * ring_radius,
                                2 * ring_radius)
 
-
-class ComputePart():
-    pass
