@@ -133,6 +133,9 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.displacement = h2
         self.Force = 4 * np.sum(F2_x * h2 / L2_x, axis=0) + 4 * np.sum(F2_y * h2 / L2_y, axis=0)
         self.Energy = 4 * np.sum(Energy2_x, axis=0) + 4 * np.sum(Energy2_y, axis=0)
+        self.gama_N2 = gama_N2
+        self.ls2_min = min(ls2_x)
+        self.lf2_min = min(lf2_x)
         self.func_output()
 
     def func_choose_dmin(self, para_nw):
@@ -228,7 +231,7 @@ class MyWindow(QMainWindow, Ui_MainWindow):
 
         self.value_output1.setText(str(format(self.displacement, '0.2f'))+' m')
         self.value_output2.setText(str(format(self.Force/1000, '0.2f'))+' kN')
-        self.value_output3.setValue(int(self.Energy/1000))
-        self.value_output4.setText('waiting')
-        self.value_output5.setText('waiting')
-        self.value_output6.setText('waiting')
+        self.value_output3.setText(str(format(self.Energy/1000, '0.2f'))+' kJ')
+        self.value_output4.setText(str(format(self.gama_N2, '0.2f')))
+        self.value_output5.setText(str(format(self.ls2_min, '0.2f'))+' m')
+        self.value_output6.setText(str(format(self.lf2_min, '0.2f'))+' m')
