@@ -15,14 +15,9 @@ index_i, index_j = symbols('index_i, index_j')
 gamma_N1, gamma_N2 = symbols('gamma_N1, gamma_N2')
 sigma_y, epsilon_N1, epsilon_N2 = symbols('sigma_y, epsilon_N1, epsilon_N2')
 
-my_dict = {n_w:7, R_p:0.5, d:0.3, d_min:0.003, w_x:2.90, w_y:2.90, m_x:2,
-k_s:10000000000000, l_s0:0.05, gamma_N1:0.056944056806819555, gamma_N2:0.37962704537879705,
-sigma_y:1770e6, epsilon_N1:0.5369106349290562, epsilon_N2:0.6316595705047718,
-index_i:1}
-
 my_dict_reference = {n_w:9, R_p:0.5, d:0.3, d_min:0.003, w_x:2.90, w_y:2.90, m_x:2,
-k_s:10000000000000, l_s0:0.05, gamma_N1:0.056944056806819555, gamma_N2:0.37962704537879705,
-sigma_y:1770e6, epsilon_N1:0.5369106349290562, epsilon_N2:0.6316595705047718,
+k_s:10000000000000, l_s0:0.05, gamma_N1:0.058268057997403915, gamma_N2:0.3884537199826928,
+sigma_y:1770e6, epsilon_N1:0.5044436521634824, epsilon_N2:0.5934631201923324,
 index_i:1}
 
 A = n_w * (pi*d_min**2/4)
@@ -42,9 +37,9 @@ z_Qi = 0
 L_PQ = sqrt((x_Pi-x_Qi)**2+(y_Pi-y_Qi)**2+(z_Pi-z_Qi)**2)
 
 L0_PQ = L_PQ.subs({z:0})  # fx.subs({x:1})与fx.evalf(subs={x:1,y:2},n=16)的区别在于evalf精度高，但只能对全部自变量赋值
-print('L0_PQ=',((y_Pi-y_Qi)**2).evalf(subs=my_dict))
+print('L0_PQ=',((y_Pi-y_Qi)**2).evalf(subs=my_dict_reference))
 l_f0_PQ = L0_PQ - l_s0
-print('l_f0_PQ=',l_f0_PQ.evalf(subs=my_dict))
+print('l_f0_PQ=',l_f0_PQ.evalf(subs=my_dict_reference))
 K1_PQ = 1/(l_f0_PQ/(E_f1*A)+1/k_s)
 K2_PQ = 1/(l_f0_PQ/(E_f2*A)+1/k_s)
 L1_PQ = L0_PQ + gamma_N1*sigma_y*A/K1_PQ
@@ -59,6 +54,6 @@ diff_n_w = diff(H_PQ, n_w)
 diff_d_min = diff(H_PQ, d_min)
 diff_m_x = diff(H_PQ, m_x)
 
-print('H=', H_PQ.evalf(subs=my_dict))
+print('H=', H_PQ.evalf(subs=my_dict_reference))
 print('diff_n_w=', diff_n_w.evalf(subs=my_dict_reference))
-print('diff_d_min=', diff_d_min.evalf(subs=my_dict))
+print('diff_d_min=', diff_d_min.evalf(subs=my_dict_reference))

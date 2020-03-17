@@ -107,7 +107,7 @@ def compute_height(L0_x,K1_x,K2_x,gama_N1,gama_N2,sigma_y,A):
 	return height1, height2
 
 def func_inputData():
-	nw = 7
+	nw = 9
 	d = 0.3
 	Rp = 0.5 
 	wx_origin = 2.95
