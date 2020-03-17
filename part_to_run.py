@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+# NetPanelAnalysis_V1_0_2主函数
 
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
