@@ -3,6 +3,8 @@ from sympy import pi
 from sympy import Eq, solve
 from sympy import summation, diff, sqrt
 from sympy import simplify
+import numpy as np
+
 
 R_p, n_w = symbols('R_p, n_w')
 d, d_min = symbols('d, d_min')
@@ -15,9 +17,51 @@ index_i, index_j = symbols('index_i, index_j')
 gamma_N1, gamma_N2 = symbols('gamma_N1, gamma_N2')
 sigma_y, epsilon_N1, epsilon_N2 = symbols('sigma_y, epsilon_N1, epsilon_N2')
 
-my_dict_reference = {n_w:9, R_p:0.5, d:0.3, d_min:0.003, w_x:2.90, w_y:2.90, m_x:2,
-k_s:10000000000000, l_s0:0.05, gamma_N1:0.058268057997403915, gamma_N2:0.3884537199826928,
-sigma_y:1770e6, epsilon_N1:0.5044436521634824, epsilon_N2:0.5934631201923324,
+def func_ringChianDataFit(nw,sigma_y):
+    lN0 = 0.3*3
+
+    nw_array = np.array([3,4,5,7,9,12,16,19],dtype='float')
+    FN2_array = np.array([16.25e3,18.84e3,44.94e3,69.72e3,80.55e3,110.88e3,177.66e3,209.39e3],dtype='float')
+    delta_lN2_array = 0.001*np.array([543.68,535.67,534.59,534.92,521.44,522.54,517.36,507.92],dtype='float')
+    dmin1, dmin2 = 0.0022, 0.003
+    Area_array = np.pi/4*np.hstack((dmin1**2*nw_array[nw_array<5], dmin2**2*nw_array[nw_array>=5]))
+    gamaMax_array = FN2_array/(sigma_y*2*Area_array)
+
+    poly_FN2_func = np.polyfit(nw_array, FN2_array,1)
+    poly_delta_lN2_func = np.polyfit(nw_array, delta_lN2_array,1)
+    poly_gamaMax_func = np.polyfit(nw_array, gamaMax_array,1)
+
+    after_fit_FN2 = np.polyval(poly_FN2_func, nw)
+    after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
+    after_fit_gamaN2 = np.polyval(poly_gamaMax_func, nw)
+
+    after_fit_lN2 = lN0 + after_fit_delta_lN2
+    after_fit_FN1 = after_fit_FN2*0.15
+    after_fit_lN1 = lN0 + after_fit_delta_lN2*0.85
+    after_fit_gamaN1 = after_fit_gamaN2 * 0.15
+
+    if nw < 5:
+    	value_dmin = 0.0022
+    else:
+    	value_dmin = 0.0030
+
+    A = nw*np.pi*value_dmin**2/4
+
+    Ef1 = after_fit_FN1*lN0/(2*A*(after_fit_lN1 - lN0))
+    Ef2 = (after_fit_FN2-after_fit_FN1)*lN0 / (2*A*(after_fit_lN2 - after_fit_lN1))
+
+    value_epsilon_N1 = after_fit_gamaN1*sigma_y/Ef1
+    value_epsilon_N2 = after_fit_gamaN1*sigma_y/Ef1+(after_fit_gamaN2-after_fit_gamaN1)*sigma_y/Ef2
+
+    return after_fit_gamaN1, after_fit_gamaN2, value_epsilon_N1, value_epsilon_N2
+
+data_nw = 9
+data_sigma_y = 1770e6
+data_gamma_N1, data_gamma_N2, data_epsilon_N1, data_epsilon_N2 = func_ringChianDataFit(data_nw, data_sigma_y)
+
+my_dict_reference = {n_w:data_nw, R_p:0.5, d:0.3, d_min:0.003, w_x:2.90, w_y:2.90, m_x:2,
+k_s:10000000000000, l_s0:0.05, gamma_N1:data_gamma_N1, gamma_N2:data_gamma_N2,
+sigma_y:data_sigma_y, epsilon_N1:data_epsilon_N1, epsilon_N2:data_epsilon_N2,
 index_i:1}
 
 A = n_w * (pi*d_min**2/4)
@@ -52,8 +96,13 @@ E_PQ = K1_PQ*(L0_PQ**2-L1_PQ**2)/2 + K2_PQ*(L2_PQ-L1_PQ)**2/2
 
 diff_n_w = diff(H_PQ, n_w)
 diff_d_min = diff(H_PQ, d_min)
+diff_d = diff(H_PQ, d)
 diff_m_x = diff(H_PQ, m_x)
+diff_R_p = diff(H_PQ, R_p)
+
 
 print('H=', H_PQ.evalf(subs=my_dict_reference))
 print('diff_n_w=', diff_n_w.evalf(subs=my_dict_reference))
 print('diff_d_min=', diff_d_min.evalf(subs=my_dict_reference))
+print('diff_d=', diff_d.evalf(subs=my_dict_reference))
+print('diff_R_p=', diff_R_p.evalf(subs=my_dict_reference))
