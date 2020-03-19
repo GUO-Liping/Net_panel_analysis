@@ -53,17 +53,31 @@ def func_ringChianDataFit(nw,sigma_y):
     value_epsilon_N1 = after_fit_gamaN1*sigma_y/Ef1
     value_epsilon_N2 = after_fit_gamaN1*sigma_y/Ef1+(after_fit_gamaN2-after_fit_gamaN1)*sigma_y/Ef2
 
-    return after_fit_gamaN1, after_fit_gamaN2, value_epsilon_N1, value_epsilon_N2
+    return after_fit_gamaN1, after_fit_gamaN2, value_epsilon_N1, value_epsilon_N2, value_dmin
 
-data_nw = 9
+def func_m(R_p, d):
+	a = np.pi*d/4
+	if R_p/a ==0.5:
+		m = int(R_p/a)+1
+	else:
+		m=round(R_p/a)
+	return m
+
+data_nw = 5
+data_Rp = 0.5
+data_d = 0.3
+data_m = func_m(data_Rp, data_d)
 data_sigma_y = 1770e6
-data_gamma_N1, data_gamma_N2, data_epsilon_N1, data_epsilon_N2 = func_ringChianDataFit(data_nw, data_sigma_y)
+data_ks = 218700
+data_ls0 = 0.05
+data_wx, data_wy = 2.9, 2.9
+data_gamma_N1, data_gamma_N2, data_epsilon_N1, data_epsilon_N2, data_dmin = func_ringChianDataFit(data_nw, data_sigma_y)
 
-my_dict_reference = {n_w:data_nw, R_p:0.5, d:0.3, d_min:0.003, w_x:2.90, w_y:2.90, m_x:2,
-k_s:10000000000000, l_s0:0.05, gamma_N1:data_gamma_N1, gamma_N2:data_gamma_N2,
-sigma_y:data_sigma_y, epsilon_N1:data_epsilon_N1, epsilon_N2:data_epsilon_N2,
-index_i:1}
-
+my_dict_reference = {n_w:data_nw, R_p:data_Rp, d:data_d, d_min:data_dmin, 
+w_x:data_wx, w_y:data_wy, m_x:data_m,k_s:data_ks, l_s0:data_ls0,
+gamma_N1:data_gamma_N1, gamma_N2:data_gamma_N2,sigma_y:data_sigma_y,
+epsilon_N1:data_epsilon_N1, epsilon_N2:data_epsilon_N2, index_i:1}
+print('gamma_N2=', data_gamma_N2)
 A = n_w * (pi*d_min**2/4)
 
 E_f1 = gamma_N1*sigma_y/epsilon_N1
@@ -81,9 +95,8 @@ z_Qi = 0
 L_PQ = sqrt((x_Pi-x_Qi)**2+(y_Pi-y_Qi)**2+(z_Pi-z_Qi)**2)
 
 L0_PQ = L_PQ.subs({z:0})  # fx.subs({x:1})与fx.evalf(subs={x:1,y:2},n=16)的区别在于evalf精度高，但只能对全部自变量赋值
-print('L0_PQ=',((y_Pi-y_Qi)**2).evalf(subs=my_dict_reference))
 l_f0_PQ = L0_PQ - l_s0
-print('l_f0_PQ=',l_f0_PQ.evalf(subs=my_dict_reference))
+
 K1_PQ = 1/(l_f0_PQ/(E_f1*A)+1/k_s)
 K2_PQ = 1/(l_f0_PQ/(E_f2*A)+1/k_s)
 L1_PQ = L0_PQ + gamma_N1*sigma_y*A/K1_PQ
@@ -99,10 +112,23 @@ diff_d_min = diff(H_PQ, d_min)
 diff_d = diff(H_PQ, d)
 diff_m_x = diff(H_PQ, m_x)
 diff_R_p = diff(H_PQ, R_p)
-
+diff_k_s = diff(H_PQ, k_s)
 
 print('H=', H_PQ.evalf(subs=my_dict_reference))
 print('diff_n_w=', diff_n_w.evalf(subs=my_dict_reference))
 print('diff_d_min=', diff_d_min.evalf(subs=my_dict_reference))
 print('diff_d=', diff_d.evalf(subs=my_dict_reference))
 print('diff_R_p=', diff_R_p.evalf(subs=my_dict_reference))
+print('diff_k_s=', diff_k_s.evalf(subs=my_dict_reference))
+
+S_H_n_w = abs(diff_n_w.evalf(subs=my_dict_reference))*data_nw/H_PQ.evalf(subs=my_dict_reference)
+S_H_d_min = abs(diff_d_min.evalf(subs=my_dict_reference))*data_dmin/H_PQ.evalf(subs=my_dict_reference)
+S_H_d = abs(diff_d.evalf(subs=my_dict_reference))*data_d/H_PQ.evalf(subs=my_dict_reference)
+S_H_R_p = abs(diff_R_p.evalf(subs=my_dict_reference))*data_Rp/H_PQ.evalf(subs=my_dict_reference)
+S_H_k_s = abs(diff_k_s.evalf(subs=my_dict_reference))*data_ks/H_PQ.evalf(subs=my_dict_reference)
+
+print('S_H_n_w = ', S_H_n_w )
+print('S_H_d_min= ', S_H_d_min)
+print('S_H_d = = ', S_H_d)
+print('S_H_R_p = ', S_H_R_p)
+print('S_H_k_s = ', S_H_k_s)
