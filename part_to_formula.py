@@ -5,6 +5,12 @@ from sympy import summation, diff, sqrt
 from sympy import simplify
 import numpy as np
 
+'''
+还有两个问题：
+(1) 3圈、4圈顶破位移与5圈~19圈顶破位移不一致
+(2) 当边界不在为刚性时，由于圈数越大，轴向应力发展程度越大，破断时钢丝纤维束轴向力更大，圈数增大
+对弹簧伸长值可能超过刚性边界下圈数增大对链破断时长度的减小值而使得最终顶破高度值的减小。
+'''
 
 R_p, n_w = symbols('R_p, n_w')
 d, d_min = symbols('d, d_min')
@@ -22,7 +28,7 @@ def func_ringChianDataFit(nw,sigma_y):
 
     nw_array = np.array([3,4,5,7,9,12,16,19],dtype='float')
     FN2_array = np.array([16.25e3,18.84e3,44.94e3,69.72e3,80.55e3,110.88e3,177.66e3,209.39e3],dtype='float')
-    delta_lN2_array = 0.001*np.array([543.68,535.67,534.59,534.92,521.44,522.54,517.36,507.92],dtype='float')
+    delta_lN2_array = 0.001*np.array([543.68,540.67,535.59,534.92,529.44,522.54,517.36,507.92],dtype='float')
     dmin1, dmin2 = 0.0022, 0.003
     Area_array = np.pi/4*np.hstack((dmin1**2*nw_array[nw_array<5], dmin2**2*nw_array[nw_array>=5]))
     gamaMax_array = FN2_array/(sigma_y*2*Area_array)
@@ -30,6 +36,8 @@ def func_ringChianDataFit(nw,sigma_y):
     poly_FN2_func = np.polyfit(nw_array, FN2_array,1)
     poly_delta_lN2_func = np.polyfit(nw_array, delta_lN2_array,1)
     poly_gamaMax_func = np.polyfit(nw_array, gamaMax_array,1)
+    print('poly_gamaMax_func=', poly_gamaMax_func)
+    print('poly_FN2_func=', poly_FN2_func)
 
     after_fit_FN2 = np.polyval(poly_FN2_func, nw)
     after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
@@ -63,12 +71,12 @@ def func_m(R_p, d):
 		m=round(R_p/a)
 	return m
 
-data_nw = 5
+data_nw = 7
 data_Rp = 0.5
 data_d = 0.3
 data_m = func_m(data_Rp, data_d)
 data_sigma_y = 1770e6
-data_ks = 218700
+data_ks = 218700000000
 data_ls0 = 0.05
 data_wx, data_wy = 2.9, 2.9
 data_gamma_N1, data_gamma_N2, data_epsilon_N1, data_epsilon_N2, data_dmin = func_ringChianDataFit(data_nw, data_sigma_y)

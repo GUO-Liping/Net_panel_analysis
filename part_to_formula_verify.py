@@ -5,12 +5,15 @@
 Name： NetPanelAnalysis
 Function: 计算环形网片顶破力、顶破位移、耗能能力
 Note: 国际单位制
-Version: 1.0.2
+Version: 1.0.2.alpha1
 Author: Liping GUO
-Date: 2020/3/2
+Date: 2020/4/1
 Remark: 影响计算结果的因素还有：
 	(1)直线传力纤维与变形后的环网曲面传力路径之间的角度差异; 
 	(2)三环环链拉伸代表了一种网环受力的最不利情形，实际网片中传力路径上环网轴向应力发展程度可能高于环链试验值
+	(3) 该版本修正了一个错误：对应网环顶破试验，R3/2.2/300其实为R4/2.2/300，而R4/2.2/300其实为R4/3.0/300。
+	(4)由于(3)中的原因，剔除了网片试验RN3对应的试验结果，只保留R4/3.0/300的试验结果
+	(5)由于(3)中的原因，对于直径为2.2mm钢丝对应的网片规格R4/2.2/300，进行了单独计算
 '''
 
 import numpy as np
@@ -44,27 +47,27 @@ def func_vector_y_direction(para_wy, para_my, para_ay, para_wx, para_h):
 def func_ringChianDataFit(nw,sigma_y):
     lN0 = 0.3*3
 
-    nw_array = np.array([3,4,5,7,9,12,16,19],dtype='float')
-    FN2_array = np.array([16.25e3,18.84e3,44.94e3,69.72e3,80.55e3,110.88e3,177.66e3,209.39e3],dtype='float')
-    delta_lN2_array = 0.001*np.array([543.68,535.67,534.59,534.92,521.44,522.54,517.36,507.92],dtype='float')
-    dmin1, dmin2 = 0.0022, 0.003
-    Area_array = np.pi/4*np.hstack((dmin1**2*nw_array[nw_array<5], dmin2**2*nw_array[nw_array>=5]))
-    gamaMax_array = FN2_array/(sigma_y*2*Area_array)
+    nw_array = np.array([5,7,9,12,16,19],dtype='float')
+    FN2_array = np.array([44.94e3,69.72e3,80.55e3,110.88e3,177.66e3,209.39e3],dtype='float')
+    delta_lN2_array = 0.001*np.array([510.67,508.59,489.92,485.644,475.54,472.36],dtype='float')
+    dmin = 0.003
+    Area_array = np.pi/4*dmin**2*nw_array
+    gamaN2_array = FN2_array/(sigma_y*2*Area_array)
 
     poly_FN2_func = np.polyfit(nw_array, FN2_array,1)
     poly_delta_lN2_func = np.polyfit(nw_array, delta_lN2_array,1)
-    poly_gamaMax_func = np.polyfit(nw_array, gamaMax_array,1)
+    poly_gamaN2_func = np.polyfit(nw_array, gamaN2_array,1)
 
     after_fit_FN2 = np.polyval(poly_FN2_func, nw)
     after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
-    after_fit_gamaMax = np.polyval(poly_gamaMax_func, nw)
+    after_fit_gamaN2 = np.polyval(poly_gamaN2_func, nw) + 0.03
 
     after_fit_lN2 = lN0 + after_fit_delta_lN2
     after_fit_FN1 = after_fit_FN2*0.15
     after_fit_lN1 = lN0 + after_fit_delta_lN2*0.85
-    after_fit_gamaN1 = after_fit_gamaMax * 0.15
+    after_fit_gamaN1 = after_fit_gamaN2 * 0.15
 
-    return after_fit_FN1, after_fit_FN2, lN0, after_fit_lN1, after_fit_lN2, after_fit_gamaN1, after_fit_gamaMax
+    return after_fit_FN1, after_fit_FN2, lN0, after_fit_lN1, after_fit_lN2, after_fit_gamaN1, after_fit_gamaN2
 
 def func_round(number):
     if number % 1 == 0.5:
@@ -72,13 +75,6 @@ def func_round(number):
     else:
         number = round(number)
     return int(number)
-
-def func_choose_dmin(para_nw):
-	if para_nw < 5:
-		para_dmin = 0.0022
-	else:
-		para_dmin = 0.003
-	return para_dmin
 
 def func_correct_gamaAndForce(mx, gama_N2_x, gama_N1, F2_x, K1_x, L2_x, L0_x, sigma_y, A):
 
@@ -107,7 +103,7 @@ def compute_height(L0_x,K1_x,K2_x,gama_N1,gama_N2,sigma_y,A):
 	return height1, height2
 
 def func_inputData():
-	nw = 19
+	nw = 4
 	d = 0.3
 	Rp = 0.5 
 	wx_origin = 2.95
@@ -122,7 +118,7 @@ def func_inputData():
 if __name__ == '__main__':
 
 	nw, d, Rp, wx_origin, wy_origin, sigma_y, ks, ls0 = func_inputData()
-	dmin = func_choose_dmin(nw)
+	dmin = 0.003
 	A = nw * np.pi*dmin**2/4  # 单肢截面面积
 
 	wx = max(wx_origin,wy_origin) - ls0  # 指定最小尺寸的弹簧-纤维单元在x方向
@@ -187,8 +183,8 @@ if __name__ == '__main__':
 	init_gama_N2_y = init_F2_y/(A*sigma_y)
 	F2_y, gama_N2_y = func_correct_gamaAndForce(my, init_gama_N2_y, gama_N1, init_F2_y, K1_y, L2_y, L0_y, sigma_y, A)
 
-	print('gama_N1_x=', gama_N1_x)
-	print('gama_N2_x=', gama_N2_x)
+	# print('gama_N1_x=', gama_N1_x)
+	# print('gama_N2_x=', gama_N2_x)
 
 	# 计算能量----------------------------------------------------------------------------------- # 
 
@@ -204,14 +200,14 @@ if __name__ == '__main__':
 	print('nw=', nw)
 	print('gama_N1=', gama_N1)
 	print('gama_N2=', gama_N2)
-	print('epsilon_N1', gama_N1*sigma_y/Ef1)
-	print('epsilon_N2', gama_N1*sigma_y/Ef1+(gama_N2-gama_N1)*sigma_y/Ef2)
-	print('L1_x = ', L1_x)
-	print('lf1_x = ', lf1_x)
-	print('ls1_x = ', ls1_x)
-	print('L2_x = ', L2_x)
-	print('lf2_x = ', lf2_x)
-	print('ls2_x = ', ls2_x)
+	# print('epsilon_N1', gama_N1*sigma_y/Ef1)
+	# print('epsilon_N2', gama_N1*sigma_y/Ef1+(gama_N2-gama_N1)*sigma_y/Ef2)
+	# print('L1_x = ', L1_x)
+	# print('lf1_x = ', lf1_x)
+	# print('ls1_x = ', ls1_x)
+	# print('L2_x = ', L2_x)
+	# print('lf2_x = ', lf2_x)
+	# print('ls2_x = ', ls2_x)
 	print('Force = ', Force)
 	print('displacement = ', displacement)
 	print('Energy = ', Energy)
