@@ -46,47 +46,37 @@ def func_vector_y_direction(para_wy, para_my, para_ay, para_wx, para_h):
     length_element_y = np.sqrt((xu-xd)**2 + (yu-yd)**2 + (zu-zd)**2)
     return length_element_y
 
-def func_ringChianDataFitDmin30(nw,sigma_y,dmin):
+def func_ringChianDataFit(nw,sigma_y,dmin):
     lN0 = 0.3*3
 
-    nw_array = np.array([5,7,9,12,16,19],dtype='float')
-    FN2_array = np.array([44.94e3,69.72e3,80.55e3,110.88e3,177.66e3,209.39e3],dtype='float')
-    delta_lN2_array = 0.001*np.array([510.67,508.59,489.92,485.644,475.54,472.36],dtype='float')
-    Area_array = np.pi/4*dmin**2*nw_array
-    print('Area_array=',Area_array)
-    gamaN2_array = FN2_array/(sigma_y*2*Area_array)
+    if dmin == 0.003:
+    	nw_array = np.array([4,5,7,9,12,16,19],dtype='float')
+    	FN2_array = np.array([30.06e3,44.94e3,69.72e3,80.55e3,110.88e3,177.66e3,209.39e3],dtype='float')
+    	delta_lN2_array = 0.001*np.array([518.05,511.67,508.59,489.92,485.644,475.54,472.36],dtype='float')
+    	Area_array = np.pi/4*dmin**2*nw_array
+    	print('Area_array=',Area_array)
+    	gammaN2_array = FN2_array/(sigma_y*2*Area_array)
+    else:
+    	nw_array = np.array([3,4],dtype='float')
+    	FN2_array = np.array([9.87e3,17.57e3],dtype='float')
+    	delta_lN2_array = np.array([521.16e-3,517.36e-3],dtype='float')
+    	Area_array = np.pi/4*dmin**2*nw_array
+    	print('Area_array=',Area_array)
+    	gammaN2_array = FN2_array/(sigma_y*2*Area_array)
 
     poly_delta_lN2_func = np.polyfit(nw_array, delta_lN2_array,1)
-    poly_gamaN2_func = np.polyfit(nw_array, gamaN2_array,1)
+    poly_gammaN2_func = np.polyfit(nw_array, gammaN2_array,1)
 
     after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
-    after_fit_gamaN2 = np.polyval(poly_gamaN2_func, nw)
+    after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw)
 
-    after_fit_FN2 = after_fit_gamaN2 * sigma_y*(2*nw*np.pi*dmin**2/4)
+    after_fit_FN2 = after_fit_gammaN2 * sigma_y*(2*nw*np.pi*dmin**2/4)
     after_fit_lN2 = lN0 + after_fit_delta_lN2
-    after_fit_FN1 = after_fit_FN2*0.15
-    after_fit_lN1 = lN0 + after_fit_delta_lN2*0.85
-    after_fit_gamaN1 = after_fit_gamaN2 * 0.15
+    after_fit_FN1 = after_fit_FN2*0.1
+    after_fit_lN1 = lN0 + after_fit_delta_lN2*0.9
+    after_fit_gammaN1 = after_fit_gammaN2 * 0.1
 
-    return after_fit_FN1, after_fit_FN2, lN0, after_fit_lN1, after_fit_lN2, after_fit_gamaN1, after_fit_gamaN2
-
-def func_ringChianDataFitDmin22(nw,sigma_y,dmin):
-    lN0 = 0.3*3
-
-    nw_array = np.array([4],dtype='float')
-    FN2_array = np.array([16.25e3],dtype='float')
-    delta_lN2_array = np.array([517.36e-3],dtype='float')
-    Area_array = np.pi/4*dmin**2*nw_array
-    print('Area_array=',Area_array)
-
-    after_fit_gamaN2 = FN2_array/(sigma_y*2*Area_array)
-    after_fit_FN2 = FN2_array
-    after_fit_lN2 = lN0 + delta_lN2_array
-    after_fit_FN1 = after_fit_FN2*0.15
-    after_fit_lN1 = lN0 + delta_lN2_array*0.85
-    after_fit_gamaN1 = after_fit_gamaN2 * 0.15
-
-    return after_fit_FN1, after_fit_FN2, lN0, after_fit_lN1, after_fit_lN2, after_fit_gamaN1, after_fit_gamaN2
+    return after_fit_FN1, after_fit_FN2, lN0, after_fit_lN1, after_fit_lN2, after_fit_gammaN1, after_fit_gammaN2
 
 def func_round(number):
     if number % 1 == 0.5:
@@ -95,22 +85,33 @@ def func_round(number):
         number = round(number)
     return int(number)
 
-def func_correct_gamaAndForce(mx, gama_N2_x, gama_N1, F2_x, K1_x, L2_x, L0_x, sigma_y, A):
+def func_correct_gammaAndForce(mx, gamma_N2_x, gamma_N1, F2_x, K1_x, L2_x, L0_x, sigma_y, A):
 
 	for i in range(mx):
-		if gama_N2_x[i] < gama_N1:
+		if gamma_N2_x[i] < gamma_N1:
 			F2_x[i] = K1_x[i] * (L2_x[i] - L0_x[i])
-			gama_N2_x[i] = F2_x[i] / (sigma_y*A)
+			gamma_N2_x[i] = F2_x[i] / (sigma_y*A)
 		else:
 			pass
-	return F2_x, gama_N2_x
+	return F2_x, gamma_N2_x
 
-def compute_height(L0_x,K1_x,K2_x,gama_N1,gama_N2,sigma_y,A):
+def funcXY_correct_gammaForceEnergy(mx, gamma_N2_x, F2_x, E2_x, gamma_N1, K2_x, K1_x, L2_x, L1_x, L0_x, sigma_y, A):
+
+	for i in range(mx):
+		if gamma_N2_x[i] > gamma_N1:
+			F2_x[i] = K1_x[i] * (L1_x[i] - L0_x[i]) + K2_x[i]*(L2_x[i]-L1_x[i])
+			gamma_N2_x[i] = F2_x[i] / (sigma_y*A)
+			E2_x[i] = K1_x[i] * L2_x[i]*(L1_x[i]-L0_x[i]) + K1_x[i]*(L0_x[i]**2-L1_x[i]**2)/2 + K2_x[i]*(L2_x[i]-L1_x[i])**2 / 2
+		else:
+			pass
+	return gamma_N2_x, F2_x, E2_x
+
+def compute_height(L0_x,K1_x,K2_x,gamma_N1,gamma_N2,sigma_y,A):
 	min_L0_x = min(L0_x)
 	max_K1_x = max(K1_x)
 	max_K2_x = max(K2_x)
-	min_L1_x = min_L0_x + gama_N1*sigma_y*A/max_K1_x
-	min_L2_x = min_L1_x + (gama_N2*sigma_y*A - max_K1_x*(min_L1_x-min_L0_x))/max_K2_x
+	min_L1_x = min_L0_x + gamma_N1*sigma_y*A/max_K1_x
+	min_L2_x = min_L1_x + (gamma_N2*sigma_y*A - max_K1_x*(min_L1_x-min_L0_x))/max_K2_x
 
 	min_L0 = min_L0_x
 	min_L1 = min_L1_x
@@ -122,23 +123,23 @@ def compute_height(L0_x,K1_x,K2_x,gama_N1,gama_N2,sigma_y,A):
 	return height1, height2
 
 def func_inputData():
-	nw = 4
+	nw = 7
 	d = 0.3
-	dmin = 0.0022
+	dmin = 0.003
 	Rp = 0.5 
 	wx_origin = 3.0
 	wy_origin = 3.0
+	rho = 7850
 	sigma_y = 1770e6
 	ks = 10000000000000  # 弹簧刚度，指代卸扣边界（刚体）
 	ls0 = 0.05
 
-	return nw, d, dmin, Rp, wx_origin, wy_origin, sigma_y, ks, ls0
+	return nw, d, dmin, Rp, wx_origin, wy_origin, sigma_y, rho, ks, ls0
 
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
 
-	nw, d, dmin, Rp, wx_origin, wy_origin, sigma_y, ks, ls0 = func_inputData()
-	rho = 7850
+	nw, d, dmin, Rp, wx_origin, wy_origin, sigma_y, rho, ks, ls0 = func_inputData()
 	A = nw * np.pi*dmin**2/4  # 单肢截面面积
 	# print(A)
 
@@ -158,10 +159,8 @@ if __name__ == '__main__':
 	my = func_round(Rp/ay)
 	
 	# 环链试验----------------------------------------------------------------------------------- #
-	if dmin == 0.003:
-		FN1, FN2, lN0, lN1, lN2, gama_N1, gama_N2 = func_ringChianDataFitDmin30(nw, sigma_y, dmin)
-	else:
-		FN1, FN2, lN0, lN1, lN2, gama_N1, gama_N2 = func_ringChianDataFitDmin22(nw, sigma_y, dmin)
+
+	FN1, FN2, lN0, lN1, lN2, gamma_N1, gamma_N2 = func_ringChianDataFit(nw, sigma_y, dmin)
 
 	Ef1 = FN1*lN0/(2*A*(lN1 - lN0))
 	print('Ef1=',Ef1)
@@ -181,7 +180,7 @@ if __name__ == '__main__':
 	K2_y = 1 / (lf0_y/(Ef2*A)+1/ks)
 	print('K1_x, K2_x=',K1_x, K2_x)
 
-	h1, h2 = compute_height(L0_x,K1_x,K2_x,gama_N1,gama_N2,sigma_y,A)
+	h1, h2 = compute_height(L0_x,K1_x,K2_x,gamma_N1,gamma_N2,sigma_y,A)
 
 	# 计算变形----------------------------------------------------------------------------------- #
 
@@ -203,31 +202,31 @@ if __name__ == '__main__':
 	# 计算顶破力----------------------------------------------------------------------------------- #
 
 	F1_x = K1_x * (L1_x - L0_x)
-	gama_N1_x = F1_x/(A*sigma_y)
+	E1_x = K1_x * (L1_x - L0_x)**2 / 2
+	gamma_N1_x = F1_x/(A*sigma_y)
 
 	F1_y = K1_y * (L1_y - L0_y)
-	gama_N1_y = F1_y/(A*sigma_y)
+	E1_y = K1_y * (L1_y - L0_y)**2 / 2
+	gamma_N1_y = F1_y/(A*sigma_y)
 
 	# 初始化并修正单元轴力、轴向应力发展程度系数----------------------------------------------------------- #
-	init_F2_x = F1_x + K2_x*(L2_x-L1_x)
-	init_gama_N2_x = init_F2_x/(A*sigma_y)
-	F2_x, gama_N2_x = func_correct_gamaAndForce(mx, init_gama_N2_x, gama_N1, init_F2_x, K1_x, L2_x, L0_x, sigma_y, A)
+	init_F2_x = K1_x*(L2_x-L0_x)
+	init_E2_x = K1_x * (L2_x-L0_x)**2 / 2
+	init_gamma_N2_x = init_F2_x/(A*sigma_y)
+
+	gamma_N2_x, F2_x, E2_x = funcXY_correct_gammaForceEnergy(mx, init_gamma_N2_x, init_F2_x, init_E2_x, gamma_N1, K2_x, K1_x, L2_x, L1_x, L0_x, sigma_y, A)
 	print('F2_x=',F2_x)
-	print('gama_N2_x',gama_N2_x)
+	print('gamma_N2_x',gamma_N2_x)
 
-	init_F2_y = F1_y + K2_y*(L2_y-L1_y)
-	init_gama_N2_y = init_F2_y/(A*sigma_y)
-	F2_y, gama_N2_y = func_correct_gamaAndForce(my, init_gama_N2_y, gama_N1, init_F2_y, K1_y, L2_y, L0_y, sigma_y, A)
+	init_F2_y = K1_y*(L2_y-L0_y)
+	init_E2_y = K1_y * (L2_y-L0_y)**2 / 2
+	init_gamma_N2_y = init_F2_y/(A*sigma_y)
+	gamma_N2_y, F2_y, E2_y = funcXY_correct_gammaForceEnergy(my, init_gamma_N2_y, init_F2_y, init_E2_y, gamma_N1, K2_y, K1_y, L2_y, L1_y, L0_y, sigma_y, A)
 
-	# print('gama_N1_x=', gama_N1_x)
-	# print('gama_N2_x=', gama_N2_x)
+	print('gamma_N1_y=', gamma_N1_y)
+	print('gamma_N2_y=', gamma_N2_y)
 
 	# 计算能量----------------------------------------------------------------------------------- # 
-
-	E1_x = K1_x * (L1_x-L0_x)**2 / 2
-	E2_x = K1_x * L2_x*(L1_x-L0_x) + K1_x*(L0_x**2-L1_x**2)/2 + K2_x*(L2_x-L1_x)**2 / 2
-	E1_y = K1_y * (L1_y-L0_y)**2 / 2
-	E2_y = K1_y * L2_y*(L1_y-L0_y) + K1_y*(L0_y**2-L1_y**2)/2 + K2_y*(L2_y-L1_y)**2 / 2
 	print('E1_x=', E1_x)
 	print('E2_x=', E2_x)
 
@@ -236,11 +235,11 @@ if __name__ == '__main__':
 	Energy = 4*np.sum(E2_x, axis=0) + 4*np.sum(E2_y, axis=0)
 
 	print('nw=', nw)
-	print('gama_N1=', gama_N1)
-	print('gama_N2=', gama_N2)
+	print('gamma_N1=', gamma_N1)
+	print('gamma_N2=', gamma_N2)
 
-	# print('epsilon_N1', gama_N1*sigma_y/Ef1)
-	# print('epsilon_N2', gama_N1*sigma_y/Ef1+(gama_N2-gama_N1)*sigma_y/Ef2)
+	# print('epsilon_N1', gamma_N1*sigma_y/Ef1)
+	# print('epsilon_N2', gamma_N1*sigma_y/Ef1+(gamma_N2-gamma_N1)*sigma_y/Ef2)
 	# print('L1_x = ', L1_x)
 	# print('lf1_x = ', lf1_x)
 	# print('ls1_x = ', ls1_x)

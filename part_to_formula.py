@@ -23,37 +23,38 @@ index_i, index_j = symbols('index_i, index_j')
 gamma_N1, gamma_N2 = symbols('gamma_N1, gamma_N2')
 sigma_y, epsilon_N1, epsilon_N2 = symbols('sigma_y, epsilon_N1, epsilon_N2')
 
-def func_ringChianDataFit(nw,sigma_y):
+def func_ringChianDataFit(nw,sigma_y,dmin):
     lN0 = 0.3*3
 
-    nw_array = np.array([3,4,5,7,9,12,16,19],dtype='float')
-    FN2_array = np.array([16.25e3,18.84e3,44.94e3,69.72e3,80.55e3,110.88e3,177.66e3,209.39e3],dtype='float')
-    delta_lN2_array = 0.001*np.array([543.68,540.67,535.59,534.92,529.44,522.54,517.36,507.92],dtype='float')
-    dmin1, dmin2 = 0.0022, 0.003
-    Area_array = np.pi/4*np.hstack((dmin1**2*nw_array[nw_array<5], dmin2**2*nw_array[nw_array>=5]))
-    gamaMax_array = FN2_array/(sigma_y*2*Area_array)
+    if dmin == 0.003:
+        nw_array = np.array([4,5,7,9,12,16,19],dtype='float')
+        FN2_array = np.array([18.84e3,44.94e3,69.72e3,80.55e3,110.88e3,177.66e3,209.39e3],dtype='float')
+        delta_lN2_array = 0.001*np.array([540.67,535.59,534.92,529.44,522.54,517.36,507.92],dtype='float')
+        Area_array = nw_array*np.pi*dmin**2/4
+        gamaN2_array = FN2_array/(sigma_y*2*Area_array)
+    else:
+        nw_array = np.array([3,4],dtype='float')
+        FN2_array = np.array([16.25e3,18.84e3],dtype='float')
+        delta_lN2_array = 0.001*np.array([543.68,540.67],dtype='float')
+        Area_array = nw_array*np.pi*np.dmin**2/4
+        gamaN2_array = FN2_array/(sigma_y*2*Area_array)
 
     poly_FN2_func = np.polyfit(nw_array, FN2_array,1)
     poly_delta_lN2_func = np.polyfit(nw_array, delta_lN2_array,1)
-    poly_gamaMax_func = np.polyfit(nw_array, gamaMax_array,1)
-    print('poly_gamaMax_func=', poly_gamaMax_func)
+    poly_gamaN2_func = np.polyfit(nw_array, gamaN2_array,1)
+    print('poly_gamaN2_func=', poly_gamaN2_func)
     print('poly_FN2_func=', poly_FN2_func)
 
     after_fit_FN2 = np.polyval(poly_FN2_func, nw)
     after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
-    after_fit_gamaN2 = np.polyval(poly_gamaMax_func, nw)
+    after_fit_gamaN2 = np.polyval(poly_gamaN2_func, nw)
 
     after_fit_lN2 = lN0 + after_fit_delta_lN2
     after_fit_FN1 = after_fit_FN2*0.15
     after_fit_lN1 = lN0 + after_fit_delta_lN2*0.85
     after_fit_gamaN1 = after_fit_gamaN2 * 0.15
 
-    if nw < 5:
-    	value_dmin = 0.0022
-    else:
-    	value_dmin = 0.0030
-
-    A = nw*np.pi*value_dmin**2/4
+    A = nw*np.pi*dmin**2/4
 
     Ef1 = after_fit_FN1*lN0/(2*A*(after_fit_lN1 - lN0))
     Ef2 = (after_fit_FN2-after_fit_FN1)*lN0 / (2*A*(after_fit_lN2 - after_fit_lN1))
@@ -61,7 +62,7 @@ def func_ringChianDataFit(nw,sigma_y):
     value_epsilon_N1 = after_fit_gamaN1*sigma_y/Ef1
     value_epsilon_N2 = after_fit_gamaN1*sigma_y/Ef1+(after_fit_gamaN2-after_fit_gamaN1)*sigma_y/Ef2
 
-    return after_fit_gamaN1, after_fit_gamaN2, value_epsilon_N1, value_epsilon_N2, value_dmin
+    return after_fit_gamaN1, after_fit_gamaN2, value_epsilon_N1, value_epsilon_N2
 
 def func_m(R_p, d):
 	a = np.pi*d/4
@@ -74,12 +75,13 @@ def func_m(R_p, d):
 data_nw = 7
 data_Rp = 0.5
 data_d = 0.3
+data_dmin = 0.003
 data_m = func_m(data_Rp, data_d)
 data_sigma_y = 1770e6
 data_ks = 218700000000
 data_ls0 = 0.05
 data_wx, data_wy = 2.9, 2.9
-data_gamma_N1, data_gamma_N2, data_epsilon_N1, data_epsilon_N2, data_dmin = func_ringChianDataFit(data_nw, data_sigma_y)
+data_gamma_N1, data_gamma_N2, data_epsilon_N1, data_epsilon_N2 = func_ringChianDataFit(data_nw, data_sigma_y, data_dmin)
 
 my_dict_reference = {n_w:data_nw, R_p:data_Rp, d:data_d, d_min:data_dmin, 
 w_x:data_wx, w_y:data_wy, m_x:data_m,k_s:data_ks, l_s0:data_ls0,
