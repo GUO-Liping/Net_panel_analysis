@@ -16,6 +16,7 @@ Remark: 影响计算结果的因素还有：
 	(5)由于(3)中的原因，剔除了网片试验RN3对应的试验结果，只保留R4/3.0/300的试验结果
 	(6)由于(3)中的原因，对于直径为2.2mm钢丝对应的网片规格R4/2.2/300，进行了单独计算
 	(7)Bug: gamma_N2的拟合结果与FN2的拟合结果存在不一致情况
+	(8)弹簧-纤维单元的双线性刚度特征，导致F_2及E_2在计算时每个单元分别修正与单元不同阶段实际刚度一致
 '''
 
 import numpy as np
@@ -51,8 +52,8 @@ def func_ringChianDataFit(nw,sigma_y,dmin):
 
     if dmin == 0.003:
     	nw_array = np.array([4,5,7,9,12,16,19],dtype='float')
-    	FN2_array = np.array([30.06e3,44.94e3,69.72e3,80.55e3,110.88e3,177.66e3,209.39e3],dtype='float')
-    	delta_lN2_array = 0.001*np.array([518.05,511.67,508.59,489.92,485.644,475.54,472.36],dtype='float')
+    	FN2_array = np.array([30.064e3,44.937e3,69.72e3,80.547e3,110.884e3,177.66e3,209.387e3],dtype='float')
+    	delta_lN2_array = 0.001*np.array([515.05,511.67,508.59,489.92,485.644,475.54,472.36],dtype='float')
     	Area_array = np.pi/4*dmin**2*nw_array
     	print('Area_array=',Area_array)
     	gammaN2_array = FN2_array/(sigma_y*2*Area_array)
@@ -68,13 +69,13 @@ def func_ringChianDataFit(nw,sigma_y,dmin):
     poly_gammaN2_func = np.polyfit(nw_array, gammaN2_array,1)
 
     after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
-    after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw)
+    after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw) + 0.12
 
     after_fit_FN2 = after_fit_gammaN2 * sigma_y*(2*nw*np.pi*dmin**2/4)
     after_fit_lN2 = lN0 + after_fit_delta_lN2
-    after_fit_FN1 = after_fit_FN2*0.1
-    after_fit_lN1 = lN0 + after_fit_delta_lN2*0.9
-    after_fit_gammaN1 = after_fit_gammaN2 * 0.1
+    after_fit_FN1 = after_fit_FN2*0.15
+    after_fit_lN1 = lN0 + after_fit_delta_lN2*0.85
+    after_fit_gammaN1 = after_fit_gammaN2 * 0.15
 
     return after_fit_FN1, after_fit_FN2, lN0, after_fit_lN1, after_fit_lN2, after_fit_gammaN1, after_fit_gammaN2
 
@@ -85,6 +86,7 @@ def func_round(number):
         number = round(number)
     return int(number)
 
+'''
 def func_correct_gammaAndForce(mx, gamma_N2_x, gamma_N1, F2_x, K1_x, L2_x, L0_x, sigma_y, A):
 
 	for i in range(mx):
@@ -94,6 +96,7 @@ def func_correct_gammaAndForce(mx, gamma_N2_x, gamma_N1, F2_x, K1_x, L2_x, L0_x,
 		else:
 			pass
 	return F2_x, gamma_N2_x
+'''
 
 def funcXY_correct_gammaForceEnergy(mx, gamma_N2_x, F2_x, E2_x, gamma_N1, K2_x, K1_x, L2_x, L1_x, L0_x, sigma_y, A):
 
@@ -123,9 +126,9 @@ def compute_height(L0_x,K1_x,K2_x,gamma_N1,gamma_N2,sigma_y,A):
 	return height1, height2
 
 def func_inputData():
-	nw = 7
+	nw = 4
 	d = 0.3
-	dmin = 0.003
+	dmin = 0.0022
 	Rp = 0.5 
 	wx_origin = 3.0
 	wy_origin = 3.0
@@ -215,14 +218,14 @@ if __name__ == '__main__':
 	init_gamma_N2_x = init_F2_x/(A*sigma_y)
 
 	gamma_N2_x, F2_x, E2_x = funcXY_correct_gammaForceEnergy(mx, init_gamma_N2_x, init_F2_x, init_E2_x, gamma_N1, K2_x, K1_x, L2_x, L1_x, L0_x, sigma_y, A)
-	print('F2_x=',F2_x)
+	print('gamma_N1_x',gamma_N1_x)
 	print('gamma_N2_x',gamma_N2_x)
 
 	init_F2_y = K1_y*(L2_y-L0_y)
 	init_E2_y = K1_y * (L2_y-L0_y)**2 / 2
 	init_gamma_N2_y = init_F2_y/(A*sigma_y)
-	gamma_N2_y, F2_y, E2_y = funcXY_correct_gammaForceEnergy(my, init_gamma_N2_y, init_F2_y, init_E2_y, gamma_N1, K2_y, K1_y, L2_y, L1_y, L0_y, sigma_y, A)
 
+	gamma_N2_y, F2_y, E2_y = funcXY_correct_gammaForceEnergy(my, init_gamma_N2_y, init_F2_y, init_E2_y, gamma_N1, K2_y, K1_y, L2_y, L1_y, L0_y, sigma_y, A)
 	print('gamma_N1_y=', gamma_N1_y)
 	print('gamma_N2_y=', gamma_N2_y)
 
@@ -231,7 +234,7 @@ if __name__ == '__main__':
 	print('E2_x=', E2_x)
 
 	displacement = h2
-	Force = 4* np.sum(F2_x * h2 / L2_x, axis=0) + 4* np.sum(F2_y * h2 / L2_y,axis=0)
+	Force = 4* np.sum(F2_x * h2 / L2_x, axis=0) + 4* np.sum(F2_y * h2 / L2_y,axis=0) * 1.5
 	Energy = 4*np.sum(E2_x, axis=0) + 4*np.sum(E2_y, axis=0)
 
 	print('nw=', nw)
