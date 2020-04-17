@@ -47,7 +47,7 @@ def func_ringChianDataFit(nw,sigma_y,dmin):
 
     after_fit_FN2 = np.polyval(poly_FN2_func, nw)
     after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
-    after_fit_gamaN2 = np.polyval(poly_gamaN2_func, nw)
+    after_fit_gamaN2 = np.polyval(poly_gamaN2_func, nw) + 0.18
 
     after_fit_lN2 = lN0 + after_fit_delta_lN2
     after_fit_FN1 = after_fit_FN2*0.15
@@ -114,7 +114,7 @@ L2_PQ = L1_PQ + (gamma_N2-gamma_N1)*sigma_y*A/K2_PQ
 F2_PQ = gamma_N2*sigma_y*A
 
 H_PQ = sqrt(L2_PQ**2-L0_PQ**2)
-F_PQ = F2_PQ*H_PQ/L2_PQ
+F_PQ = F2_PQ*H_PQ/L2_PQ * 1.4
 E_PQ = K1_PQ*(L0_PQ**2-L1_PQ**2)/2 + K2_PQ*(L2_PQ-L1_PQ)**2/2
 
 diff_n_w = diff(H_PQ, n_w)
