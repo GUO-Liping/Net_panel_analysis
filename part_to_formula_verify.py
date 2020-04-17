@@ -9,8 +9,8 @@ Version: 1.0.2.alpha1
 Author: Liping GUO
 Date: 2020/4/1
 Remark: 影响计算结果的因素还有：
-	(1)直线传力纤维与变形后的环网曲面传力路径之间的角度差异; 
-	(2)三环环链拉伸代表了一种网环受力的最不利情形，实际网片中传力路径上环网轴向应力发展程度可能高于环链试验值+0.05
+	(1)直线传力纤维与变形后的环网曲面传力路径之间的角度差异 1.5F; 
+	(2)三环环链拉伸代表了一种网环受力的最不利情形，实际网片中传力路径上环网轴向应力发展程度可能高于环链试验值+0.18
 	(3)需保证夹持卡扣的强度，一旦卡扣强度不足，将发生钢丝滑移失效，造成网片承载力下降。
 	(4) 该版本修正了一个错误：对应网环顶破试验，R3/2.2/300其实为R4/2.2/300，而R4/2.2/300其实为R4/3.0/300。
 	(5)由于(3)中的原因，剔除了网片试验RN3对应的试验结果，只保留R4/3.0/300的试验结果
@@ -57,6 +57,7 @@ def func_ringChianDataFit(nw,sigma_y,dmin):
     	Area_array = np.pi/4*dmin**2*nw_array
     	print('Area_array=',Area_array)
     	gammaN2_array = FN2_array/(sigma_y*2*Area_array)
+    	print('gammaN2_array111=', gammaN2_array)
     else:
     	nw_array = np.array([3,4],dtype='float')
     	FN2_array = np.array([9.87e3,17.57e3],dtype='float')
@@ -69,7 +70,12 @@ def func_ringChianDataFit(nw,sigma_y,dmin):
     poly_gammaN2_func = np.polyfit(nw_array, gammaN2_array,1)
 
     after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
-    after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw) + 0.12
+    after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw) + 0.18
+    '''
+    对比五环试验与三环试验轴向力发展程度可发现，
+    五环(5圈0.551，7圈0.554,9圈0.559)，三环(5圈0.359, 7圈0.398, 9圈0.358)
+    分别大于三环(5圈0.192, 7圈0.156, 9圈0.201,)均值为0.183
+	'''
 
     after_fit_FN2 = after_fit_gammaN2 * sigma_y*(2*nw*np.pi*dmin**2/4)
     after_fit_lN2 = lN0 + after_fit_delta_lN2
