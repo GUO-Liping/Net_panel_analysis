@@ -53,17 +53,17 @@ def func_ringChianDataFit(nw,sigma_y,dmin):
     if dmin == 0.003:
     	nw_array = np.array([4,5,7,9,12,16,19],dtype='float')
     	FN2_array = np.array([30.064e3,44.937e3,69.72e3,80.547e3,110.884e3,177.66e3,209.387e3],dtype='float')
-    	delta_lN2_array = 0.001*np.array([515.05,511.67,508.59,489.92,485.644,475.54,472.36],dtype='float')
+    	delta_lN2_array = 0.001*np.array([515.05,518.67,508.59,489.92,490.644,475.54,472.36],dtype='float')
     	Area_array = np.pi/4*dmin**2*nw_array
-    	print('Area_array=',Area_array)
+    	# print('Area_array=',Area_array)
     	gammaN2_array = FN2_array/(sigma_y*2*Area_array)
-    	print('gammaN2_array111=', gammaN2_array)
+    	# print('gammaN2_array111=', gammaN2_array)
     else:
     	nw_array = np.array([3,4],dtype='float')
     	FN2_array = np.array([9.87e3,17.57e3],dtype='float')
     	delta_lN2_array = np.array([521.16e-3,517.36e-3],dtype='float')
     	Area_array = np.pi/4*dmin**2*nw_array
-    	print('Area_array=',Area_array)
+    	# print('Area_array=',Area_array)
     	gammaN2_array = FN2_array/(sigma_y*2*Area_array)
 
     poly_delta_lN2_func = np.polyfit(nw_array, delta_lN2_array,1)
@@ -132,130 +132,163 @@ def compute_height(L0_x,K1_x,K2_x,gamma_N1,gamma_N2,sigma_y,A):
 	return height1, height2
 
 def func_inputData():
-	nw = 4
+
+	nw = 3
+	dmin = 0.003
 	d = 0.3
-	dmin = 0.0022
 	Rp = 0.5 
 	wx_origin = 3.0
 	wy_origin = 3.0
 	rho = 7850
 	sigma_y = 1770e6
-	ks = 10000000000000  # 弹簧刚度，指代卸扣边界（刚体）
+	ks = 5000000  # 弹簧刚度，指代卸扣边界（刚体）
 	ls0 = 0.05
 
 	return nw, d, dmin, Rp, wx_origin, wy_origin, sigma_y, rho, ks, ls0
 
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
+	nw_sensitive = np.array([3,5,7,9,11,13,15])
+	dmin_sensitive = np.array([0.0012,0.0018,0.0024,0.003,0.0036,0.0042,0.0048])
+	d_sensitive = np.array([0.12,0.18,0.24,0.3,0.36,0.42,0.48])
+	Rp_sensitive = np.array([0.2,0.3,0.4,0.5,0.6,0.7,0.8])
+	wx_sensitive = np.array([1.2,1.8,2.4,3.0,3.6,4.2,4.8])
+	ks_sensitive = 1000000*np.array([2,3,4,5,6,7,8])
+	for i in range(len(nw_sensitive)):
 
-	nw, d, dmin, Rp, wx_origin, wy_origin, sigma_y, rho, ks, ls0 = func_inputData()
-	A = nw * np.pi*dmin**2/4  # 单肢截面面积
-	# print(A)
+		# nw = nw_sensitive[i]
+		nw = 9
+		# print('nw=', nw)
 
-	wx = max(wx_origin,wy_origin) - ls0  # 指定最小尺寸的弹簧-纤维单元在x方向
-	wy = min(wx_origin,wy_origin) - ls0  # 指定最小尺寸的弹簧-纤维单元不在y方向
+		# dmin = dmin_sensitive[i]
+		dmin = 0.003
+		# print('dmin=', dmin)
+
+		# d = d_sensitive[i]
+		d = 0.3
+		# print('d=', d)
+
+		# Rp = Rp_sensitive[i]
+		Rp = 0.5 
+		# print('Rp=', Rp)
+
+		# wx_origin = wx_sensitive[i]
+		wx_origin = 3.0
+		# print('wx=', wx_origin)
+
+		ks = ks_sensitive[i]
+		# ks = 5000000  # 弹簧刚度，指代卸扣边界（刚体）
+		print('ks=', ks)
+
+		ls0 = 0.05
+		wy_origin = 3.0
+		rho = 7850
+		sigma_y = 1770e6
 	
-	# 成本计算——网片钢丝用量（总长度、总质量）
-	l_wire = nw*np.pi/(2*np.sqrt(2))*((wx-d+2*np.sqrt(2)*d)*(wy-d+2*np.sqrt(2)*d)+(wx-d)*(wy-d))
-	m_wire = rho*np.pi*dmin**2*l_wire/4
-	print('l_wire=', l_wire)
-	print('m_wire=', m_wire)
-
-	ax = np.pi*d/2 * wy/(wx+wy)  # 加载区域x方向网环边长
-	ay = np.pi*d/2 * wx/(wx+wy)  # 加载区域y方向网环边长
+		A = nw * np.pi*dmin**2/4  # 单肢截面面积
+		# print(A)
 	
-	mx = func_round(Rp/ax)
-	my = func_round(Rp/ay)
+		wx = max(wx_origin,wy_origin) - ls0  # 指定最小尺寸的弹簧-纤维单元在x方向
+		wy = min(wx_origin,wy_origin) - ls0  # 指定最小尺寸的弹簧-纤维单元不在y方向
+		
+		# 成本计算——网片钢丝用量（总长度、总质量）
+		l_wire = nw*np.pi/(2*np.sqrt(2))*((wx-d+2*np.sqrt(2)*d)*(wy-d+2*np.sqrt(2)*d)+(wx-d)*(wy-d))
+		m_wire = rho*np.pi*dmin**2*l_wire/4
+		# print('l_wire=', l_wire)
+		# print('m_wire=', m_wire)
 	
-	# 环链试验----------------------------------------------------------------------------------- #
-
-	FN1, FN2, lN0, lN1, lN2, gamma_N1, gamma_N2 = func_ringChianDataFit(nw, sigma_y, dmin)
-
-	Ef1 = FN1*lN0/(2*A*(lN1 - lN0))
-	print('Ef1=',Ef1)
-	Ef2 = (FN2-FN1)*lN0 / (2*A*(lN2 - lN1))
-	print('Ef2=',Ef2)
+		ax = np.pi*d/2 * wy/(wx+wy)  # 加载区域x方向网环边长
+		ay = np.pi*d/2 * wx/(wx+wy)  # 加载区域y方向网环边长
+		
+		mx = func_round(Rp/ax)
+		my = func_round(Rp/ay)
+		
+		# 环链试验----------------------------------------------------------------------------------- #
 	
-	L0_x = func_vector_x_direction(wx, mx, ax, wy, 0)
-	L0_y = func_vector_y_direction(wy, my, ay, wx, 0)
-	print('L0_x, L0_y=',L0_x, L0_y)
-
-	lf0_x = L0_x - ls0
-	lf0_y = L0_y - ls0
+		FN1, FN2, lN0, lN1, lN2, gamma_N1, gamma_N2 = func_ringChianDataFit(nw, sigma_y, dmin)
 	
-	K1_x = 1 / (lf0_x/(Ef1*A)+1/ks)
-	K2_x = 1 / (lf0_x/(Ef2*A)+1/ks)
-	K1_y = 1 / (lf0_y/(Ef1*A)+1/ks)
-	K2_y = 1 / (lf0_y/(Ef2*A)+1/ks)
-	print('K1_x, K2_x=',K1_x, K2_x)
-
-	h1, h2 = compute_height(L0_x,K1_x,K2_x,gamma_N1,gamma_N2,sigma_y,A)
-
-	# 计算变形----------------------------------------------------------------------------------- #
-
-	L1_x = func_vector_x_direction(wx, mx, ax, wy, h1)
-	L1_y = func_vector_x_direction(wy, my, ay, wx, h1)
-	ls1_x = (Ef1*A*(L1_x-lf0_x)+ks*ls0*lf0_x) / (ks*lf0_x+Ef1*A)
-	ls1_y = (Ef1*A*(L1_y-lf0_y)+ks*ls0*lf0_y) / (ks*lf0_y+Ef1*A)
-	lf1_x = (ks*lf0_x*(L1_x-ls0)+Ef1*A*lf0_x) / (ks*lf0_x+Ef1*A)
-	lf1_y = (ks*lf0_y*(L1_y-ls0)+Ef1*A*lf0_y) / (ks*lf0_y+Ef1*A)
-
-
-	L2_x = func_vector_x_direction(wx, mx, ax, wy, h2)
-	L2_y = func_vector_x_direction(wy, my, ay, wx, h2)
-	ls2_x = (Ef2*A/lf0_x*(L2_x-lf1_x)+ks*ls1_x) / (ks+Ef2*A/lf0_x)
-	ls2_y = (Ef2*A/lf0_y*(L2_y-lf1_y)+ks*ls1_y) / (ks+Ef2*A/lf0_y)
-	lf2_x = (ks*(L2_x-ls1_x)+lf1_x*Ef2*A/lf0_x) / (ks+Ef2*A/lf0_x)
-	lf2_y = (ks*(L2_y-ls1_y)+lf1_y*Ef2*A/lf0_y) / (ks+Ef2*A/lf0_y)
-
-	# 计算顶破力----------------------------------------------------------------------------------- #
-
-	F1_x = K1_x * (L1_x - L0_x)
-	E1_x = K1_x * (L1_x - L0_x)**2 / 2
-	gamma_N1_x = F1_x/(A*sigma_y)
-
-	F1_y = K1_y * (L1_y - L0_y)
-	E1_y = K1_y * (L1_y - L0_y)**2 / 2
-	gamma_N1_y = F1_y/(A*sigma_y)
-
-	# 初始化并修正单元轴力、轴向应力发展程度系数----------------------------------------------------------- #
-	init_F2_x = K1_x*(L2_x-L0_x)
-	init_E2_x = K1_x * (L2_x-L0_x)**2 / 2
-	init_gamma_N2_x = init_F2_x/(A*sigma_y)
-
-	gamma_N2_x, F2_x, E2_x = funcXY_correct_gammaForceEnergy(mx, init_gamma_N2_x, init_F2_x, init_E2_x, gamma_N1, K2_x, K1_x, L2_x, L1_x, L0_x, sigma_y, A)
-	print('gamma_N1_x',gamma_N1_x)
-	print('gamma_N2_x',gamma_N2_x)
-
-	init_F2_y = K1_y*(L2_y-L0_y)
-	init_E2_y = K1_y * (L2_y-L0_y)**2 / 2
-	init_gamma_N2_y = init_F2_y/(A*sigma_y)
-
-	gamma_N2_y, F2_y, E2_y = funcXY_correct_gammaForceEnergy(my, init_gamma_N2_y, init_F2_y, init_E2_y, gamma_N1, K2_y, K1_y, L2_y, L1_y, L0_y, sigma_y, A)
-	print('gamma_N1_y=', gamma_N1_y)
-	print('gamma_N2_y=', gamma_N2_y)
-
-	# 计算能量----------------------------------------------------------------------------------- # 
-	print('E1_x=', E1_x)
-	print('E2_x=', E2_x)
-
-	displacement = h2
-	Force = 4* np.sum(F2_x * h2 / L2_x, axis=0) + 4* np.sum(F2_y * h2 / L2_y,axis=0) * 1.5
-	Energy = 4*np.sum(E2_x, axis=0) + 4*np.sum(E2_y, axis=0)
-
-	print('nw=', nw)
-	print('gamma_N1=', gamma_N1)
-	print('gamma_N2=', gamma_N2)
-
-	# print('epsilon_N1', gamma_N1*sigma_y/Ef1)
-	# print('epsilon_N2', gamma_N1*sigma_y/Ef1+(gamma_N2-gamma_N1)*sigma_y/Ef2)
-	# print('L1_x = ', L1_x)
-	# print('lf1_x = ', lf1_x)
-	# print('ls1_x = ', ls1_x)
-	# print('L2_x = ', L2_x)
-	# print('lf2_x = ', lf2_x)
-	# print('ls2_x = ', ls2_x)
-
-	print('Force = ', Force)
-	print('displacement = ', displacement)
-	print('Energy = ', Energy)
+		Ef1 = FN1*lN0/(2*A*(lN1 - lN0))
+		# print('Ef1=',Ef1)
+		Ef2 = (FN2-FN1)*lN0 / (2*A*(lN2 - lN1))
+		# print('Ef2=',Ef2)
+		
+		L0_x = func_vector_x_direction(wx, mx, ax, wy, 0)
+		L0_y = func_vector_y_direction(wy, my, ay, wx, 0)
+		# print('L0_x, L0_y=',L0_x, L0_y)
+	
+		lf0_x = L0_x - ls0
+		lf0_y = L0_y - ls0
+		
+		K1_x = 1 / (lf0_x/(Ef1*A)+1/ks)
+		K2_x = 1 / (lf0_x/(Ef2*A)+1/ks)
+		K1_y = 1 / (lf0_y/(Ef1*A)+1/ks)
+		K2_y = 1 / (lf0_y/(Ef2*A)+1/ks)
+		# print('K1_x, K2_x=',K1_x, K2_x)
+	
+		h1, h2 = compute_height(L0_x,K1_x,K2_x,gamma_N1,gamma_N2,sigma_y,A)
+	
+		# 计算变形----------------------------------------------------------------------------------- #
+	
+		L1_x = func_vector_x_direction(wx, mx, ax, wy, h1)
+		L1_y = func_vector_x_direction(wy, my, ay, wx, h1)
+		ls1_x = (Ef1*A*(L1_x-lf0_x)+ks*ls0*lf0_x) / (ks*lf0_x+Ef1*A)
+		ls1_y = (Ef1*A*(L1_y-lf0_y)+ks*ls0*lf0_y) / (ks*lf0_y+Ef1*A)
+		lf1_x = (ks*lf0_x*(L1_x-ls0)+Ef1*A*lf0_x) / (ks*lf0_x+Ef1*A)
+		lf1_y = (ks*lf0_y*(L1_y-ls0)+Ef1*A*lf0_y) / (ks*lf0_y+Ef1*A)
+	
+	
+		L2_x = func_vector_x_direction(wx, mx, ax, wy, h2)
+		L2_y = func_vector_x_direction(wy, my, ay, wx, h2)
+		ls2_x = (Ef2*A/lf0_x*(L2_x-lf1_x)+ks*ls1_x) / (ks+Ef2*A/lf0_x)
+		ls2_y = (Ef2*A/lf0_y*(L2_y-lf1_y)+ks*ls1_y) / (ks+Ef2*A/lf0_y)
+		lf2_x = (ks*(L2_x-ls1_x)+lf1_x*Ef2*A/lf0_x) / (ks+Ef2*A/lf0_x)
+		lf2_y = (ks*(L2_y-ls1_y)+lf1_y*Ef2*A/lf0_y) / (ks+Ef2*A/lf0_y)
+	
+		# 计算顶破力----------------------------------------------------------------------------------- #
+	
+		F1_x = K1_x * (L1_x - L0_x)
+		E1_x = K1_x * (L1_x - L0_x)**2 / 2
+		gamma_N1_x = F1_x/(A*sigma_y)
+	
+		F1_y = K1_y * (L1_y - L0_y)
+		E1_y = K1_y * (L1_y - L0_y)**2 / 2
+		gamma_N1_y = F1_y/(A*sigma_y)
+	
+		# 初始化并修正单元轴力、轴向应力发展程度系数----------------------------------------------------------- #
+		init_F2_x = K1_x*(L2_x-L0_x)
+		init_E2_x = K1_x * (L2_x-L0_x)**2 / 2
+		init_gamma_N2_x = init_F2_x/(A*sigma_y)
+	
+		gamma_N2_x, F2_x, E2_x = funcXY_correct_gammaForceEnergy(mx, init_gamma_N2_x, init_F2_x, init_E2_x, gamma_N1, K2_x, K1_x, L2_x, L1_x, L0_x, sigma_y, A)
+		# print('gamma_N1_x',gamma_N1_x)
+		# print('gamma_N2_x',gamma_N2_x)
+	
+		init_F2_y = K1_y*(L2_y-L0_y)
+		init_E2_y = K1_y * (L2_y-L0_y)**2 / 2
+		init_gamma_N2_y = init_F2_y/(A*sigma_y)
+	
+		gamma_N2_y, F2_y, E2_y = funcXY_correct_gammaForceEnergy(my, init_gamma_N2_y, init_F2_y, init_E2_y, gamma_N1, K2_y, K1_y, L2_y, L1_y, L0_y, sigma_y, A)
+		# print('F1_y=', F1_y)
+		# print('F2_y=', F2_y)
+	
+		# 计算能量----------------------------------------------------------------------------------- # 
+		# print('E1_x=', E1_x)
+		# print('E2_x=', E2_x)
+	
+		displacement = h2
+		Force = 4*np.sum(F2_x * h2 / L2_x, axis=0) + 4*np.sum(F2_y * h2 / L2_y,axis=0) * 1.4
+		Energy = 4*np.sum(E2_x, axis=0) + 4*np.sum(E2_y, axis=0)
+	
+		# print('epsilon_N1', gamma_N1*sigma_y/Ef1)
+		# print('epsilon_N2', gamma_N1*sigma_y/Ef1+(gamma_N2-gamma_N1)*sigma_y/Ef2)
+		# print('L1_x = ', L1_x)
+		# print('lf1_x = ', lf1_x)
+		# print('ls1_x = ', ls1_x)
+		# print('L2_x = ', L2_x)
+		# print('lf2_x = ', lf2_x)
+		# print('ls2_x = ', ls2_x)
+	
+		print('displacement = ', format(displacement, '.3f'), 'm')
+		print('Force = ', format(Force/1000, '.3f'), 'kN')
+		print('Energy = ', format(Energy/1000, '.3f'), 'kJ')
+	
