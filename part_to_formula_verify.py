@@ -133,7 +133,7 @@ def compute_height(L0_x,K1_x,K2_x,gamma_N1,gamma_N2,sigma_y,A):
 
 def func_inputData():
 
-	nw = 3
+	nw = 7
 	dmin = 0.003
 	d = 0.3
 	Rp = 0.5 
@@ -172,13 +172,13 @@ if __name__ == '__main__':
 		Rp = 0.5 
 		# print('Rp=', Rp)
 
-		# wx_origin = wx_sensitive[i]
-		wx_origin = 3.0
-		# print('wx=', wx_origin)
+		wx_origin = wx_sensitive[i]
+		# wx_origin = 3.0
+		print('wx=', wx_origin)
 
-		ks = ks_sensitive[i]
-		# ks = 5000000  # 弹簧刚度，指代卸扣边界（刚体）
-		print('ks=', ks)
+		# ks = ks_sensitive[i]
+		ks = 5000000  # 弹簧刚度，指代卸扣边界（刚体）
+		# print('ks=', ks)
 
 		ls0 = 0.05
 		wy_origin = 3.0
@@ -201,7 +201,9 @@ if __name__ == '__main__':
 		ay = np.pi*d/2 * wx/(wx+wy)  # 加载区域y方向网环边长
 		
 		mx = func_round(Rp/ax)
+		print('mx=', mx)
 		my = func_round(Rp/ay)
+		print('my=', my)
 		
 		# 环链试验----------------------------------------------------------------------------------- #
 	

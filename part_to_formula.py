@@ -10,6 +10,8 @@ import numpy as np
 (1) 3圈、4圈顶破位移与5圈~19圈顶破位移不一致
 (2) 当边界不在为刚性时，由于圈数越大，轴向应力发展程度越大，破断时钢丝纤维束轴向力更大，圈数增大
 对弹簧伸长值可能超过刚性边界下圈数增大对链破断时长度的减小值而使得最终顶破高度值的减小。
+(3)由于环形网片的变形能力、承载能力、耗能能力均为nw、Rp、d的非连续函数，不可导，对影响因素进行敏感
+性分析时应该采用敏感度函数应按照离散形式的表达式计算
 '''
 
 R_p, n_w = symbols('R_p, n_w')
@@ -28,41 +30,46 @@ def func_ringChianDataFit(nw,sigma_y,dmin):
 
     if dmin == 0.003:
         nw_array = np.array([4,5,7,9,12,16,19],dtype='float')
-        FN2_array = np.array([18.84e3,44.94e3,69.72e3,80.55e3,110.88e3,177.66e3,209.39e3],dtype='float')
-        delta_lN2_array = 0.001*np.array([540.67,535.59,534.92,529.44,522.54,517.36,507.92],dtype='float')
-        Area_array = nw_array*np.pi*dmin**2/4
-        gamaN2_array = FN2_array/(sigma_y*2*Area_array)
+        FN2_array = np.array([30.064e3,44.937e3,69.72e3,80.547e3,110.884e3,177.66e3,209.387e3],dtype='float')
+        delta_lN2_array = 0.001*np.array([515.05,518.67,508.59,489.92,490.644,475.54,472.36],dtype='float')
+        Area_array = np.pi/4*dmin**2*nw_array
+        # print('Area_array=',Area_array)
+        gammaN2_array = FN2_array/(sigma_y*2*Area_array)
+        # print('gammaN2_array111=', gammaN2_array)
     else:
         nw_array = np.array([3,4],dtype='float')
-        FN2_array = np.array([16.25e3,18.84e3],dtype='float')
-        delta_lN2_array = 0.001*np.array([543.68,540.67],dtype='float')
-        Area_array = nw_array*np.pi*np.dmin**2/4
-        gamaN2_array = FN2_array/(sigma_y*2*Area_array)
+        FN2_array = np.array([9.87e3,17.57e3],dtype='float')
+        delta_lN2_array = np.array([521.16e-3,517.36e-3],dtype='float')
+        Area_array = np.pi/4*dmin**2*nw_array
+        # print('Area_array=',Area_array)
+        gammaN2_array = FN2_array/(sigma_y*2*Area_array)
 
-    poly_FN2_func = np.polyfit(nw_array, FN2_array,1)
     poly_delta_lN2_func = np.polyfit(nw_array, delta_lN2_array,1)
-    poly_gamaN2_func = np.polyfit(nw_array, gamaN2_array,1)
-    print('poly_gamaN2_func=', poly_gamaN2_func)
-    print('poly_FN2_func=', poly_FN2_func)
+    poly_gammaN2_func = np.polyfit(nw_array, gammaN2_array,1)
 
-    after_fit_FN2 = np.polyval(poly_FN2_func, nw)
     after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
-    after_fit_gamaN2 = np.polyval(poly_gamaN2_func, nw) + 0.18
+    after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw) + 0.18
+    '''
+    对比五环试验与三环试验轴向力发展程度可发现，
+    五环(5圈0.551，7圈0.554,9圈0.559)，三环(5圈0.359, 7圈0.398, 9圈0.358)
+    分别大于三环(5圈0.192, 7圈0.156, 9圈0.201,)均值为0.183
+    '''
 
+    after_fit_FN2 = after_fit_gammaN2 * sigma_y*(2*nw*np.pi*dmin**2/4)
     after_fit_lN2 = lN0 + after_fit_delta_lN2
     after_fit_FN1 = after_fit_FN2*0.15
     after_fit_lN1 = lN0 + after_fit_delta_lN2*0.85
-    after_fit_gamaN1 = after_fit_gamaN2 * 0.15
+    after_fit_gammaN1 = after_fit_gammaN2 * 0.15
 
     A = nw*np.pi*dmin**2/4
 
     Ef1 = after_fit_FN1*lN0/(2*A*(after_fit_lN1 - lN0))
     Ef2 = (after_fit_FN2-after_fit_FN1)*lN0 / (2*A*(after_fit_lN2 - after_fit_lN1))
 
-    value_epsilon_N1 = after_fit_gamaN1*sigma_y/Ef1
-    value_epsilon_N2 = after_fit_gamaN1*sigma_y/Ef1+(after_fit_gamaN2-after_fit_gamaN1)*sigma_y/Ef2
+    value_epsilon_N1 = after_fit_gammaN1*sigma_y/Ef1
+    value_epsilon_N2 = after_fit_gammaN1*sigma_y/Ef1+(after_fit_gammaN2-after_fit_gammaN1)*sigma_y/Ef2
 
-    return after_fit_gamaN1, after_fit_gamaN2, value_epsilon_N1, value_epsilon_N2
+    return after_fit_gammaN1, after_fit_gammaN2, value_epsilon_N1, value_epsilon_N2
 
 def func_m(R_p, d):
 	a = np.pi*d/4
@@ -78,9 +85,9 @@ data_d = 0.3
 data_dmin = 0.003
 data_m = func_m(data_Rp, data_d)
 data_sigma_y = 1770e6
-data_ks = 218700000000
+data_ks = 5000000
 data_ls0 = 0.05
-data_wx, data_wy = 2.9, 2.9
+data_wx, data_wy = 2.95, 2.95
 data_gamma_N1, data_gamma_N2, data_epsilon_N1, data_epsilon_N2 = func_ringChianDataFit(data_nw, data_sigma_y, data_dmin)
 
 my_dict_reference = {n_w:data_nw, R_p:data_Rp, d:data_d, d_min:data_dmin, 
