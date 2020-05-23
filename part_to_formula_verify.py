@@ -148,12 +148,16 @@ def func_inputData():
 
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
-	nw_sensitive = np.array([3,4,5,6,7,8,9,10,11,12,13,1415])
-	dmin_sensitive = np.array([0.0012,0.0015,0.0018,0.0021,0.0024,0.0027,0.003,0.0033,0.0036,0.0039,0.0042,0.0045,0.0048])
-	d_sensitive = np.array([0.12,0.15,0.18,0.21,0.24,0.27,0.3,0.33,0.36,0.39,0.42,0.45,0.48])
-	Rp_sensitive = np.array([0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8])
-	wx_sensitive = np.array([1.2,1.5,1.8,2.1,2.4,2.7,3.0,3.3,3.6,3.9,4.2,4.5,4.8])
-	ks_sensitive = 1000000*np.array([2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8])
+	num = 9
+	nw_sensitive = np.linspace(9-int(num/2)*2,9+int(num/2)*2,num=num)
+	dmin_sensitive = np.linspace(0.003-int(num/2)*0.2*0.003,0.003+int(num/2)*0.2*0.003,num=num)
+	d_sensitive = np.linspace(0.3-int(num/2)*0.2*0.3,0.3+int(num/2)*0.2*0.3,num=num)
+	Rp_sensitive = np.linspace(0.9-int(num/2)*0.2*0.5,0.9+int(num/2)*0.2*0.5,num=num)
+	
+	print(Rp_sensitive)
+	wx_sensitive = np.linspace(3-int(num/2)*0.2*3,3+int(num/2)*0.2*3,num=num)
+	ks_sensitive = 1000000*np.linspace(5-int(num/2)*0.2*5,5+int(num/2)*0.2*5,num=num)
+	
 	for i in range(len(nw_sensitive)):
 
 		# nw = nw_sensitive[i]
@@ -168,13 +172,13 @@ if __name__ == '__main__':
 		d = 0.3
 		# print('d=', d)
 
-		# Rp = Rp_sensitive[i]
-		Rp = 0.5 
-		# print('Rp=', Rp)
+		Rp = Rp_sensitive[i]
+		# Rp = 0.5 
+		print('Rp=', Rp)
 
-		wx_origin = wx_sensitive[i]
-		# wx_origin = 3.0
-		print('wx=', wx_origin)
+		# wx_origin = wx_sensitive[i]
+		wx_origin = 3.0
+		# print('wx=', wx_origin)
 
 		# ks = ks_sensitive[i]
 		ks = 5000000  # 弹簧刚度，指代卸扣边界（刚体）
