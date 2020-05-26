@@ -148,39 +148,49 @@ def func_inputData():
 
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
-	num = 9
+	num = 7
+	para_array = np.empty([num])
+	disp_array = np.empty([num])
+	forc_array = np.empty([num])
+	ener_array = np.empty([num])
+
 	nw_sensitive = np.linspace(9-int(num/2)*2,9+int(num/2)*2,num=num)
 	dmin_sensitive = np.linspace(0.003-int(num/2)*0.2*0.003,0.003+int(num/2)*0.2*0.003,num=num)
 	d_sensitive = np.linspace(0.3-int(num/2)*0.2*0.3,0.3+int(num/2)*0.2*0.3,num=num)
 	Rp_sensitive = np.linspace(0.9-int(num/2)*0.2*0.5,0.9+int(num/2)*0.2*0.5,num=num)
 	
-	print(Rp_sensitive)
 	wx_sensitive = np.linspace(3-int(num/2)*0.2*3,3+int(num/2)*0.2*3,num=num)
 	ks_sensitive = 1000000*np.linspace(5-int(num/2)*0.2*5,5+int(num/2)*0.2*5,num=num)
 	
 	for i in range(len(nw_sensitive)):
 
 		# nw = nw_sensitive[i]
+		# para_array[i] = nw
 		nw = 9
 		# print('nw=', nw)
 
 		# dmin = dmin_sensitive[i]
+		# para_array[i] = dmin
 		dmin = 0.003
 		# print('dmin=', dmin)
 
 		# d = d_sensitive[i]
+		# para_array[i] = d
 		d = 0.3
 		# print('d=', d)
 
 		Rp = Rp_sensitive[i]
+		para_array[i] = Rp
 		# Rp = 0.5 
 		print('Rp=', Rp)
 
 		# wx_origin = wx_sensitive[i]
+		# para_array[i] = wx_origin
 		wx_origin = 3.0
 		# print('wx=', wx_origin)
 
 		# ks = ks_sensitive[i]
+		# para_array[i] = ks
 		ks = 5000000  # 弹簧刚度，指代卸扣边界（刚体）
 		# print('ks=', ks)
 
@@ -284,6 +294,10 @@ if __name__ == '__main__':
 		displacement = h2
 		Force = 4*np.sum(F2_x * h2 / L2_x, axis=0) + 4*np.sum(F2_y * h2 / L2_y,axis=0) * 1.4
 		Energy = 4*np.sum(E2_x, axis=0) + 4*np.sum(E2_y, axis=0)
+
+		disp_array[i] = displacement
+		forc_array[i] = Force
+		ener_array[i] = Energy
 	
 		# print('epsilon_N1', gamma_N1*sigma_y/Ef1)
 		# print('epsilon_N2', gamma_N1*sigma_y/Ef1+(gamma_N2-gamma_N1)*sigma_y/Ef2)
@@ -293,8 +307,12 @@ if __name__ == '__main__':
 		# print('L2_x = ', L2_x)
 		# print('lf2_x = ', lf2_x)
 		# print('ls2_x = ', ls2_x)
-	
+		'''
 		print('displacement = ', format(displacement, '.3f'), 'm')
 		print('Force = ', format(Force/1000, '.3f'), 'kN')
 		print('Energy = ', format(Energy/1000, '.3f'), 'kJ')
-	
+		'''
+		print('sensitive factors = ', para_array)
+		print('displacement = ', disp_array, 'm')
+		print('Force = ', forc_array/1000, 'kN')
+		print('Energy = ', ener_array/1000, 'kJ')
