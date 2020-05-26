@@ -312,6 +312,7 @@ if __name__ == '__main__':
 		print('Force = ', format(Force/1000, '.3f'), 'kN')
 		print('Energy = ', format(Energy/1000, '.3f'), 'kJ')
 		'''
+		np.set_printoptions(formatter={"float": lambda x: format(x, '.3f')})
 		print('sensitive factors = ', para_array)
 		print('displacement = ', disp_array, 'm')
 		print('Force = ', forc_array/1000, 'kN')
