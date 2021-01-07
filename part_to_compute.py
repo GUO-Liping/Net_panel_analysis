@@ -162,7 +162,7 @@ class MyWindow(QMainWindow, Ui_MainWindow):
              0.45116, 0.4, 0.44, 0.5, 0.45348, 0.43676, 0.431])
 
         poly_gama_Nmax_all = np.polyfit(nw_array_all, gama_Nmax_all, 1)
-        gama_N2 = np.polyval(poly_gama_Nmax_all, self.nw)
+        gama_N2 = np.polyval(poly_gama_Nmax_all, self.nw) + 0.05
         nw_array = np.array([3, 4, 5, 7, 9, 12, 16, 19])
         lN0 = 0.3 * 3
         delta_lN2_array = 0.001 * np.array([543.68, 539.67, 534.59, 534.92, 521.44, 522.54, 517.36, 507.92],
