@@ -189,8 +189,8 @@ if __name__ == '__main__':
 		Rp = 0.5 
 		# print('Rp=', Rp)
 
-		kappa = kappa_array[i]
-		# kappa = 1.0
+		# kappa = kappa_array[i]
+		kappa = 1.0
 		# print('kappa=', kappa)
 
 		# ks = ks_array[i]

@@ -115,6 +115,7 @@ def funcXY_correct_gammaForceEnergy(mx, gamma_N2_x, F2_x, E2_x, gamma_N1, K2_x, 
 			pass
 	return gamma_N2_x, F2_x, E2_x
 
+
 def compute_height(L0_x,K1_x,K2_x,gamma_N1,gamma_N2,sigma_y,A):
 	min_L0_x = min(L0_x)
 	max_K1_x = max(K1_x)
@@ -131,20 +132,6 @@ def compute_height(L0_x,K1_x,K2_x,gamma_N1,gamma_N2,sigma_y,A):
 
 	return height1, height2
 
-def func_inputData():
-
-	nw = 7
-	dmin = 0.003
-	d = 0.3
-	Rp = 0.5 
-	wx_origin = 3.0
-	wy_origin = 3.0
-	rho = 7850
-	sigma_y = 1770e6
-	ks = 5000000  # 弹簧刚度，指代卸扣边界（刚体）
-	ls0 = 0.05
-
-	return nw, d, dmin, Rp, wx_origin, wy_origin, sigma_y, rho, ks, ls0
 
 def func_sensitive(factor_star, factor_array,disp_array,forc_array,ener_array):
 	index_ref = np.int(np.where(factor_array==factor_star)[0])
@@ -155,30 +142,41 @@ def func_sensitive(factor_star, factor_array,disp_array,forc_array,ener_array):
 
 	return sens_disp_factor,sens_forc_factor,sens_ener_factor
 
+def func_return_dmin(nw):
+	if nw > 0:
+		if nw <= 4:
+			return 0.0022
+		elif nw > 4:
+			return 0.003
+		else:
+			raise ValueError
+	else:
+		raise ValueError
+
 
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
-	num = 7
-	disp_array = np.empty([num])
-	forc_array = np.empty([num])
-	ener_array = np.empty([num])
+	num_array = 7
+	disp_array = np.empty([num_array])
+	forc_array = np.empty([num_array])
+	ener_array = np.empty([num_array])
 
-	nw_array = np.linspace(9-int(num/2)*2,9+int(num/2)*2,num=num)
-	dmin_array = np.linspace(0.003-int(num/2)*0.2*0.003,0.003+int(num/2)*0.2*0.003,num=num)
-	d_array = np.linspace(0.3-int(num/2)*0.2*0.3,0.3+int(num/2)*0.2*0.3,num=num)
-	Rp_array = np.linspace(0.9-int(num/2)*0.2*0.5,0.9+int(num/2)*0.2*0.5,num=num)
+	nw_array = np.linspace(9-int(num_array/2)*2,9+int(num_array/2)*2,num=num_array)
+	dmin_array = np.linspace(0.003-int(num_array/2)*0.2*0.003,0.003+int(num_array/2)*0.2*0.003,num=num_array)
+	d_array = np.linspace(0.3-int(num_array/2)*0.2*0.3,0.3+int(num_array/2)*0.2*0.3,num=num_array)
+	Rp_array = np.linspace(0.9-int(num_array/2)*0.2*0.5,0.9+int(num_array/2)*0.2*0.5,num=num_array)
 	
 	kappa_array = np.array([1.0,1.2,1.4,1.6,1.8,2.0,2.2])
-	ks_array = 1000000*np.linspace(5-int(num/2)*0.2*5,5+int(num/2)*0.2*5,num=num)
+	ks_array = 1000000*np.linspace(5-int(num_array/2)*0.2*5,5+int(num_array/2)*0.2*5,num=num_array)
 	
 	for i in range(len(nw_array)):
 
 		# nw = nw_array[i]
-		nw = 7
+		nw = 5
 		#print('nw=', nw)
 
 		# dmin = dmin_array[i]
-		dmin = 0.003
+		dmin = func_return_dmin(nw)
 		# print('dmin=', dmin)
 
 		# d = d_array[i]
@@ -186,18 +184,18 @@ if __name__ == '__main__':
 		# print('d=', d)
 
 		# Rp = Rp_array[i]
-		Rp = 0.3 
+		Rp = 0.5 
 		# print('Rp=', Rp)
 
 		# kappa = kappa_array[i]
-		kappa = 1.0
+		kappa = 1.818
 		# print('kappa=', kappa)
 
 		# ks = ks_array[i]
-		ks = 50000000000  # 弹簧刚度，指代卸扣边界（刚体）
+		ks = 5000  # 弹簧刚度，指代卸扣边界（刚体）
 		# print('ks=', ks)
 
-		wx_origin = 3.0
+		wx_origin = 5.5
 		wy_origin = wx_origin*kappa
 		ls0 = 0.05
 		rho = 7850
@@ -321,25 +319,8 @@ if __name__ == '__main__':
 		print('Force = ', format(Force/1000, '.3f'), 'kN')
 		print('Energy = ', format(Energy/1000, '.3f'), 'kJ')
 		'''
-	nw_star = 3
-	dmin_star = 0.0022
-	d_star = 0.3
-	Rp_star = 0.5
-	kappa_star = 1.0
-	ks_star = 5000000
-
-	F_star = 504599  # N
-	H_star = 1.177  # m
-	E_star = 57158  # J
-
-	sens_disp_factor,sens_forc_factor,sens_ener_factor = func_sensitive(kappa_star, kappa_array,disp_array,forc_array,ener_array)
-	print('factor_array=',kappa_array)
-
 	np.set_printoptions(formatter={"float": lambda x: format(x, '.3f')})
 	print('displacement = ', disp_array, 'm')
 	print('Force = ', forc_array/1000, 'kN')
 	print('Energy = ', ener_array/1000, 'kJ')
 
-	print('sens_disp_factor = ', "{0:.4f}".format(sens_disp_factor))
-	print('sens_forc_factor = ', "{0:.4f}".format(sens_forc_factor))
-	print('sens_ener_factor = ', "{0:.4f}".format(sens_ener_factor))
