@@ -89,6 +89,18 @@ if __name__ == '__main__':
 	L2_PQx_y ,	L2_CDx_y = func_xyz('+x-y', w, kappa, Rp, a, ex, ey, z2)
 	L2_PQ_x_y,	L2_CD_x_y= func_xyz('-x-y', w, kappa, Rp, a, ex, ey, z2)
 
+	Ang1_PQxy  , Ang1_CDxy   = np.arccos(z1/L1_PQxy)  , np.arccos(z1/L1_CDxy)
+	Ang1_PQ_xy , Ang1_CD_xy  = np.arccos(z1/L1_PQ_xy) , np.arccos(z1/L1_CD_xy)
+	Ang1_PQx_y , Ang1_CDx_y  = np.arccos(z1/L1_PQx_y) , np.arccos(z1/L1_CDx_y)
+	Ang1_PQ_x_y, Ang1_CD_x_y = np.arccos(z1/L1_PQ_x_y), np.arccos(z1/L1_CD_x_y)
+
+	Ang2_PQxy  , Ang2_CDxy   = np.arccos(z2/L2_PQxy)  , np.arccos(z2/L2_CDxy)
+	Ang2_PQ_xy , Ang2_CD_xy  = np.arccos(z2/L2_PQ_xy) , np.arccos(z2/L2_CD_xy)
+	Ang2_PQx_y , Ang2_CDx_y  = np.arccos(z2/L2_PQx_y) , np.arccos(z2/L2_CDx_y)
+	Ang2_PQ_x_y, Ang2_CD_x_y = np.arccos(z2/L2_PQ_x_y), np.arccos(z2/L2_CD_x_y)
+
+	chi_ang = 0.8  # chi为考虑实际顶破后环绕加载区域边缘网环内钢丝纤维与竖直方向夹角小于模型角度的修正系数
+
 	F1_PQxy  , F2_PQxy  , E1_PQxy  ,E2_PQxy   = func_vectorFiEi(L0_PQxy  ,L1_PQxy  ,L2_PQxy  ,K1_PQxy  ,K2_PQxy  ,gamma_N1,sigma_y,A)
 	F1_CDxy  , F2_CDxy  , E1_CDxy  ,E2_CDxy   = func_vectorFiEi(L0_CDxy  ,L1_CDxy  ,L2_CDxy  ,K1_CDxy  ,K2_CDxy  ,gamma_N1,sigma_y,A)
 	F1_PQ_xy , F2_PQ_xy , E1_PQ_xy ,E2_PQ_xy  = func_vectorFiEi(L0_PQ_xy ,L1_PQ_xy ,L2_PQ_xy ,K1_PQ_xy ,K2_PQ_xy ,gamma_N1,sigma_y,A)
@@ -109,11 +121,12 @@ if __name__ == '__main__':
 
 	H_net = z2
 
-	Fxy = np.sum(F2_PQxy*z2/L2_PQxy)+np.sum(F2_CDxy*z2/L2_CDxy)
-	F_xy =  np.sum(F2_PQ_xy*z2/L2_PQ_xy)+np.sum(F2_CD_xy*z2/L2_CD_xy)
-	Fx_y =  np.sum(F2_PQx_y*z2/L2_PQx_y)+np.sum(F2_CDx_y*z2/L2_CDx_y)
-	F_x_y =  np.sum(F2_PQ_x_y*z2/L2_PQ_x_y)+np.sum(F2_CD_x_y*z2/L2_CD_x_y)
-	F_net = (Fxy + F_xy + Fx_y + F_x_y)/np.cos(maxTheta1)
+	Fxy   = np.sum(F2_PQxy  *np.cos(chi_ang*Ang2_PQxy))  +np.sum(F2_CDxy  *np.cos(chi_ang*Ang2_CDxy))
+	F_xy  = np.sum(F2_PQ_xy *np.cos(chi_ang*Ang2_PQ_xy)) +np.sum(F2_CD_xy *np.cos(chi_ang*Ang2_PQ_xy))
+	Fx_y  = np.sum(F2_PQx_y *np.cos(chi_ang*Ang2_PQx_y)) +np.sum(F2_CDx_y *np.cos(chi_ang*Ang2_PQx_y))
+	F_x_y = np.sum(F2_PQ_x_y*np.cos(chi_ang*Ang2_PQ_x_y))+np.sum(F2_CD_x_y*np.cos(chi_ang*Ang2_PQ_x_y))
+
+	F_net = Fxy + F_xy + Fx_y + F_x_y
 
 	Exy  = np.sum(E2_PQxy) + np.sum(E2_CDxy)
 	E_xy = np.sum(E2_PQ_xy) + np.sum(E2_CD_xy)

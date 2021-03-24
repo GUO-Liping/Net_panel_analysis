@@ -96,8 +96,8 @@ def func_ringChianDataFit(nw,sigma_y,d):
     poly_gammaN2_func = np.polyfit(nw_array, gammaN2_array,1)
 
     after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
-    # after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw) + 0.18
-    after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw)+0.1
+    chi_gammaN = 0.183
+    after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw)+chi_gammaN
     '''
     对比五环试验与三环试验轴向力发展程度可发现，
     五环(5圈0.551，7圈0.554,9圈0.559)，三环(5圈0.359, 7圈0.398, 9圈0.358)
