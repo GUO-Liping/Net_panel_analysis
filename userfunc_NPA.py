@@ -73,32 +73,6 @@ def func_xyz(points, w, kappa, Rp, a, ex, ey, z):
 		raise ValueError
 
 
-def func_vector_x_direction(para_wx, para_mx, para_ax, para_wy, para_h):
-    index_xi = np.linspace(1, para_mx, para_mx, endpoint=True)
-
-    xu = para_ax * (index_xi - 1/2)
-    yu = np.sqrt(Rp**2 - (para_ax*index_xi - para_ax/2)**2)
-    zu = np.zeros(para_mx) + para_h
-    xd = para_wx * (index_xi-1/2)/(2*para_mx + 1)
-    yd = np.zeros(para_mx) + para_wy/2
-    zd = np.zeros(para_mx) + 0
-
-    length_element_xi = np.sqrt((xu-xd)**2 + (yu-yd)**2 + (zu-zd)**2)
-    return length_element_xi
-
-def func_vector_y_direction(para_wy, para_my, para_ay, para_wx, para_h):
-    index_yi = np.linspace(1, para_my, para_my, endpoint=True)
-
-    xu = np.sqrt(Rp**2 - (para_ay*index_yi - para_ay/2)**2)
-    yu = para_ay * (index_yi - 1/2)
-    zu = np.zeros(para_my) + para_h
-    xd = np.zeros(para_my) + para_wx/2
-    yd = para_wy * (index_yi-1/2)/(2*para_my + 1)
-    zd = np.zeros(para_my) + 0
-
-    length_element_y = np.sqrt((xu-xd)**2 + (yu-yd)**2 + (zu-zd)**2)
-    return length_element_y
-
 def func_ringChianDataFit(nw,sigma_y,d):
     lN0 = 0.3*3
 
@@ -123,7 +97,7 @@ def func_ringChianDataFit(nw,sigma_y,d):
 
     after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
     # after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw) + 0.18
-    after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw)
+    after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw)+0.1
     '''
     对比五环试验与三环试验轴向力发展程度可发现，
     五环(5圈0.551，7圈0.554,9圈0.559)，三环(5圈0.359, 7圈0.398, 9圈0.358)
@@ -226,6 +200,7 @@ def func_compute_z1z2(min_L0,K1,K2,gamma_N1,gamma_N2,sigma_y,A):
 	return z1, z2
 
 def func_vectorFiEi(L0,L1,L2,K1,K2,gamma_N1,sigma_y,A):
+	gamma_N1 = gamma_N1+1e-5
 	F_gammaN1 = gamma_N1*sigma_y*A
 	L_gammaN1 = F_gammaN1/K1 + L0
 

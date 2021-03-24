@@ -30,7 +30,7 @@ if __name__ == '__main__':
 	d = func_return_d(nw)
 	D = 0.3
 	Rp = 0.5 
-	w = 2.95
+	w = 3.0
 	kappa = 1
 	ks_PQ = 500000000  # 弹簧刚度，指代卸扣边界（刚体）
 	ks_CD = 500000000  # 弹簧刚度，指代卸扣边界（刚体）
@@ -74,7 +74,10 @@ if __name__ == '__main__':
 	z1PQ, z2PQ = func_compute_z1z2(L0minPQ,K1minPQ,K2minPQ,gamma_N1,gamma_N2,sigma_y,A)
 	z1CD, z2CD = func_compute_z1z2(L0minCD,K1minCD,K2minCD,gamma_N1,gamma_N2,sigma_y,A)
 
+	L0min = np.min([L0minPQ,L0minCD])
 	z1, z2 = func_z1z2(z1PQ,z1CD,z2PQ,z2CD)
+	maxTheta1 = np.arctan(z1/L0min)  # 第一阶段纤维-弹簧单元最大角度
+	maxTheta2 = np.arctan(z2/L0min)  # 第二阶段纤维-弹簧单元最大角度
 
 	L1_PQxy  ,	L1_CDxy  = func_xyz('+x+y', w, kappa, Rp, a, ex, ey, z1)
 	L1_PQ_xy ,	L1_CD_xy = func_xyz('-x+y', w, kappa, Rp, a, ex, ey, z1)
@@ -110,7 +113,7 @@ if __name__ == '__main__':
 	F_xy =  np.sum(F2_PQ_xy*z2/L2_PQ_xy)+np.sum(F2_CD_xy*z2/L2_CD_xy)
 	Fx_y =  np.sum(F2_PQx_y*z2/L2_PQx_y)+np.sum(F2_CDx_y*z2/L2_CDx_y)
 	F_x_y =  np.sum(F2_PQ_x_y*z2/L2_PQ_x_y)+np.sum(F2_CD_x_y*z2/L2_CD_x_y)
-	F_net = Fxy + F_xy +(Fx_y + F_x_y)
+	F_net = (Fxy + F_xy + Fx_y + F_x_y)/np.cos(maxTheta1)
 
 	Exy  = np.sum(E2_PQxy) + np.sum(E2_CDxy)
 	E_xy = np.sum(E2_PQ_xy) + np.sum(E2_CD_xy)
