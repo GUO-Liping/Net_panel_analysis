@@ -152,7 +152,7 @@ def func_test_exey(ex, ey, wx, wy, Rp):
 
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
-	nw = 19
+	nw = 7
 	d = func_return_d(nw)
 	D = 0.3
 	Rp = 0.5 
@@ -181,11 +181,9 @@ if __name__ == '__main__':
 
 	Ef1 = FN1*lN0/(2*A*(lN1 - lN0))
 	Ef2 = (FN2-FN1)*lN0 / (2*A*(lN2 - lN1))
-	print(Ef1,Ef2)
 	
 	L0_x = func_vector_x_direction(wx, mx, ax, wy, 0, ex, ey)
 	L0_y = func_vector_y_direction(wy, my, ay, wx, 0, ex, ey)
-	print(L0_x,L0_y)
 
 	lf0_x = L0_x - ls0
 	lf0_y = L0_y - ls0
@@ -218,6 +216,7 @@ if __name__ == '__main__':
 	F1_x = K1_x * (L1_x - L0_x)
 	E1_x = K1_x * (L1_x - L0_x)**2 / 2
 	gamma_N1_x = F1_x/(A*sigma_y)
+	print(gamma_N1 )
 
 	F1_y = K1_y * (L1_y - L0_y)
 	E1_y = K1_y * (L1_y - L0_y)**2 / 2
