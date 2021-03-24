@@ -8,6 +8,7 @@ Note: 国际单位制
 Version: 1.0.2.alpha1
 Author: Liping GUO
 Date: 2020/4/1
+命名方式：以平行于x方向及y方向分别作为后缀
 Remark: 影响计算结果的因素还有：
 	(1)直线传力纤维与变形后的环网曲面传力路径之间的角度差异 1.5F; 
 	(2)三环环链拉伸代表了一种网环受力的最不利情形，实际网片中传力路径上环网轴向应力发展程度可能高于环链试验值+0.18
@@ -20,6 +21,78 @@ Remark: 影响计算结果的因素还有：
 '''
 
 import numpy as np
+
+
+def func_xyz(points, w, kappa, Rp, a, ex, ey, z):
+	mPQ = func_round(Rp/a)
+	index_mPQ = np.linspace(1, mPQ, mPQ, endpoint=True)
+
+	xP = a * (index_mPQ - 1/2) + ex
+	yP = np.sqrt(Rp**2 - (a*index_mPQ - a/2)**2) + ey
+	zP = np.zeros(mPQ) + z
+
+	xQ = kappa*w * (index_mPQ-1/2)/(2*mPQ + 1)
+	yQ = np.zeros(mPQ) + w/2
+	zQ = np.zeros(mPQ) + 0
+
+	mCD = func_round(Rp/(kappa*a))
+	index_mCD = np.linspace(1, mCD, mCD, endpoint=True)
+
+	xC = np.sqrt(Rp**2 - (kappa*a*index_mCD - kappa*a/2)**2) + ex
+	yC = kappa*a * (index_mCD - 1/2) + ey
+	zC = np.zeros(mCD) + z
+
+	xD = np.zeros(mCD) + kappa*w/2
+	yD = w * (index_mCD-1/2)/(2*mCD + 1)
+	zD = np.zeros(mCD) + 0
+
+	if points == '+x+y':
+		xP, xC = xP, xC
+		yP, yC = yP, yC
+		zP, zC = zP, zC
+		xQ, xD = xQ, xD
+		yQ, yD = yQ, yD
+		zQ, zD = zQ, zD
+		LPQ = np.sqrt((xP-xQ)**2 +(yP-yQ)**2 +(zP-zQ)**2)
+		LCD = np.sqrt((xC-xD)**2 +(yC-yD)**2 +(zC-zD)**2)
+		return LPQ, LCD 
+
+	elif points == '-x+y':
+		xPminusX ,xCminusX = 2*ex - xP	,2*ex - xC
+		yPminusX ,yCminusX = yP			,yC
+		zPminusX ,zCminusX = zP			,zC
+		xQminusX ,xDminusX = -xQ		,-xD
+		yQminusX ,yDminusX = yQ			,yD
+		zQminusX ,zDminusX = zQ			,zD
+		LPQ = np.sqrt((xPminusX-xQminusX)**2 +(yPminusX-yQminusX)**2 +(zPminusX-zQminusX)**2)
+		LCD = np.sqrt((xCminusX-xDminusX)**2 +(yCminusX-yDminusX)**2 +(zCminusX-zDminusX)**2)
+		return LPQ, LCD 
+
+	elif points == '+x-y':
+		xPminusY, xCminusY = xP			, xC
+		yPminusY, yCminusY = 2*ey - yP	, 2*ey - yC
+		zPminusY, zCminusY = zP			, zC
+		xQminusY, xDminusY = xQ			, xD
+		yQminusY, yDminusY = -yQ		, -yD
+		zQminusY, zDminusY = zQ			, zD
+		LPQ = np.sqrt((xPminusY-xQminusY)**2 +(yPminusY-yQminusY)**2 +(zPminusY-zQminusY)**2)
+		LCD = np.sqrt((xCminusY-xDminusY)**2 +(yCminusY-yDminusY)**2 +(zCminusY-zDminusY)**2)
+		return LPQ, LCD 
+
+	elif points == '-x-y':
+		xPminusXY, xCminusXY = 2*ex - xP, 2*ex - xC	
+		yPminusXY, yCminusXY = 2*ey - yP, 2*ey - yC	
+		zPminusXY, zCminusXY = zP		, zC
+		xQminusXY, xDminusXY = -xQ		, -xD
+		yQminusXY, yDminusXY = -yQ		, -yD
+		zQminusXY, zDminusXY = zQ		, zD
+		LPQ = np.sqrt((xPminusXY-xQminusXY)**2 +(yPminusXY-yQminusXY)**2 +(zPminusXY-zQminusXY)**2)
+		LCD = np.sqrt((xCminusXY-xDminusXY)**2 +(yCminusXY-yDminusXY)**2 +(zCminusXY-zDminusXY)**2)
+		return LPQ, LCD 
+
+	else:
+		raise ValueError
+
 
 def func_vector_x_direction(para_wx, para_mx, para_ax, para_wy, para_h):
     index_xi = np.linspace(1, para_mx, para_mx, endpoint=True)
@@ -47,14 +120,14 @@ def func_vector_y_direction(para_wy, para_my, para_ay, para_wx, para_h):
     length_element_y = np.sqrt((xu-xd)**2 + (yu-yd)**2 + (zu-zd)**2)
     return length_element_y
 
-def func_ringChianDataFit(nw,sigma_y,dmin):
+def func_ringChianDataFit(nw,sigma_y,d):
     lN0 = 0.3*3
 
-    if dmin == 0.003:
+    if d == 0.003:
     	nw_array = np.array([4,5,7,9,12,16,19],dtype='float')
     	FN2_array = np.array([30.064e3,44.937e3,69.72e3,80.547e3,110.884e3,177.66e3,209.387e3],dtype='float')
     	delta_lN2_array = 0.001*np.array([515.05,518.67,508.59,489.92,490.644,475.54,472.36],dtype='float')
-    	Area_array = np.pi/4*dmin**2*nw_array
+    	Area_array = np.pi/4*d**2*nw_array
     	# print('Area_array=',Area_array)
     	gammaN2_array = FN2_array/(sigma_y*2*Area_array)
     	# print('gammaN2_array111=', gammaN2_array)
@@ -62,7 +135,7 @@ def func_ringChianDataFit(nw,sigma_y,dmin):
     	nw_array = np.array([3,4],dtype='float')
     	FN2_array = np.array([9.87e3,17.57e3],dtype='float')
     	delta_lN2_array = np.array([521.16e-3,517.36e-3],dtype='float')
-    	Area_array = np.pi/4*dmin**2*nw_array
+    	Area_array = np.pi/4*d**2*nw_array
     	# print('Area_array=',Area_array)
     	gammaN2_array = FN2_array/(sigma_y*2*Area_array)
 
@@ -77,7 +150,7 @@ def func_ringChianDataFit(nw,sigma_y,dmin):
     分别大于三环(5圈0.192, 7圈0.156, 9圈0.201,)均值为0.183
 	'''
 
-    after_fit_FN2 = after_fit_gammaN2 * sigma_y*(2*nw*np.pi*dmin**2/4)
+    after_fit_FN2 = after_fit_gammaN2 * sigma_y*(2*nw*np.pi*d**2/4)
     after_fit_lN2 = lN0 + after_fit_delta_lN2
     after_fit_FN1 = after_fit_FN2*0.15
     after_fit_lN1 = lN0 + after_fit_delta_lN2*0.85
@@ -92,17 +165,6 @@ def func_round(number):
         number = round(number)
     return int(number)
 
-'''
-def func_correct_gammaAndForce(mx, gamma_N2_x, gamma_N1, F2_x, K1_x, L2_x, L0_x, sigma_y, A):
-
-	for i in range(mx):
-		if gamma_N2_x[i] < gamma_N1:
-			F2_x[i] = K1_x[i] * (L2_x[i] - L0_x[i])
-			gamma_N2_x[i] = F2_x[i] / (sigma_y*A)
-		else:
-			pass
-	return F2_x, gamma_N2_x
-'''
 
 def funcXY_correct_gammaForceEnergy(mx, gamma_N2_x, F2_x, E2_x, gamma_N1, K2_x, K1_x, L2_x, L1_x, L0_x, sigma_y, A):
 
@@ -114,6 +176,7 @@ def funcXY_correct_gammaForceEnergy(mx, gamma_N2_x, F2_x, E2_x, gamma_N1, K2_x, 
 		else:
 			pass
 	return gamma_N2_x, F2_x, E2_x
+
 
 def compute_height(L0_x,K1_x,K2_x,gamma_N1,gamma_N2,sigma_y,A):
 	min_L0_x = min(L0_x)
@@ -131,189 +194,237 @@ def compute_height(L0_x,K1_x,K2_x,gamma_N1,gamma_N2,sigma_y,A):
 
 	return height1, height2
 
-def func_inputData():
+def func_compute_z1z2(min_L0,K1,K2,gamma_N1,gamma_N2,sigma_y,A):
 
-	nw = 7
-	dmin = 0.003
-	d = 0.3
-	Rp = 0.5 
-	wx_origin = 3.0
-	wy_origin = 3.0
-	rho = 7850
-	sigma_y = 1770e6
-	ks = 5000000  # 弹簧刚度，指代卸扣边界（刚体）
-	ls0 = 0.05
+	min_L1 = min_L0 + gamma_N1*sigma_y*A/K1
+	min_L2 = min_L1 + (gamma_N2 - gamma_N1)*sigma_y*A/K2
+	z1 = np.sqrt(min_L1**2 - min_L0**2)
+	z2 = np.sqrt(min_L2**2 - min_L0**2)
 
-	return nw, d, dmin, Rp, wx_origin, wy_origin, sigma_y, rho, ks, ls0
+	return z1, z2
+
+def func_vectorFiEi(L0,L1,L2,K1,K2,gamma_N1,sigma_y,A):
+	F_gammaN1 = gamma_N1*sigma_y*A
+	L_gammaN1 = F_gammaN1/K1 + L0
+
+	F1 = K1*(L1-L0)
+	F2 = K1*(L_gammaN1-L0) + K2*(L2-L_gammaN1)
+
+	E1 = K1*(L1-L0)**2/2
+	E2 = K1*L2*(L1-L0) + K1*(L0**2-L1**2)/2 + K2*(L2-L1)**2 / 2
+
+	for i in range(len(L1)):
+		if L1[i] <= L_gammaN1[i]:
+			pass
+		else:
+			raise ValueError
+	for j in range(len(L2)):
+		if L2[j] >= L_gammaN1[j]:
+			pass
+		else:
+			F2[j] = K1[j]*(L2[j]-L0[j])
+			E2[j] = K1[j]*(L1[j]-L0[j])**2/2
+	return F1,F2,E1,E2
+
+
+def func_lslf(F1,F2,L1,L2,ls0,lf0,ks,E1,E2,gamma_N1,sigma_y,A):
+	gamma1_N = F1/(sigma_y*A)
+	ls1 = np.zeros_like(L1)
+	lf1 = np.zeros_like(L1)
+	ls2 = np.zeros_like(L2)
+	lf2 = np.zeros_like(L2)
+	for k1 in range(len(gamma1_N)):
+		if gamma1_N[k1] <=gamma_N1:
+			ls1[k1] = (E1*A*(L1[k1]-lf0[k1])+ks*ls0*lf0[k1]) / (ks*lf0[k1]+E1*A)
+			lf1[k1] = (ks*lf0[k1]*(L1[k1]-ls0)+E1*A*lf0[k1]) / (ks*lf0[k1]+E1*A)
+		elif gamma1_N[k1] >gamma1_N1:
+			raise ValueError
+	gamma2_N = F2/(sigma_y*A)
+	for k2 in range(len(gamma2_N)):
+		if gamma2_N[k2] <=gamma_N1:
+			ls2[k2] = (E1*A*(L2[k2]-lf0[k2])+ks*ls0*lf0[k2]) / (ks*lf0[k2]+E1*A)
+			lf2[k2] = (ks*lf0[k2]*(L2[k2]-ls0)+E1*A*lf0[k2]) / (ks*lf0[k2]+E1*A)
+		elif gamma2_N[k2] >gamma_N1:
+			ls2[k2] = (E2*A/lf0[k2]*(L2[k2]-lf1[k2])+ks*ls1[k2]) / (ks+E2*A/lf0[k2])
+			lf2[k2] = (ks*(L2[k2]-ls1[k2])+lf1[k2]*E2*A/lf0[k2]) / (ks+E2*A/lf0[k2])
+	return ls1,ls2,lf1,lf2
+
+
+def func_sensitive(factor_star, factor_array,disp_array,forc_array,ener_array):
+	index_ref = np.int(np.where(factor_array==factor_star)[0])
+	print('index_ref=',index_ref)
+	sens_disp_factor = np.abs((disp_array[index_ref+1]-disp_array[index_ref])/(factor_array[index_ref+1]-factor_star)*(factor_star/disp_array[index_ref]))
+	sens_forc_factor = np.abs((forc_array[index_ref+1]-forc_array[index_ref])/(factor_array[index_ref+1]-factor_star)*(factor_star/forc_array[index_ref]))
+	sens_ener_factor = np.abs((ener_array[index_ref+1]-ener_array[index_ref])/(factor_array[index_ref+1]-factor_star)*(factor_star/ener_array[index_ref]))
+
+	return sens_disp_factor,sens_forc_factor,sens_ener_factor
+
+
+def func_return_d(nw):
+	if nw > 0:
+		if nw <= 4:
+			return 0.0022
+		elif nw > 4:
+			return 0.003
+		else:
+			raise ValueError
+	else:
+		raise ValueError
+
 
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
-	num = 7
-	para_array = np.empty([num])
-	disp_array = np.empty([num])
-	forc_array = np.empty([num])
-	ener_array = np.empty([num])
 
-	nw_sensitive = np.linspace(9-int(num/2)*2,9+int(num/2)*2,num=num)
-	dmin_sensitive = np.linspace(0.003-int(num/2)*0.2*0.003,0.003+int(num/2)*0.2*0.003,num=num)
-	d_sensitive = np.linspace(0.3-int(num/2)*0.2*0.3,0.3+int(num/2)*0.2*0.3,num=num)
-	Rp_sensitive = np.linspace(0.9-int(num/2)*0.2*0.5,0.9+int(num/2)*0.2*0.5,num=num)
+	nw = 19
+	d = func_return_d(nw)
+	D = 0.3
+	Rp = 0.5 
+	w = 3.0
+	kappa = 1
+	ks_PQ = 500000000  # 弹簧刚度，指代卸扣边界（刚体）
+	ks_CD = 500000000  # 弹簧刚度，指代卸扣边界（刚体）
+	sigma_y = 1770e6
+	A = nw * np.pi*d**2/4  # 单肢截面面积
+	a = np.pi*D/(2*(1+kappa))
+	ls0_PQ = 0.05
+	ls0_CD = 0.05
+	ex = 0
+	ey = 0
 	
-	wx_sensitive = np.linspace(3-int(num/2)*0.2*3,3+int(num/2)*0.2*3,num=num)
-	ks_sensitive = 1000000*np.linspace(5-int(num/2)*0.2*5,5+int(num/2)*0.2*5,num=num)
-	
-	for i in range(len(nw_sensitive)):
+	# 环链试验----------------------------------------------------------------------------------- #
 
-		# nw = nw_sensitive[i]
-		# para_array[i] = nw
-		nw = 9
-		# print('nw=', nw)
+	FN1, FN2, lN0, lN1, lN2, gamma_N1, gamma_N2 = func_ringChianDataFit(nw, sigma_y, d)
+	E1 = FN1*lN0/(2*A*(lN1 - lN0))
+	E2 = (FN2-FN1)*lN0 / (2*A*(lN2 - lN1))
 
-		# dmin = dmin_sensitive[i]
-		# para_array[i] = dmin
-		dmin = 0.003
-		# print('dmin=', dmin)
+	L0_PQxy  ,	L0_CDxy  = func_xyz('+x+y', w, kappa, Rp, a, ex, ey, 0)
+	L0_PQ_xy ,	L0_CD_xy = func_xyz('-x+y', w, kappa, Rp, a, ex, ey, 0)
+	L0_PQx_y ,	L0_CDx_y = func_xyz('+x-y', w, kappa, Rp, a, ex, ey, 0)
+	L0_PQ_x_y,	L0_CD_x_y= func_xyz('-x-y', w, kappa, Rp, a, ex, ey, 0)
 
-		# d = d_sensitive[i]
-		# para_array[i] = d
-		d = 0.3
-		# print('d=', d)
+	lf0_PQxy  ,	lf0_CDxy  =  L0_PQxy -ls0_PQ , L0_CDxy -ls0_CD
+	lf0_PQ_xy ,	lf0_CD_xy =  L0_PQ_xy-ls0_PQ, L0_CD_xy -ls0_CD
+	lf0_PQx_y ,	lf0_CDx_y =  L0_PQx_y-ls0_PQ, L0_CDx_y -ls0_CD
+	lf0_PQ_x_y,	lf0_CD_x_y= L0_PQ_x_y-ls0_PQ, L0_CD_x_y-ls0_CD
 
-		Rp = Rp_sensitive[i]
-		para_array[i] = Rp
-		# Rp = 0.5 
-		print('Rp=', Rp)
+	K1_PQxy  , K1_CDxy  = 1/(lf0_PQxy  /(E1*A)+1/ks_PQ), 1/(lf0_CDxy  /(E1*A)+1/ks_CD)
+	K1_PQ_xy , K1_CD_xy = 1/(lf0_PQ_xy /(E1*A)+1/ks_PQ), 1/(lf0_CD_xy /(E1*A)+1/ks_CD)
+	K1_PQx_y , K1_CDx_y = 1/(lf0_PQx_y /(E1*A)+1/ks_PQ), 1/(lf0_CDx_y /(E1*A)+1/ks_CD)
+	K1_PQ_x_y, K1_CD_x_y= 1/(lf0_PQ_x_y/(E1*A)+1/ks_PQ), 1/(lf0_CD_x_y/(E1*A)+1/ks_CD)
 
-		# wx_origin = wx_sensitive[i]
-		# para_array[i] = wx_origin
-		wx_origin = 3.0
-		# print('wx=', wx_origin)
+	K2_PQxy  , K2_CDxy  = 1/(lf0_PQxy  /(E2*A)+1/ks_PQ), 1/(lf0_CDxy  /(E2*A)+1/ks_CD)
+	K2_PQ_xy , K2_CD_xy = 1/(lf0_PQ_xy /(E2*A)+1/ks_PQ), 1/(lf0_CD_xy /(E2*A)+1/ks_CD)
+	K2_PQx_y , K2_CDx_y = 1/(lf0_PQx_y /(E2*A)+1/ks_PQ), 1/(lf0_CDx_y /(E2*A)+1/ks_CD)
+	K2_PQ_x_y, K2_CD_x_y= 1/(lf0_PQ_x_y/(E2*A)+1/ks_PQ), 1/(lf0_CD_x_y/(E2*A)+1/ks_CD)
 
-		# ks = ks_sensitive[i]
-		# para_array[i] = ks
-		ks = 5000000  # 弹簧刚度，指代卸扣边界（刚体）
-		# print('ks=', ks)
+	p1, p2, p3, p4 = len(L0_PQxy), len(L0_PQ_xy), len(L0_PQx_y), len(L0_PQ_x_y)
+	min_PQ = np.min([L0_PQxy, L0_PQ_xy, L0_PQx_y, L0_PQ_x_y])
+	index_minPQ = np.argmin([L0_PQxy, L0_PQ_xy, L0_PQx_y, L0_PQ_x_y])
+	if index_minPQ>=0 and index_minPQ<p1:
+		L0minPQ = min_PQ
+		idPQ = index_minPQ
+		K1minPQ = K1_PQxy[idPQ]
+		K2minPQ = K2_PQxy[idPQ]
+	elif index_minPQ>=p1 and index_minPQ<(p1+p2):
+		L0minPQ = min_PQ
+		idPQ = index_minPQ-p1
+		K1minPQ = K1_PQxy[idPQ]
+		K2minPQ = K2_PQxy[idPQ]
+	elif index_minPQ>=(p1+p2) and index_minPQ<(p1+p2+p3):
+		L0minPQ = min_PQ
+		idPQ = index_minPQ-p1-p2
+		K1minPQ = K1_PQxy[idPQ]
+		K2minPQ = K2_PQxy[idPQ]
+	elif index_minPQ>=(p1+p2+p3) and index_minPQ<(p1+p2+p3+p4):
+		L0minPQ = min_PQ
+		idPQ = index_minPQ-p1-p2-p3
+		K1minPQ = K1_PQxy[idPQ]
+		K2minPQ = K2_PQxy[idPQ]
+	else:
+		raise ValueError
 
-		ls0 = 0.05
-		wy_origin = 3.0
-		rho = 7850
-		sigma_y = 1770e6
-	
-		A = nw * np.pi*dmin**2/4  # 单肢截面面积
-		# print(A)
-	
-		wx = max(wx_origin,wy_origin) - ls0  # 指定最小尺寸的弹簧-纤维单元在x方向
-		wy = min(wx_origin,wy_origin) - ls0  # 指定最小尺寸的弹簧-纤维单元不在y方向
-		
-		# 成本计算——网片钢丝用量（总长度、总质量）
-		l_wire = nw*np.pi/(2*np.sqrt(2))*((wx-d+2*np.sqrt(2)*d)*(wy-d+2*np.sqrt(2)*d)+(wx-d)*(wy-d))
-		m_wire = rho*np.pi*dmin**2*l_wire/4
-		# print('l_wire=', l_wire)
-		# print('m_wire=', m_wire)
-	
-		ax = np.pi*d/2 * wy/(wx+wy)  # 加载区域x方向网环边长
-		ay = np.pi*d/2 * wx/(wx+wy)  # 加载区域y方向网环边长
-		
-		mx = func_round(Rp/ax)
-		# print('mx=', mx)
-		my = func_round(Rp/ay)
-		# print('my=', my)
-		
-		# 环链试验----------------------------------------------------------------------------------- #
-	
-		FN1, FN2, lN0, lN1, lN2, gamma_N1, gamma_N2 = func_ringChianDataFit(nw, sigma_y, dmin)
-	
-		Ef1 = FN1*lN0/(2*A*(lN1 - lN0))
-		# print('Ef1=',Ef1)
-		Ef2 = (FN2-FN1)*lN0 / (2*A*(lN2 - lN1))
-		# print('Ef2=',Ef2)
-		
-		L0_x = func_vector_x_direction(wx, mx, ax, wy, 0)
-		L0_y = func_vector_y_direction(wy, my, ay, wx, 0)
-		# print('L0_x, L0_y=',L0_x, L0_y)
-	
-		lf0_x = L0_x - ls0
-		lf0_y = L0_y - ls0
-		
-		K1_x = 1 / (lf0_x/(Ef1*A)+1/ks)
-		K2_x = 1 / (lf0_x/(Ef2*A)+1/ks)
-		K1_y = 1 / (lf0_y/(Ef1*A)+1/ks)
-		K2_y = 1 / (lf0_y/(Ef2*A)+1/ks)
-		# print('K1_x, K2_x=',K1_x, K2_x)
-	
-		h1, h2 = compute_height(L0_x,K1_x,K2_x,gamma_N1,gamma_N2,sigma_y,A)
-	
-		# 计算变形----------------------------------------------------------------------------------- #
-	
-		L1_x = func_vector_x_direction(wx, mx, ax, wy, h1)
-		L1_y = func_vector_x_direction(wy, my, ay, wx, h1)
-		ls1_x = (Ef1*A*(L1_x-lf0_x)+ks*ls0*lf0_x) / (ks*lf0_x+Ef1*A)
-		ls1_y = (Ef1*A*(L1_y-lf0_y)+ks*ls0*lf0_y) / (ks*lf0_y+Ef1*A)
-		lf1_x = (ks*lf0_x*(L1_x-ls0)+Ef1*A*lf0_x) / (ks*lf0_x+Ef1*A)
-		lf1_y = (ks*lf0_y*(L1_y-ls0)+Ef1*A*lf0_y) / (ks*lf0_y+Ef1*A)
-	
-	
-		L2_x = func_vector_x_direction(wx, mx, ax, wy, h2)
-		L2_y = func_vector_x_direction(wy, my, ay, wx, h2)
-		ls2_x = (Ef2*A/lf0_x*(L2_x-lf1_x)+ks*ls1_x) / (ks+Ef2*A/lf0_x)
-		ls2_y = (Ef2*A/lf0_y*(L2_y-lf1_y)+ks*ls1_y) / (ks+Ef2*A/lf0_y)
-		lf2_x = (ks*(L2_x-ls1_x)+lf1_x*Ef2*A/lf0_x) / (ks+Ef2*A/lf0_x)
-		lf2_y = (ks*(L2_y-ls1_y)+lf1_y*Ef2*A/lf0_y) / (ks+Ef2*A/lf0_y)
-	
-		# 计算顶破力----------------------------------------------------------------------------------- #
-	
-		F1_x = K1_x * (L1_x - L0_x)
-		E1_x = K1_x * (L1_x - L0_x)**2 / 2
-		gamma_N1_x = F1_x/(A*sigma_y)
-	
-		F1_y = K1_y * (L1_y - L0_y)
-		E1_y = K1_y * (L1_y - L0_y)**2 / 2
-		gamma_N1_y = F1_y/(A*sigma_y)
-	
-		# 初始化并修正单元轴力、轴向应力发展程度系数----------------------------------------------------------- #
-		init_F2_x = K1_x*(L2_x-L0_x)
-		init_E2_x = K1_x * (L2_x-L0_x)**2 / 2
-		init_gamma_N2_x = init_F2_x/(A*sigma_y)
-	
-		gamma_N2_x, F2_x, E2_x = funcXY_correct_gammaForceEnergy(mx, init_gamma_N2_x, init_F2_x, init_E2_x, gamma_N1, K2_x, K1_x, L2_x, L1_x, L0_x, sigma_y, A)
-		# print('gamma_N1_x',gamma_N1_x)
-		# print('gamma_N2_x',gamma_N2_x)
-	
-		init_F2_y = K1_y*(L2_y-L0_y)
-		init_E2_y = K1_y * (L2_y-L0_y)**2 / 2
-		init_gamma_N2_y = init_F2_y/(A*sigma_y)
-	
-		gamma_N2_y, F2_y, E2_y = funcXY_correct_gammaForceEnergy(my, init_gamma_N2_y, init_F2_y, init_E2_y, gamma_N1, K2_y, K1_y, L2_y, L1_y, L0_y, sigma_y, A)
-		# print('F1_y=', F1_y)
-		# print('F2_y=', F2_y)
-	
-		# 计算能量----------------------------------------------------------------------------------- # 
-		# print('E1_x=', E1_x)
-		# print('E2_x=', E2_x)
-	
-		displacement = h2
-		Force = 4*np.sum(F2_x * h2 / L2_x, axis=0) + 4*np.sum(F2_y * h2 / L2_y,axis=0) * 1.4
-		Energy = 4*np.sum(E2_x, axis=0) + 4*np.sum(E2_y, axis=0)
+	c1, c2, c3, c4 = len(L0_CDxy), len(L0_CD_xy), len(L0_CDx_y), len(L0_CD_x_y)
+	min_CD = np.min([L0_CDxy, L0_CD_xy, L0_CDx_y, L0_CD_x_y])
+	index_minCD = np.argmin([L0_CDxy, L0_CD_xy, L0_CDx_y, L0_CD_x_y])
+	if index_minCD>=0 and index_minCD<c1:
+		L0minCD = min_CD
+		idCD = index_minCD
+		K1minCD = K1_CDxy[idCD]
+		K2minCD = K2_CDxy[idCD]
+	elif index_minCD>=c1 and index_minPQ<(c1+c2):
+		L0minCD = min_CD
+		idCD = index_minCD-c1
+		K1minCD = K1_CDxy[idCD]
+		K2minCD = K2_CDxy[idCD]
+	elif index_minPQ>=(c1+c2) and index_minPQ<(c1+c2+c3):
+		L0minCD = min_CD
+		idCD = index_minCD-c1-c2
+		K1minCD = K1_CDxy[idCD]
+		K2minCD = K2_CDxy[idCD]
+	elif index_minPQ>=(c1+c2+c3) and index_minPQ<(c1+c2+c3+c4):
+		L0minCD = min_CD
+		idCD = index_minCD-c1-c2-c3
+		K1minCD = K1_CDxy[idCD]
+		K2minCD = K2_CDxy[idCD]
+	else:
+		raise ValueError
 
-		disp_array[i] = displacement
-		forc_array[i] = Force
-		ener_array[i] = Energy
+	z1PQ, z2PQ = func_compute_z1z2(L0minPQ,K1minPQ,K2minPQ,gamma_N1,gamma_N2,sigma_y,A)
+	z1CD, z2CD = func_compute_z1z2(L0minCD,K1minCD,K2minCD,gamma_N1,gamma_N2,sigma_y,A)
+
+	if z1PQ<=z1CD and z2PQ<=z2CD:
+		z1 = z1PQ
+		z2 = z2PQ
+	elif z1PQ>z1CD and z2PQ>z2CD:
+		z1 = z1CD
+		z2 = z2CD
+	else:
+		raise ValueError
+
+	L1_PQxy  ,	L1_CDxy  = func_xyz('+x+y', w, kappa, Rp, a, ex, ey, z1)
+	L1_PQ_xy ,	L1_CD_xy = func_xyz('-x+y', w, kappa, Rp, a, ex, ey, z1)
+	L1_PQx_y ,	L1_CDx_y = func_xyz('+x-y', w, kappa, Rp, a, ex, ey, z1)
+	L1_PQ_x_y,	L1_CD_x_y= func_xyz('-x-y', w, kappa, Rp, a, ex, ey, z1)
+
+	L2_PQxy  ,	L2_CDxy  = func_xyz('+x+y', w, kappa, Rp, a, ex, ey, z2)
+	L2_PQ_xy ,	L2_CD_xy = func_xyz('-x+y', w, kappa, Rp, a, ex, ey, z2)
+	L2_PQx_y ,	L2_CDx_y = func_xyz('+x-y', w, kappa, Rp, a, ex, ey, z2)
+	L2_PQ_x_y,	L2_CD_x_y= func_xyz('-x-y', w, kappa, Rp, a, ex, ey, z2)
+
+	F1_PQxy  , F2_PQxy  , E1_PQxy  ,E2_PQxy   = func_vectorFiEi(L0_PQxy  ,L1_PQxy  ,L2_PQxy  ,K1_PQxy  ,K2_PQxy  ,gamma_N1,sigma_y,A)
+	F1_CDxy  , F2_CDxy  , E1_CDxy  ,E2_CDxy   = func_vectorFiEi(L0_CDxy  ,L1_CDxy  ,L2_CDxy  ,K1_CDxy  ,K2_CDxy  ,gamma_N1,sigma_y,A)
+	F1_PQ_xy , F2_PQ_xy , E1_PQ_xy ,E2_PQ_xy  = func_vectorFiEi(L0_PQ_xy ,L1_PQ_xy ,L2_PQ_xy ,K1_PQ_xy ,K2_PQ_xy ,gamma_N1,sigma_y,A)
+	F1_CD_xy , F2_CD_xy , E1_CD_xy ,E2_CD_xy  = func_vectorFiEi(L0_CD_xy ,L1_CD_xy ,L2_CD_xy ,K1_CD_xy ,K2_CD_xy ,gamma_N1,sigma_y,A)
+	F1_PQx_y , F2_PQx_y , E1_PQx_y ,E2_PQx_y  = func_vectorFiEi(L0_PQx_y ,L1_PQx_y ,L2_PQx_y ,K1_PQx_y ,K2_PQx_y ,gamma_N1,sigma_y,A)
+	F1_CDx_y , F2_CDx_y , E1_CDx_y ,E2_CDx_y  = func_vectorFiEi(L0_CDx_y ,L1_CDx_y ,L2_CDx_y ,K1_CDx_y ,K2_CDx_y ,gamma_N1,sigma_y,A)
+	F1_PQ_x_y, F2_PQ_x_y, E1_PQ_x_y,E2_PQ_x_y = func_vectorFiEi(L0_PQ_x_y,L1_PQ_x_y,L2_PQ_x_y,K1_PQ_x_y,K2_PQ_x_y,gamma_N1,sigma_y,A)
+	F1_CD_x_y, F2_CD_x_y, E1_CD_x_y,E2_CD_x_y = func_vectorFiEi(L0_CD_x_y,L1_CD_x_y,L2_CD_x_y,K1_CD_x_y,K2_CD_x_y,gamma_N1,sigma_y,A)
 	
-		# print('epsilon_N1', gamma_N1*sigma_y/Ef1)
-		# print('epsilon_N2', gamma_N1*sigma_y/Ef1+(gamma_N2-gamma_N1)*sigma_y/Ef2)
-		# print('L1_x = ', L1_x)
-		# print('lf1_x = ', lf1_x)
-		# print('ls1_x = ', ls1_x)
-		# print('L2_x = ', L2_x)
-		# print('lf2_x = ', lf2_x)
-		# print('ls2_x = ', ls2_x)
-		'''
-		print('displacement = ', format(displacement, '.3f'), 'm')
-		print('Force = ', format(Force/1000, '.3f'), 'kN')
-		print('Energy = ', format(Energy/1000, '.3f'), 'kJ')
-		'''
-		np.set_printoptions(formatter={"float": lambda x: format(x, '.3f')})
-		print('sensitive factors = ', para_array)
-		print('displacement = ', disp_array, 'm')
-		print('Force = ', forc_array/1000, 'kN')
-		print('Energy = ', ener_array/1000, 'kJ')
+	ls1_PQxy  ,ls2_PQxy  ,lf1_PQxy  ,lf2_PQxy   = func_lslf(F1_PQxy  ,F2_PQxy  ,L1_PQxy  ,L2_PQxy  ,ls0_PQ,lf0_PQxy  ,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
+	ls1_CDxy  ,ls2_CDxy  ,lf1_CDxy  ,lf2_CDxy   = func_lslf(F1_CDxy  ,F2_CDxy  ,L1_CDxy  ,L2_CDxy  ,ls0_CD,lf0_CDxy  ,ks_CD,E1,E2,gamma_N1,sigma_y,A)
+	ls1_PQ_xy ,ls2_PQ_xy ,lf1_PQ_xy ,lf2_PQ_xy  = func_lslf(F1_PQ_xy ,F2_PQ_xy ,L1_PQ_xy ,L2_PQ_xy ,ls0_PQ,lf0_PQ_xy ,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
+	ls1_CD_xy ,ls2_CD_xy ,lf1_CD_xy ,lf2_CD_xy  = func_lslf(F1_CD_xy ,F2_CD_xy ,L1_CD_xy ,L2_CD_xy ,ls0_CD,lf0_CD_xy ,ks_CD,E1,E2,gamma_N1,sigma_y,A)
+	ls1_PQx_y ,ls2_PQx_y ,lf1_PQx_y ,lf2_PQx_y  = func_lslf(F1_PQx_y ,F2_PQx_y ,L1_PQx_y ,L2_PQx_y ,ls0_PQ,lf0_PQx_y ,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
+	ls1_CDx_y ,ls2_CDx_y ,lf1_CDx_y ,lf2_CDx_y  = func_lslf(F1_CDx_y ,F2_CDx_y ,L1_CDx_y ,L2_CDx_y ,ls0_CD,lf0_CDx_y ,ks_CD,E1,E2,gamma_N1,sigma_y,A)
+	ls1_PQ_x_y,ls2_PQ_x_y,lf1_PQ_x_y,lf2_PQ_x_y = func_lslf(F1_PQ_x_y,F2_PQ_x_y,L1_PQ_x_y,L2_PQ_x_y,ls0_PQ,lf0_PQ_x_y,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
+	ls1_CD_x_y,ls2_CD_x_y,lf1_CD_x_y,lf2_CD_x_y = func_lslf(F1_CD_x_y,F2_CD_x_y,L1_CD_x_y,L2_CD_x_y,ls0_PQ,lf0_CD_x_y,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
+
+	H_net = z2
+
+	Fxy = np.sum(F2_PQxy*z2/L2_PQxy)+np.sum(F2_CDxy*z2/L2_CDxy)
+	F_xy =  np.sum(F2_PQ_xy*z2/L2_PQ_xy)+np.sum(F2_CD_xy*z2/L2_CD_xy)
+	Fx_y =  np.sum(F2_PQx_y*z2/L2_PQx_y)+np.sum(F2_CDx_y*z2/L2_CDx_y)
+	F_x_y =  np.sum(F2_PQ_x_y*z2/L2_PQ_x_y)+np.sum(F2_CD_x_y*z2/L2_CD_x_y)
+	F_net = Fxy + F_xy +(Fx_y + F_x_y)*1.4
+
+	Exy  = np.sum(E2_PQxy) + np.sum(E2_CDxy)
+	E_xy = np.sum(E2_PQ_xy) + np.sum(E2_CD_xy)
+	Ex_y = np.sum(E2_PQx_y) + np.sum(E2_CDx_y)
+	E_x_y= np.sum(E2_PQ_x_y) + np.sum(E2_CD_x_y)
+	E_net = Exy + E_xy + Ex_y + E_x_y
+
+	print('Displacement = ', format(H_net, '.3f'), 'm')
+	print('Force = ', format(F_net/1000, '.3f'), 'kN')
+	print('Energy = ', format(E_net/1000, '.3f'), 'kJ')
+
+
