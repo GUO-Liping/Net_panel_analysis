@@ -26,14 +26,14 @@ from userfunc_NPA import *
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
 
-	nw = 7
+	nw = 19
 	d = func_return_d(nw)
 	D = 0.3
 	Rp = 0.5 
 	w = 3.0
 	kappa = 1
-	ks_PQ = 500000000  # 弹簧刚度，指代卸扣边界（刚体）
-	ks_CD = 500000000  # 弹簧刚度，指代卸扣边界（刚体）
+	ks_PQ = 500000000000  # 弹簧刚度，指代卸扣边界（刚体）
+	ks_CD = 500000000000  # 弹簧刚度，指代卸扣边界（刚体）
 	sigma_y = 1770e6
 	A = nw * np.pi*d**2/4  # 单肢截面面积
 	a = np.pi*D/(2*(1+kappa))
@@ -99,39 +99,42 @@ if __name__ == '__main__':
 	Ang2_PQx_y , Ang2_CDx_y  = np.arccos(z2/L2_PQx_y) , np.arccos(z2/L2_CDx_y)
 	Ang2_PQ_x_y, Ang2_CD_x_y = np.arccos(z2/L2_PQ_x_y), np.arccos(z2/L2_CD_x_y)
 
-	chi_ang = 0.8  # chi为考虑实际顶破后环绕加载区域边缘网环内钢丝纤维与竖直方向夹角小于模型角度的修正系数
+	chi_ang = 0.5  # chi为考虑实际顶破后环绕加载区域边缘网环内钢丝纤维与竖直方向夹角小于模型角度的修正系数
 
 	F1_PQxy  , F2_PQxy  , E1_PQxy  ,E2_PQxy   = func_vectorFiEi(L0_PQxy  ,L1_PQxy  ,L2_PQxy  ,K1_PQxy  ,K2_PQxy  ,gamma_N1,sigma_y,A)
-	F1_CDxy  , F2_CDxy  , E1_CDxy  ,E2_CDxy   = func_vectorFiEi(L0_CDxy  ,L1_CDxy  ,L2_CDxy  ,K1_CDxy  ,K2_CDxy  ,gamma_N1,sigma_y,A)
 	F1_PQ_xy , F2_PQ_xy , E1_PQ_xy ,E2_PQ_xy  = func_vectorFiEi(L0_PQ_xy ,L1_PQ_xy ,L2_PQ_xy ,K1_PQ_xy ,K2_PQ_xy ,gamma_N1,sigma_y,A)
-	F1_CD_xy , F2_CD_xy , E1_CD_xy ,E2_CD_xy  = func_vectorFiEi(L0_CD_xy ,L1_CD_xy ,L2_CD_xy ,K1_CD_xy ,K2_CD_xy ,gamma_N1,sigma_y,A)
 	F1_PQx_y , F2_PQx_y , E1_PQx_y ,E2_PQx_y  = func_vectorFiEi(L0_PQx_y ,L1_PQx_y ,L2_PQx_y ,K1_PQx_y ,K2_PQx_y ,gamma_N1,sigma_y,A)
-	F1_CDx_y , F2_CDx_y , E1_CDx_y ,E2_CDx_y  = func_vectorFiEi(L0_CDx_y ,L1_CDx_y ,L2_CDx_y ,K1_CDx_y ,K2_CDx_y ,gamma_N1,sigma_y,A)
 	F1_PQ_x_y, F2_PQ_x_y, E1_PQ_x_y,E2_PQ_x_y = func_vectorFiEi(L0_PQ_x_y,L1_PQ_x_y,L2_PQ_x_y,K1_PQ_x_y,K2_PQ_x_y,gamma_N1,sigma_y,A)
+
+	F1_CDxy  , F2_CDxy  , E1_CDxy  ,E2_CDxy   = func_vectorFiEi(L0_CDxy  ,L1_CDxy  ,L2_CDxy  ,K1_CDxy  ,K2_CDxy  ,gamma_N1,sigma_y,A)
+	F1_CD_xy , F2_CD_xy , E1_CD_xy ,E2_CD_xy  = func_vectorFiEi(L0_CD_xy ,L1_CD_xy ,L2_CD_xy ,K1_CD_xy ,K2_CD_xy ,gamma_N1,sigma_y,A)
+	F1_CDx_y , F2_CDx_y , E1_CDx_y ,E2_CDx_y  = func_vectorFiEi(L0_CDx_y ,L1_CDx_y ,L2_CDx_y ,K1_CDx_y ,K2_CDx_y ,gamma_N1,sigma_y,A)
 	F1_CD_x_y, F2_CD_x_y, E1_CD_x_y,E2_CD_x_y = func_vectorFiEi(L0_CD_x_y,L1_CD_x_y,L2_CD_x_y,K1_CD_x_y,K2_CD_x_y,gamma_N1,sigma_y,A)
 
 	ls1_PQxy  ,ls2_PQxy  ,lf1_PQxy  ,lf2_PQxy   = func_lslf(F1_PQxy  ,F2_PQxy  ,L1_PQxy  ,L2_PQxy  ,ls0_PQ,lf0_PQxy  ,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
-	ls1_CDxy  ,ls2_CDxy  ,lf1_CDxy  ,lf2_CDxy   = func_lslf(F1_CDxy  ,F2_CDxy  ,L1_CDxy  ,L2_CDxy  ,ls0_CD,lf0_CDxy  ,ks_CD,E1,E2,gamma_N1,sigma_y,A)
 	ls1_PQ_xy ,ls2_PQ_xy ,lf1_PQ_xy ,lf2_PQ_xy  = func_lslf(F1_PQ_xy ,F2_PQ_xy ,L1_PQ_xy ,L2_PQ_xy ,ls0_PQ,lf0_PQ_xy ,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
-	ls1_CD_xy ,ls2_CD_xy ,lf1_CD_xy ,lf2_CD_xy  = func_lslf(F1_CD_xy ,F2_CD_xy ,L1_CD_xy ,L2_CD_xy ,ls0_CD,lf0_CD_xy ,ks_CD,E1,E2,gamma_N1,sigma_y,A)
 	ls1_PQx_y ,ls2_PQx_y ,lf1_PQx_y ,lf2_PQx_y  = func_lslf(F1_PQx_y ,F2_PQx_y ,L1_PQx_y ,L2_PQx_y ,ls0_PQ,lf0_PQx_y ,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
-	ls1_CDx_y ,ls2_CDx_y ,lf1_CDx_y ,lf2_CDx_y  = func_lslf(F1_CDx_y ,F2_CDx_y ,L1_CDx_y ,L2_CDx_y ,ls0_CD,lf0_CDx_y ,ks_CD,E1,E2,gamma_N1,sigma_y,A)
 	ls1_PQ_x_y,ls2_PQ_x_y,lf1_PQ_x_y,lf2_PQ_x_y = func_lslf(F1_PQ_x_y,F2_PQ_x_y,L1_PQ_x_y,L2_PQ_x_y,ls0_PQ,lf0_PQ_x_y,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
+
+	ls1_CDxy  ,ls2_CDxy  ,lf1_CDxy  ,lf2_CDxy   = func_lslf(F1_CDxy  ,F2_CDxy  ,L1_CDxy  ,L2_CDxy  ,ls0_CD,lf0_CDxy  ,ks_CD,E1,E2,gamma_N1,sigma_y,A)
+	ls1_CD_xy ,ls2_CD_xy ,lf1_CD_xy ,lf2_CD_xy  = func_lslf(F1_CD_xy ,F2_CD_xy ,L1_CD_xy ,L2_CD_xy ,ls0_CD,lf0_CD_xy ,ks_CD,E1,E2,gamma_N1,sigma_y,A)
+	ls1_CDx_y ,ls2_CDx_y ,lf1_CDx_y ,lf2_CDx_y  = func_lslf(F1_CDx_y ,F2_CDx_y ,L1_CDx_y ,L2_CDx_y ,ls0_CD,lf0_CDx_y ,ks_CD,E1,E2,gamma_N1,sigma_y,A)
 	ls1_CD_x_y,ls2_CD_x_y,lf1_CD_x_y,lf2_CD_x_y = func_lslf(F1_CD_x_y,F2_CD_x_y,L1_CD_x_y,L2_CD_x_y,ls0_PQ,lf0_CD_x_y,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
 
 	H_net = z2
 
 	Fxy   = np.sum(F2_PQxy  *np.cos(chi_ang*Ang2_PQxy))  +np.sum(F2_CDxy  *np.cos(chi_ang*Ang2_CDxy))
-	F_xy  = np.sum(F2_PQ_xy *np.cos(chi_ang*Ang2_PQ_xy)) +np.sum(F2_CD_xy *np.cos(chi_ang*Ang2_PQ_xy))
-	Fx_y  = np.sum(F2_PQx_y *np.cos(chi_ang*Ang2_PQx_y)) +np.sum(F2_CDx_y *np.cos(chi_ang*Ang2_PQx_y))
-	F_x_y = np.sum(F2_PQ_x_y*np.cos(chi_ang*Ang2_PQ_x_y))+np.sum(F2_CD_x_y*np.cos(chi_ang*Ang2_PQ_x_y))
+	F_xy  = np.sum(F2_PQ_xy *np.cos(chi_ang*Ang2_PQ_xy)) +np.sum(F2_CD_xy *np.cos(chi_ang*Ang2_CD_xy))
+	Fx_y  = np.sum(F2_PQx_y *np.cos(chi_ang*Ang2_PQx_y)) +np.sum(F2_CDx_y *np.cos(chi_ang*Ang2_CDx_y))
+	F_x_y = np.sum(F2_PQ_x_y*np.cos(chi_ang*Ang2_PQ_x_y))+np.sum(F2_CD_x_y*np.cos(chi_ang*Ang2_CD_x_y))
 
 	F_net = Fxy + F_xy + Fx_y + F_x_y
 
-	Exy  = np.sum(E2_PQxy) + np.sum(E2_CDxy)
-	E_xy = np.sum(E2_PQ_xy) + np.sum(E2_CD_xy)
-	Ex_y = np.sum(E2_PQx_y) + np.sum(E2_CDx_y)
+	Exy  = np.sum(E2_PQxy)   + np.sum(E2_CDxy)
+	E_xy = np.sum(E2_PQ_xy)  + np.sum(E2_CD_xy)
+	Ex_y = np.sum(E2_PQx_y)  + np.sum(E2_CDx_y)
 	E_x_y= np.sum(E2_PQ_x_y) + np.sum(E2_CD_x_y)
+	
 	E_net = Exy + E_xy + Ex_y + E_x_y
 
 	print('Displacement = ', format(H_net, '.3f'), 'm')
