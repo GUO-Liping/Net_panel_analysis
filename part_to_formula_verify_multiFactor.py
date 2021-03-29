@@ -25,23 +25,28 @@ from userfunc_NPA import *
 
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
-
-	nw = 19
+	# MULTIPLE FACTORS INPUT
+	nw = 5
 	d = func_return_d(nw)
 	D = 0.3
 	Rp = 0.5 
 	w = 3.0
+
 	kappa = 1
-	ks_PQ = 500000000000  # 弹簧刚度，指代卸扣边界（刚体）
-	ks_CD = 500000000000  # 弹簧刚度，指代卸扣边界（刚体）
+	ks_PQ = 500000000000000  # 弹簧刚度，指代卸扣边界
+	ks_CD = 500000000000000  # 弹簧刚度，指代卸扣边界
+	ls0_PQ = 0.05
+	ls0_CD = 0.05
+
+	ex = 0.0
+	ey = 0.0
+
 	sigma_y = 1770e6
 	A = nw * np.pi*d**2/4  # 单肢截面面积
 	a = np.pi*D/(2*(1+kappa))
-	ls0_PQ = 0.05
-	ls0_CD = 0.05
-	ex = 0
-	ey = 0
-	
+
+	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey)
+
 	# 环链试验----------------------------------------------------------------------------------- #
 
 	FN1, FN2, lN0, lN1, lN2, gamma_N1, gamma_N2 = func_ringChianDataFit(nw, sigma_y, d)
@@ -75,7 +80,7 @@ if __name__ == '__main__':
 	z1CD, z2CD = func_compute_z1z2(L0minCD,K1minCD,K2minCD,gamma_N1,gamma_N2,sigma_y,A)
 
 	L0min = np.min([L0minPQ,L0minCD])
-	z1, z2 = func_z1z2(z1PQ,z1CD,z2PQ,z2CD)
+	z1, z2 = func_Checkz1z2(z1PQ,z1CD,z2PQ,z2CD)
 	maxTheta1 = np.arctan(z1/L0min)  # 第一阶段纤维-弹簧单元最大角度
 	maxTheta2 = np.arctan(z2/L0min)  # 第二阶段纤维-弹簧单元最大角度
 
@@ -140,5 +145,4 @@ if __name__ == '__main__':
 	print('Displacement = ', format(H_net, '.3f'), 'm')
 	print('Force = ', format(F_net/1000, '.3f'), 'kN')
 	print('Energy = ', format(E_net/1000, '.3f'), 'kJ')
-
 

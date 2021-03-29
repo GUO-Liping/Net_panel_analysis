@@ -180,11 +180,12 @@ def func_minElement(L0_CDxy, L0_CD_xy, L0_CDx_y, L0_CD_x_y,K1_CDxy,K2_CDxy):
 	return L0minCD,idCD,K1minCD,K2minCD
 
 
-def func_z1z2(z1PQ,z1CD,z2PQ,z2CD):
-	if z1PQ<=z1CD and z2PQ<=z2CD:
+def func_Checkz1z2(z1PQ,z1CD,z2PQ,z2CD):
+
+	if z1PQ<=(z1CD+1e-9) and z2PQ<=(z2CD+1e-9):
 		z1 = z1PQ
 		z2 = z2PQ
-	elif z1PQ>z1CD and z2PQ>z2CD:
+	elif z1PQ>(z1CD-1e-9) and (z2PQ>z2CD-1e-9):
 		z1 = z1CD
 		z2 = z2CD
 	else:
@@ -200,6 +201,30 @@ def func_compute_z1z2(min_L0,K1,K2,gamma_N1,gamma_N2,sigma_y,A):
 	z2 = np.sqrt(min_L2**2 - min_L0**2)
 
 	return z1, z2
+
+
+def	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey):
+	
+	inputData = np.array([nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey])
+	for i in range(len(inputData)):
+		if inputData[i]<0:
+			print('All of the input data should be greater than 0!')
+		else:
+			pass
+
+	if not(isinstance(nw,int)):
+		print('nw should be an integer!')
+	elif D > w:
+		print('Load area should be smaller than ring net!')
+	elif kappa <1:
+		print('kappa should be greater than 1!')
+	elif ex > ((kappa*w)/2-ls0_CD-Rp):
+		print('load area is beyound the boundary of the net along x direction!')
+	elif ey > (w/2-ls0_PQ-Rp):
+		print('load area is beyound the boundary of the net along y direction!')
+	else:
+		pass
+
 
 def func_vectorFiEi(L0,L1,L2,K1,K2,gamma_N1,sigma_y,A):
 	gamma_N1 = gamma_N1+1e-5
