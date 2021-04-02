@@ -304,3 +304,7 @@ def func_return_d(nw):
 	else:
 		raise ValueError
 
+
+	def func_rope():
+		sinh_1 = np.arcsinh(4*v_r/h_r)
+		l_r = np.sqrt(h_r**2/4 + 4*v_r**2) + h_r**2/(8*v_r)*sinh_1
