@@ -33,13 +33,6 @@ if __name__ == '__main__':
 	w = 3.0
 
 	kappa = 1
-	ks_PQ = 180000  # 弹簧刚度，指代卸扣边界
-	ks_CD = 180000  # 弹簧刚度，指代卸扣边界
-
-	d_rope = 0.016  # 钢丝绳直径
-	l0_rope = 3.0  # 钢丝绳初始长度
-	E_rope = 93.2e9  # 钢丝绳弹性模量
-
 
 	ls0_PQ = 0.05
 	ls0_CD = 0.05
@@ -51,6 +44,9 @@ if __name__ == '__main__':
 	A = nw * np.pi*d**2/4  # 单肢截面面积
 	a = np.pi*D/(2*(1+kappa))
 
+	ks_PQ = 180000  # 弹簧刚度，指代卸扣边界
+	ks_CD = 180000  # 弹簧刚度，指代卸扣边界
+
 	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey)
 
 	# 环链试验----------------------------------------------------------------------------------- #
@@ -59,6 +55,20 @@ if __name__ == '__main__':
 	E1 = FN1*lN0/(2*A*(lN1 - lN0))
 	E2 = (FN2-FN1)*lN0 / (2*A*(lN2 - lN1))
 
+	l0_rope = 3.0  # 钢丝绳初始长度
+	F_rope = 190e3
+	sigma_rope = 1720e6
+	E_rope = 150e9  # 钢丝绳弹性模量
+
+	m_x = func_round(Rp/a)  # 长边x方向力矢量个数
+	m_y = func_round(Rp/(kappa*a))  # 短边y方向力矢量个数
+	ux_max = func_rope(F_rope,sigma_rope,E_rope,l0_rope,gamma_N2,kappa*w,m_x)
+	uy_max = func_rope(F_rope,sigma_rope,E_rope,l0_rope,gamma_N2,w,m_y)
+
+	ks_PQ = gamma_N2*sigma_y*A/ux_max  # 弹簧刚度，指代柔性边界
+	ks_CD = gamma_N2*sigma_y*A/uy_max  # 弹簧刚度，指代柔性边界
+
+	print(ks_PQ,ks_CD)
 	L0_PQxy  ,	L0_CDxy  = func_xyz('+x+y', w, kappa, Rp, a, ex, ey, 0)
 	L0_PQ_xy ,	L0_CD_xy = func_xyz('-x+y', w, kappa, Rp, a, ex, ey, 0)
 	L0_PQx_y ,	L0_CDx_y = func_xyz('+x-y', w, kappa, Rp, a, ex, ey, 0)
@@ -131,7 +141,7 @@ if __name__ == '__main__':
 	ls1_CD_xy ,ls2_CD_xy ,lf1_CD_xy ,lf2_CD_xy  = func_lslf(F1_CD_xy ,F2_CD_xy ,L1_CD_xy ,L2_CD_xy ,ls0_CD,lf0_CD_xy ,ks_CD,E1,E2,gamma_N1,sigma_y,A)
 	ls1_CDx_y ,ls2_CDx_y ,lf1_CDx_y ,lf2_CDx_y  = func_lslf(F1_CDx_y ,F2_CDx_y ,L1_CDx_y ,L2_CDx_y ,ls0_CD,lf0_CDx_y ,ks_CD,E1,E2,gamma_N1,sigma_y,A)
 	ls1_CD_x_y,ls2_CD_x_y,lf1_CD_x_y,lf2_CD_x_y = func_lslf(F1_CD_x_y,F2_CD_x_y,L1_CD_x_y,L2_CD_x_y,ls0_PQ,lf0_CD_x_y,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
-
+	print(ls1_CDxy  ,ls2_CDxy)
 	H_net = z2
 
 	Fxy   = np.sum(F2_PQxy  *np.cos(chi_ang*Ang2_PQxy))  +np.sum(F2_CDxy  *np.cos(chi_ang*Ang2_CDxy))

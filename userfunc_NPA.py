@@ -305,6 +305,10 @@ def func_return_d(nw):
 		raise ValueError
 
 
-	def func_rope():
-		sinh_1 = np.arcsinh(4*v_r/h_r)
-		l_r = np.sqrt(h_r**2/4 + 4*v_r**2) + h_r**2/(8*v_r)*sinh_1
+def func_rope(F_fail,sigma_y,E_r,l0_r,gamma_r,w_b,m):
+
+	A_r = F_fail/sigma_y
+	q = gamma_r * sigma_y*A_r*m/(w_b/2)
+	u_max = (3*q*l0_r**4/(64*E_r*A_r))**(1/3)
+
+	return u_max
