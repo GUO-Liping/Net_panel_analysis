@@ -26,7 +26,7 @@ from userfunc_NPA import *
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
 	# MULTIPLE FACTORS INPUT
-	nw = 5
+	nw = 7
 	d = func_return_d(nw)
 	D = 0.3
 	Rp = 0.5
@@ -39,13 +39,13 @@ if __name__ == '__main__':
 
 	ex = 0.0
 	ey = 0.0
-
+	blockShape = 'round'  # blockShape must be 'Round' or 'Polygon'!
 	sigma_y = 1770e6
 	A = nw * np.pi*d**2/4  # 单肢截面面积
 	a = np.pi*D/(2*(1+kappa))
 
-	ks_PQ = 180000  # 弹簧刚度，指代卸扣边界
-	ks_CD = 180000  # 弹簧刚度，指代卸扣边界
+	ks_PQ = 180000000  # 弹簧刚度，指代卸扣边界
+	ks_CD = 180000000  # 弹簧刚度，指代卸扣边界
 
 	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey)
 
@@ -58,21 +58,20 @@ if __name__ == '__main__':
 	l0_rope = 3.0  # 钢丝绳初始长度
 	F_rope = 190e3
 	sigma_rope = 1720e6
-	E_rope = 150e9  # 钢丝绳弹性模量
+	E_rope = 100e9  # 钢丝绳弹性模量
 
 	m_x = func_round(Rp/a)  # 长边x方向力矢量个数
 	m_y = func_round(Rp/(kappa*a))  # 短边y方向力矢量个数
-	ux_max = func_rope(F_rope,sigma_rope,E_rope,l0_rope,gamma_N2,kappa*w,m_x)
-	uy_max = func_rope(F_rope,sigma_rope,E_rope,l0_rope,gamma_N2,w,m_y)
+	ux_max = func_rope(F_rope,sigma_rope,E_rope,l0_rope,gamma_N2,kappa*w,1)
+	uy_max = func_rope(F_rope,sigma_rope,E_rope,l0_rope,gamma_N2,w,1)
 
-	ks_PQ = gamma_N2*sigma_y*A/ux_max  # 弹簧刚度，指代柔性边界
-	ks_CD = gamma_N2*sigma_y*A/uy_max  # 弹簧刚度，指代柔性边界
+	#ks_PQ = gamma_N2*sigma_y*A/ux_max  # 弹簧刚度，指代柔性边界
+	#ks_CD = gamma_N2*sigma_y*A/uy_max  # 弹簧刚度，指代柔性边界
 
-	print(ks_PQ,ks_CD)
-	L0_PQxy  ,	L0_CDxy  = func_xyz('+x+y', w, kappa, Rp, a, ex, ey, 0)
-	L0_PQ_xy ,	L0_CD_xy = func_xyz('-x+y', w, kappa, Rp, a, ex, ey, 0)
-	L0_PQx_y ,	L0_CDx_y = func_xyz('+x-y', w, kappa, Rp, a, ex, ey, 0)
-	L0_PQ_x_y,	L0_CD_x_y= func_xyz('-x-y', w, kappa, Rp, a, ex, ey, 0)
+	L0_PQxy  ,	L0_CDxy  = func_xyz(blockShape, '+x+y', w, kappa, Rp, a, ex, ey, 0)
+	L0_PQ_xy ,	L0_CD_xy = func_xyz(blockShape, '-x+y', w, kappa, Rp, a, ex, ey, 0)
+	L0_PQx_y ,	L0_CDx_y = func_xyz(blockShape, '+x-y', w, kappa, Rp, a, ex, ey, 0)
+	L0_PQ_x_y,	L0_CD_x_y= func_xyz(blockShape, '-x-y', w, kappa, Rp, a, ex, ey, 0)
 
 	lf0_PQxy  ,	lf0_CDxy  = L0_PQxy  -ls0_PQ, L0_CDxy  -ls0_CD
 	lf0_PQ_xy ,	lf0_CD_xy = L0_PQ_xy -ls0_PQ, L0_CD_xy -ls0_CD
@@ -100,15 +99,15 @@ if __name__ == '__main__':
 	maxTheta1 = np.arctan(z1/L0min)  # 第一阶段纤维-弹簧单元最大角度
 	maxTheta2 = np.arctan(z2/L0min)  # 第二阶段纤维-弹簧单元最大角度
 
-	L1_PQxy  ,	L1_CDxy  = func_xyz('+x+y', w, kappa, Rp, a, ex, ey, z1)
-	L1_PQ_xy ,	L1_CD_xy = func_xyz('-x+y', w, kappa, Rp, a, ex, ey, z1)
-	L1_PQx_y ,	L1_CDx_y = func_xyz('+x-y', w, kappa, Rp, a, ex, ey, z1)
-	L1_PQ_x_y,	L1_CD_x_y= func_xyz('-x-y', w, kappa, Rp, a, ex, ey, z1)
+	L1_PQxy  ,	L1_CDxy  = func_xyz(blockShape,'+x+y', w, kappa, Rp, a, ex, ey, z1)
+	L1_PQ_xy ,	L1_CD_xy = func_xyz(blockShape,'-x+y', w, kappa, Rp, a, ex, ey, z1)
+	L1_PQx_y ,	L1_CDx_y = func_xyz(blockShape,'+x-y', w, kappa, Rp, a, ex, ey, z1)
+	L1_PQ_x_y,	L1_CD_x_y= func_xyz(blockShape,'-x-y', w, kappa, Rp, a, ex, ey, z1)
 
-	L2_PQxy  ,	L2_CDxy  = func_xyz('+x+y', w, kappa, Rp, a, ex, ey, z2)
-	L2_PQ_xy ,	L2_CD_xy = func_xyz('-x+y', w, kappa, Rp, a, ex, ey, z2)
-	L2_PQx_y ,	L2_CDx_y = func_xyz('+x-y', w, kappa, Rp, a, ex, ey, z2)
-	L2_PQ_x_y,	L2_CD_x_y= func_xyz('-x-y', w, kappa, Rp, a, ex, ey, z2)
+	L2_PQxy  ,	L2_CDxy  = func_xyz(blockShape,'+x+y', w, kappa, Rp, a, ex, ey, z2)
+	L2_PQ_xy ,	L2_CD_xy = func_xyz(blockShape,'-x+y', w, kappa, Rp, a, ex, ey, z2)
+	L2_PQx_y ,	L2_CDx_y = func_xyz(blockShape,'+x-y', w, kappa, Rp, a, ex, ey, z2)
+	L2_PQ_x_y,	L2_CD_x_y= func_xyz(blockShape,'-x-y', w, kappa, Rp, a, ex, ey, z2)
 
 	Ang1_PQxy  , Ang1_CDxy   = np.arccos(z1/L1_PQxy)  , np.arccos(z1/L1_CDxy)
 	Ang1_PQ_xy , Ang1_CD_xy  = np.arccos(z1/L1_PQ_xy) , np.arccos(z1/L1_CD_xy)
