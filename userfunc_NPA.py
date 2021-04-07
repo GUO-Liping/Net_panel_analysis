@@ -25,25 +25,26 @@ def	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey):
 	else:
 		pass
 
+def func_m(BC,Rp,kappa,a):
+	if BC == 'round' or BC == 'Round':
+		mPQ = func_round(Rp/a)
+		mCD = func_round(Rp/(kappa*a))
+		return mPQ, mCD
+	elif BC == 'polygon' or BC == 'Polygon':
+		mPQ = func_round((5*Rp/np.sqrt(34))/a)
+		mCD = func_round((5*Rp/np.sqrt(34))/(kappa*a))
+		return mPQ, mCD
+	else:
+		raise ValueError
 
-def func_rope(**kwargs):
-
-	A_r = F_fail/sigma_y
-	q = gamma_r * sigma_y*A_r*m/(w_b/2)
-	u_max = (3*q*l0_r**4/(64*E_r*A_r))**(1/3)
-
-	return u_max
-
-
-def func_ks(BC):
-	if BC=='shackle' or BC=='Shackle' or BC=='shackles' or BC=='Shackles':
-		ks = 1e20
-		return ks
-	elif BC=='rope' or BC=='ropes' or BC=='Rope' or BC=='Ropes':
-		A_r = F_fail/sigma_y
-		q = gamma_r * sigma_y*A_r*m/(w_b/2)
-		u_max = (3*q*l0_r**4/(64*E_r*A_r))**(1/3)
-		ks = gamma_N2*sigma_y*A/u_max
+def func_ks(BC,**kwargs):
+	if BC=='rigid' or BC=='Rigid':
+		return kwargs['ks']
+	elif BC=='flexible' or BC=='Flexible':
+		q_rope = kwargs['gamma_ave'] * kwargs['sigma_y']*kwargs['A']*kwargs['m']/(kwargs['l0_rope']/2)
+		A_rope = kwargs['F_rope']/kwargs['sigma_rope']
+		u_max = (3*q_rope*kwargs['l0_rope']**4/(64*kwargs['E_rope']*A_rope))**(1/3)
+		ks = kwargs['gamma_N2']*kwargs['sigma_y']*kwargs['A']/u_max
 		return ks
 	else:
 		raise ValueError
