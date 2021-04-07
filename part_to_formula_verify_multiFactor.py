@@ -39,15 +39,21 @@ if __name__ == '__main__':
 
 	ex = 0.0
 	ey = 0.0
-	blockShape = 'round'  # blockShape must be 'Round' or 'Polygon'!
+
+	blockShape = 'Round'  # blockShape must be 'Round' or 'Polygon'!
+	boundary = 'Flexible'  # boundary must be 'Rigid' or 'Flexible'!
+
 	sigma_y = 1770e6
 	A = nw * np.pi*d**2/4  # 单肢截面面积
 	a = np.pi*D/(2*(1+kappa))
 
-	ks_PQ = 180000000  # 弹簧刚度，指代卸扣边界
-	ks_CD = 180000000  # 弹簧刚度，指代卸扣边界
+	l0_rope = 3.0  # 钢丝绳初始长度
+	F_rope = 190e3  # 钢丝绳破断力
+	sigma_rope = 1720e6  # 钢丝绳应力强度
+	E_rope = 100e9  # 钢丝绳弹性模量
 
-	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey)
+	ks_PQ = 1e20  # 弹簧刚度，指代卸扣边界
+	ks_CD = 1e20  # 弹簧刚度，指代卸扣边界
 
 	# 环链试验----------------------------------------------------------------------------------- #
 
@@ -55,18 +61,34 @@ if __name__ == '__main__':
 	E1 = FN1*lN0/(2*A*(lN1 - lN0))
 	E2 = (FN2-FN1)*lN0 / (2*A*(lN2 - lN1))
 
-	l0_rope = 3.0  # 钢丝绳初始长度
-	F_rope = 190e3
-	sigma_rope = 1720e6
-	E_rope = 100e9  # 钢丝绳弹性模量
 
-	m_x = func_round(Rp/a)  # 长边x方向力矢量个数
-	m_y = func_round(Rp/(kappa*a))  # 短边y方向力矢量个数
-	ux_max = func_rope(F_rope,sigma_rope,E_rope,l0_rope,gamma_N2,kappa*w,1)
-	uy_max = func_rope(F_rope,sigma_rope,E_rope,l0_rope,gamma_N2,w,1)
+	if boundary=='rigid' or boundary=='Rigid':
+		ks = 1e20
+	elif boundary=='Flexible' or boundary=='flexible':
+		gamma_ave = gamma_N2
+
+		q_rope = gamma_ave * sigma_y*A*m/(l0_rope/2)
+		A_rope = F_rope/sigma_rope
+		u_max = (3*q_rope*l0_rope**4/(64*E_rope*A_rope))**(1/3)
+		ks = gamma_N2*sigma_y*A/u_max
+	else:
+		raise ValueError
+	
+	dictRigid = {'ks':1e20}
+	dictRope = {'l0_rope':l0_rope,'F_rope':F_rope,'sigma_rope':sigma_rope,'E_rope':E_rope}
+	dictFiber = {'gamma_ave':gamma_ave,'m':m,'sigma_y':sigma_y,'gamma_N2':gamma_N2,'A':A}
+	dictFlexible = {dictRope,dictFiber}
+	
+	m_PQ = func_round(Rp/a)  # 长边x方向力矢量个数
+	m_CD = func_round(Rp/(kappa*a))  # 短边y方向力矢量个数
+	uPQ_max = func_rope(F_rope,sigma_rope,E_rope,l0_rope,gamma_N2,kappa*w,1)
+	uCD_max = func_rope(F_rope,sigma_rope,E_rope,l0_rope,gamma_N2,w,1)
 
 	#ks_PQ = gamma_N2*sigma_y*A/ux_max  # 弹簧刚度，指代柔性边界
 	#ks_CD = gamma_N2*sigma_y*A/uy_max  # 弹簧刚度，指代柔性边界
+
+	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey)
+
 
 	L0_PQxy  ,	L0_CDxy  = func_xyz(blockShape, '+x+y', w, kappa, Rp, a, ex, ey, 0)
 	L0_PQ_xy ,	L0_CD_xy = func_xyz(blockShape, '-x+y', w, kappa, Rp, a, ex, ey, 0)

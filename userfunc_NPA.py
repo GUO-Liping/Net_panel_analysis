@@ -2,6 +2,53 @@
 # -*- coding: UTF-8 -*-
 import numpy as np
 
+
+def	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey):
+	
+	inputData = np.array([nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey])
+	for i in range(len(inputData)):
+		if inputData[i]<0:
+			print('All of the input data should be greater than 0!')
+		else:
+			pass
+
+	if not(isinstance(nw,int)):
+		print('nw should be an integer!')
+	elif D > w:
+		print('Load area should be smaller than ring net!')
+	elif kappa <1:
+		print('kappa should be greater than 1!')
+	elif ex > ((kappa*w)/2-ls0_CD-Rp):
+		print('load area is beyound the boundary of the net along x direction!')
+	elif ey > (w/2-ls0_PQ-Rp):
+		print('load area is beyound the boundary of the net along y direction!')
+	else:
+		pass
+
+
+def func_rope(**kwargs):
+
+	A_r = F_fail/sigma_y
+	q = gamma_r * sigma_y*A_r*m/(w_b/2)
+	u_max = (3*q*l0_r**4/(64*E_r*A_r))**(1/3)
+
+	return u_max
+
+
+def func_ks(BC):
+	if BC=='shackle' or BC=='Shackle' or BC=='shackles' or BC=='Shackles':
+		ks = 1e20
+		return ks
+	elif BC=='rope' or BC=='ropes' or BC=='Rope' or BC=='Ropes':
+		A_r = F_fail/sigma_y
+		q = gamma_r * sigma_y*A_r*m/(w_b/2)
+		u_max = (3*q*l0_r**4/(64*E_r*A_r))**(1/3)
+		ks = gamma_N2*sigma_y*A/u_max
+		return ks
+	else:
+		raise ValueError
+
+
 def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 	if blockShape == 'round' or blockShape == 'Round':
 		mPQ = func_round(Rp/a)
@@ -275,29 +322,6 @@ def func_compute_z1z2(min_L0,K1,K2,gamma_N1,gamma_N2,sigma_y,A):
 	return z1, z2
 
 
-def	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey):
-	
-	inputData = np.array([nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey])
-	for i in range(len(inputData)):
-		if inputData[i]<0:
-			print('All of the input data should be greater than 0!')
-		else:
-			pass
-
-	if not(isinstance(nw,int)):
-		print('nw should be an integer!')
-	elif D > w:
-		print('Load area should be smaller than ring net!')
-	elif kappa <1:
-		print('kappa should be greater than 1!')
-	elif ex > ((kappa*w)/2-ls0_CD-Rp):
-		print('load area is beyound the boundary of the net along x direction!')
-	elif ey > (w/2-ls0_PQ-Rp):
-		print('load area is beyound the boundary of the net along y direction!')
-	else:
-		pass
-
-
 def func_vectorFiEi(L0,L1,L2,K1,K2,gamma_N1,sigma_y,A):
 	gamma_N1 = gamma_N1+1e-5
 	F_gammaN1 = gamma_N1*sigma_y*A
@@ -376,11 +400,3 @@ def func_return_d(nw):
 	else:
 		raise ValueError
 
-
-def func_rope(F_fail,sigma_y,E_r,l0_r,gamma_r,w_b,m):
-
-	A_r = F_fail/sigma_y
-	q = gamma_r * sigma_y*A_r*m/(w_b/2)
-	u_max = (3*q*l0_r**4/(64*E_r*A_r))**(1/3)
-
-	return u_max
