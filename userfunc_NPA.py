@@ -51,6 +51,7 @@ def func_ks(BC,**kwargs):
 
 
 def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
+
 	if blockShape == 'round' or blockShape == 'Round':
 		mPQ = func_round(Rp/a)
 		index_mPQ = np.linspace(1, mPQ, mPQ, endpoint=True)
@@ -73,18 +74,16 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 		xD = np.zeros(mCD) + kappa*w/2
 		yD = w * (index_mCD-1/2)/(2*mCD + 1)
 		zD = np.zeros(mCD) + 0
-	
+
+		LPr = abs(yP - ey)
+		LCr = abs(xC - ex)
+
 		if points == '+x+y':
-			xP, xC = xP, xC
-			yP, yC = yP, yC
-			zP, zC = zP, zC
-			xQ, xD = xQ, xD
-			yQ, yD = yQ, yD
-			zQ, zD = zQ, zD
+
 			LPQ = np.sqrt((xP-xQ)**2 +(yP-yQ)**2 +(zP-zQ)**2)
 			LCD = np.sqrt((xC-xD)**2 +(yC-yD)**2 +(zC-zD)**2)
-			return LPQ, LCD 
-	
+			print(LPQ,LCD)		
+		# 进行y轴对称坐标变换
 		elif points == '-x+y':
 			xPminusX ,xCminusX = 2*ex - xP	,2*ex - xC
 			yPminusX ,yCminusX = yP			,yC
@@ -94,8 +93,8 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 			zQminusX ,zDminusX = zQ			,zD
 			LPQ = np.sqrt((xPminusX-xQminusX)**2 +(yPminusX-yQminusX)**2 +(zPminusX-zQminusX)**2)
 			LCD = np.sqrt((xCminusX-xDminusX)**2 +(yCminusX-yDminusX)**2 +(zCminusX-zDminusX)**2)
-			return LPQ, LCD 
-	
+		
+		# 进行x轴对称坐标变换
 		elif points == '+x-y':
 			xPminusY, xCminusY = xP			, xC
 			yPminusY, yCminusY = 2*ey - yP	, 2*ey - yC
@@ -105,8 +104,8 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 			zQminusY, zDminusY = zQ			, zD
 			LPQ = np.sqrt((xPminusY-xQminusY)**2 +(yPminusY-yQminusY)**2 +(zPminusY-zQminusY)**2)
 			LCD = np.sqrt((xCminusY-xDminusY)**2 +(yCminusY-yDminusY)**2 +(zCminusY-zDminusY)**2)
-			return LPQ, LCD 
-	
+		
+		# 进行中心对称坐标变换
 		elif points == '-x-y':
 			xPminusXY, xCminusXY = 2*ex - xP, 2*ex - xC	
 			yPminusXY, yCminusXY = 2*ey - yP, 2*ey - yC	
@@ -116,7 +115,11 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 			zQminusXY, zDminusXY = zQ		, zD
 			LPQ = np.sqrt((xPminusXY-xQminusXY)**2 +(yPminusXY-yQminusXY)**2 +(zPminusXY-zQminusXY)**2)
 			LCD = np.sqrt((xCminusXY-xDminusXY)**2 +(yCminusXY-yDminusXY)**2 +(zCminusXY-zDminusXY)**2)
-			return LPQ, LCD 
+		else:
+			raise ValueError		
+
+		return LPQ, LCD, LPr, LCr
+
 	elif blockShape == 'polygon' or blockShape == 'Polygon':
 		mPQ = func_round((5*Rp/np.sqrt(34))/a)
 		mPQ1 = func_round((3*Rp/np.sqrt(34))/a)
@@ -147,16 +150,10 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 		zD = np.zeros(mCD) + 0
 	
 		if points == '+x+y':
-			xP, xC = xP, xC
-			yP, yC = yP, yC
-			zP, zC = zP, zC
-			xQ, xD = xQ, xD
-			yQ, yD = yQ, yD
-			zQ, zD = zQ, zD
 			LPQ = np.sqrt((xP-xQ)**2 +(yP-yQ)**2 +(zP-zQ)**2)
 			LCD = np.sqrt((xC-xD)**2 +(yC-yD)**2 +(zC-zD)**2)
-			return LPQ, LCD 
-	
+		
+		# 进行y轴对称坐标变换
 		elif points == '-x+y':
 			xPminusX ,xCminusX = 2*ex - xP	,2*ex - xC
 			yPminusX ,yCminusX = yP			,yC
@@ -166,8 +163,8 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 			zQminusX ,zDminusX = zQ			,zD
 			LPQ = np.sqrt((xPminusX-xQminusX)**2 +(yPminusX-yQminusX)**2 +(zPminusX-zQminusX)**2)
 			LCD = np.sqrt((xCminusX-xDminusX)**2 +(yCminusX-yDminusX)**2 +(zCminusX-zDminusX)**2)
-			return LPQ, LCD 
-	
+		
+		# 进行x轴对称坐标变换
 		elif points == '+x-y':
 			xPminusY, xCminusY = xP			, xC
 			yPminusY, yCminusY = 2*ey - yP	, 2*ey - yC
@@ -177,8 +174,8 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 			zQminusY, zDminusY = zQ			, zD
 			LPQ = np.sqrt((xPminusY-xQminusY)**2 +(yPminusY-yQminusY)**2 +(zPminusY-zQminusY)**2)
 			LCD = np.sqrt((xCminusY-xDminusY)**2 +(yCminusY-yDminusY)**2 +(zCminusY-zDminusY)**2)
-			return LPQ, LCD 
-	
+		
+		# 进行中心对称坐标变换
 		elif points == '-x-y':
 			xPminusXY, xCminusXY = 2*ex - xP, 2*ex - xC	
 			yPminusXY, yCminusXY = 2*ey - yP, 2*ey - yC	
@@ -188,7 +185,11 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 			zQminusXY, zDminusXY = zQ		, zD
 			LPQ = np.sqrt((xPminusXY-xQminusXY)**2 +(yPminusXY-yQminusXY)**2 +(zPminusXY-zQminusXY)**2)
 			LCD = np.sqrt((xCminusXY-xDminusXY)**2 +(yCminusXY-yDminusXY)**2 +(zCminusXY-zDminusXY)**2)
-			return LPQ, LCD 		
+				
+		LPr = abs(yP - ey)
+		LCr = abs(xC - ex)
+
+		return LPQ, LCD, LPr, LCr
 	else:
 		raise ValueError
 
@@ -313,12 +314,18 @@ def func_Checkz1z2(z1PQ,z1CD,z2PQ,z2CD):
 	return z1,z2
 
 
-def func_compute_z1z2(min_L0,K1,K2,gamma_N1,gamma_N2,sigma_y,A):
+def func_compute_z1z2(min_L1,min_L2,a,b,c):
 
-	min_L1 = min_L0 + gamma_N1*sigma_y*A/K1
-	min_L2 = min_L1 + (gamma_N2 - gamma_N1)*sigma_y*A/K2
-	z1 = np.sqrt(min_L1**2 - min_L0**2)
-	z2 = np.sqrt(min_L2**2 - min_L0**2)
+	C11 = ((min_L1-c)**2+b**2-a**2)**2
+	C12 = 4*(min_L1-c)**2
+	C13 = b**2
+	
+	C21 = ((min_L2-c)**2+b**2-a**2)**2
+	C22 = 4*(min_L2-c)**2
+	C23 = b**2
+
+	z1 = np.sqrt(C11/C12-C13)
+	z2 = np.sqrt(C21/C22-C23)
 
 	return z1, z2
 
