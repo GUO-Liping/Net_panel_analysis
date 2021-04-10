@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 import numpy as np
 
-
 def	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey):
 	
 	inputData = np.array([nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey])
@@ -82,7 +81,7 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 
 			LPQ = np.sqrt((xP-xQ)**2 +(yP-yQ)**2 +(zP-zQ)**2)
 			LCD = np.sqrt((xC-xD)**2 +(yC-yD)**2 +(zC-zD)**2)
-			print(LPQ,LCD)		
+			# print(LPQ,LCD)		
 		# 进行y轴对称坐标变换
 		elif points == '-x+y':
 			xPminusX ,xCminusX = 2*ex - xP	,2*ex - xC
@@ -194,53 +193,55 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 		raise ValueError
 
 
-def func_ringChianDataFit(nw,sigma_y,d):
-    lN0 = 0.3*3
+def func_ringChianDataFit(nw,sigma_y,D,d):
+	lN0 = D*3
+	A_nw = nw*np.pi*d**2/4
 
-    if d == 0.003:
-    	nw_array = np.array([4,5,7,9,12,16,19],dtype='float')
-    	FN2_array = np.array([30.064e3,44.937e3,69.72e3,80.547e3,110.884e3,177.66e3,209.387e3],dtype='float')
-    	delta_lN2_array = 0.001*np.array([515.05,518.67,508.59,489.92,490.644,475.54,472.36],dtype='float')
-    	Area_array = np.pi/4*d**2*nw_array
-    	# print('Area_array=',Area_array)
-    	gammaN2_array = FN2_array/(sigma_y*2*Area_array)
-    	# print('gammaN2_array111=', gammaN2_array)
-    else:
-    	nw_array = np.array([3,4],dtype='float')
-    	FN2_array = np.array([9.87e3,17.57e3],dtype='float')
-    	delta_lN2_array = np.array([521.16e-3,517.36e-3],dtype='float')
-    	Area_array = np.pi/4*d**2*nw_array
-    	# print('Area_array=',Area_array)
-    	gammaN2_array = FN2_array/(sigma_y*2*Area_array)
+	if d == 0.003:
+		nw_array = np.array([4,5,7,9,12,16,19],dtype='float')
+		FN2_array = np.array([30.064e3,44.937e3,69.72e3,80.547e3,110.884e3,177.66e3,209.387e3],dtype='float')
+		delta_lN2_array = 0.001*np.array([515.05,518.67,508.59,489.92,490.644,475.54,472.36],dtype='float')
+		Area_array = np.pi/4*d**2*nw_array
+		# print('Area_array=',Area_array)
+		gammaN2_array = FN2_array/(sigma_y*2*Area_array)
+		# print('gammaN2_array111=', gammaN2_array)
+	elif d == 0.0022:
+		nw_array = np.array([3,4],dtype='float')
+		FN2_array = np.array([9.87e3,17.57e3],dtype='float')
+		delta_lN2_array = np.array([521.16e-3,517.36e-3],dtype='float')
+		Area_array = np.pi/4*d**2*nw_array
+		# print('Area_array=',Area_array)
+		gammaN2_array = FN2_array/(sigma_y*2*Area_array)
 
-    poly_delta_lN2_func = np.polyfit(nw_array, delta_lN2_array,1)
-    poly_gammaN2_func = np.polyfit(nw_array, gammaN2_array,1)
+	poly_delta_lN2_func = np.polyfit(nw_array, delta_lN2_array,1)
+	poly_gammaN2_func = np.polyfit(nw_array, gammaN2_array,1)
 
-    after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
+	after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)*0.707
+	# print('after_fit_delta_lN2=',after_fit_delta_lN2)
+	after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw)
 
-    chi_gammaN = 0.15
-    after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw)+chi_gammaN
-
-    '''
-    对比五环试验与三环试验轴向力发展程度可发现，
-    五环(5圈0.551，7圈0.554,9圈0.559)，三环(5圈0.359, 7圈0.398, 9圈0.358)
-    分别大于三环(5圈0.192, 7圈0.156, 9圈0.201,)均值约0.1至0.2之间
+	chi_gammaN = 0.15
+	after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw)+chi_gammaN
+	after_fit_lN2 = lN0 + after_fit_delta_lN2
+	after_fit_gammaN1 = after_fit_gammaN2 * 0.15
+	after_fit_lN1 = lN0 + after_fit_delta_lN2*0.85
+	'''
+	对比五环试验与三环试验轴向力发展程度可发现，
+	五环(5圈0.551，7圈0.554,9圈0.559)，三环(5圈0.359, 7圈0.398, 9圈0.358)
+	分别大于三环(5圈0.192, 7圈0.156, 9圈0.201,)均值约0.1至0.2之间
 	'''
 
-    after_fit_FN2 = after_fit_gammaN2 * sigma_y*(2*nw*np.pi*d**2/4)
-    after_fit_lN2 = lN0 + after_fit_delta_lN2
-    after_fit_FN1 = after_fit_FN2*0.15
-    after_fit_lN1 = lN0 + after_fit_delta_lN2*0.85
-    after_fit_gammaN1 = after_fit_gammaN2 * 0.15
+	after_fit_FN1 = after_fit_gammaN1 * sigma_y*(2*A_nw)
+	after_fit_FN2 = after_fit_gammaN2 * sigma_y*(2*A_nw)
 
-    return after_fit_FN1, after_fit_FN2, lN0, after_fit_lN1, after_fit_lN2, after_fit_gammaN1, after_fit_gammaN2
+	return after_fit_FN1, after_fit_FN2, lN0, after_fit_lN1, after_fit_lN2, after_fit_gammaN1, after_fit_gammaN2
 
 def func_round(number):
-    if number % 1 == 0.5:
-        number = number + 0.5
-    else:
-        number = round(number)
-    return int(number)
+	if number % 1 == 0.5:
+		number = number + 0.5
+	else:
+		number = round(number)
+	return int(number)
 
 
 def funcXY_correct_gammaForceEnergy(mx, gamma_N2_x, F2_x, E2_x, gamma_N1, K2_x, K1_x, L2_x, L1_x, L0_x, sigma_y, A):

@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
 	# 环链试验----------------------------------------------------------------------------------- #
   	# 将三环环链试验力位移数据转换为弹簧纤维单元中的纤维双折线E1,E2应力应变关系
-	FN1, FN2, lN0, lN1, lN2, gamma_N1, gamma_N2 = func_ringChianDataFit(nw, sigma_y, d)
+	FN1, FN2, lN0, lN1, lN2, gamma_N1, gamma_N2 = func_ringChianDataFit(nw, sigma_y, D, d)
 	E1 = FN1*lN0/(2*A*(lN1 - lN0))
 	E2 = (FN2-FN1)*lN0 / (2*A*(lN2 - lN1))
 
@@ -174,8 +174,6 @@ if __name__ == '__main__':
 	chi_ang = 0.5  # chi为考虑实际顶破后环绕加载区域边缘网环内钢丝纤维与竖直方向夹角小于模型角度的修正系数
 	
 	# 第一阶段各个纤维弹簧单元内力
-	print(L1_PQx)
-	print(gamma_N1*sigma_y*A/K1_PQx + L0_PQx)
 	F1_PQx  , F2_PQx  , E1_PQx  ,E2_PQx   = func_vectorFiEi(L0_PQx  ,L1_PQx  ,L2_PQx  ,K1_PQx  ,K2_PQx  ,gamma_N1,sigma_y,A)
 	F1_PQ_x , F2_PQ_x , E1_PQ_x ,E2_PQ_x  = func_vectorFiEi(L0_PQ_x ,L1_PQ_x ,L2_PQ_x ,K1_PQ_x ,K2_PQ_x ,gamma_N1,sigma_y,A)
 
@@ -193,48 +191,31 @@ if __name__ == '__main__':
 	H_net2 = z2  # 顶破高度
 
 	# 第一阶段结束时刻各个单元内力在加载方向的分量
-	cos1PQx = np.concatenate((np.cos(chi_ang*Ang1_PQxy) ,np.cos(chi_ang*Ang1_PQx_y)))
-	cos1PQ_x= np.concatenate((np.cos(chi_ang*Ang1_PQ_xy),np.cos(chi_ang*Ang1_PQ_x_y)))
-	cos1CDy = np.concatenate((np.cos(chi_ang*Ang1_CDxy) ,np.cos(chi_ang*Ang1_CD_xy)))
-	cos1CD_y= np.concatenate((np.cos(chi_ang*Ang1_CDx_y),np.cos(chi_ang*Ang1_PQ_x_y)))
+	Fz1_PQx = np.sum(F1_PQx *(np.cos(chi_ang*Ang1_PQxy) +np.cos(chi_ang*Ang1_PQx_y)))
+	Fz1_PQ_x= np.sum(F1_PQ_x*(np.cos(chi_ang*Ang1_PQ_xy)+np.cos(chi_ang*Ang1_PQ_x_y)))
+	Fz1_CDy = np.sum(F1_CDy *(np.cos(chi_ang*Ang1_CDxy) +np.cos(chi_ang*Ang1_CD_xy)))
+	Fz1_CD_y= np.sum(F1_CD_y*(np.cos(chi_ang*Ang1_CDx_y)+np.cos(chi_ang*Ang1_CD_x_y)))
 
-	cos2PQx = np.concatenate((np.cos(chi_ang*Ang2_PQxy) ,np.cos(chi_ang*Ang2_PQx_y)))
-	cos2PQ_x= np.concatenate((np.cos(chi_ang*Ang2_PQ_xy),np.cos(chi_ang*Ang2_PQ_x_y)))
-	cos2CDy = np.concatenate((np.cos(chi_ang*Ang2_CDxy) ,np.cos(chi_ang*Ang2_CD_xy)))
-	cos2CD_y= np.concatenate((np.cos(chi_ang*Ang2_CDx_y),np.cos(chi_ang*Ang2_PQ_x_y)))
+	Fz2_PQx = np.sum(F2_PQx *(np.cos(chi_ang*Ang2_PQxy) +np.cos(chi_ang*Ang2_PQx_y)))
+	Fz2_PQ_x= np.sum(F2_PQ_x*(np.cos(chi_ang*Ang2_PQ_xy)+np.cos(chi_ang*Ang2_PQ_x_y)))
+	Fz2_CDy = np.sum(F2_CDy *(np.cos(chi_ang*Ang2_CDxy) +np.cos(chi_ang*Ang2_CD_xy)))
+	Fz2_CD_y= np.sum(F2_CD_y*(np.cos(chi_ang*Ang2_CDx_y)+np.cos(chi_ang*Ang2_CD_x_y)))
 
-	F1_PQ = np.sum(F1_PQx *cos1PQx)  +np.sum(F1_PQ_x  *cos1PQ_x)
-	F2_PQ = np.sum(F2_PQx *cos2PQx)  +np.sum(F2_PQ_x  *cos2PQ_x)
-
-	F1_CD = np.sum(F1_CDy *cos1CDy)  +np.sum(F1_CD_y  *cos1CD_y)
-	F2_CD = np.sum(F2_CD_y *cos2CD_y)  +np.sum(F2_CD_y  *cos2CD_xy)
-
-	Fxy1  = np.sum(F1_PQxy  *np.cos(chi_ang*Ang1_PQxy))  +np.sum(F1_CDxy  *np.cos(chi_ang*Ang1_CDxy))
-	F_xy1 = np.sum(F1_PQ_xy *np.cos(chi_ang*Ang1_PQ_xy)) +np.sum(F1_CD_xy *np.cos(chi_ang*Ang1_CD_xy))
-	Fx_y1 = np.sum(F1_PQx_y *np.cos(chi_ang*Ang1_PQx_y)) +np.sum(F1_CDx_y *np.cos(chi_ang*Ang1_CDx_y))
-	F_x_y1= np.sum(F1_PQ_x_y*np.cos(chi_ang*Ang1_PQ_x_y))+np.sum(F1_CD_x_y*np.cos(chi_ang*Ang1_CD_x_y))
 	# 顶破时刻各个单元内力在加载方向的分量
-	Fxy2  = np.sum(F2_PQxy  *np.cos(chi_ang*Ang2_PQxy))  +np.sum(F2_CDxy  *np.cos(chi_ang*Ang2_CDxy))
-	F_xy2 = np.sum(F2_PQ_xy *np.cos(chi_ang*Ang2_PQ_xy)) +np.sum(F2_CD_xy *np.cos(chi_ang*Ang2_CD_xy))
-	Fx_y2 = np.sum(F2_PQx_y *np.cos(chi_ang*Ang2_PQx_y)) +np.sum(F2_CDx_y *np.cos(chi_ang*Ang2_CDx_y))
-	F_x_y2= np.sum(F2_PQ_x_y*np.cos(chi_ang*Ang2_PQ_x_y))+np.sum(F2_CD_x_y*np.cos(chi_ang*Ang2_CD_x_y))
-
-	F_net1 = Fxy1 + F_xy1 + Fx_y1 + F_x_y1  # 第一阶段顶头拉力
-	F_net2 = Fxy2 + F_xy2 + Fx_y2 + F_x_y2  # 顶破力
+	F_net1 = Fz1_PQx + Fz1_PQ_x + Fz1_CDy + Fz1_CD_y  # 第一阶段顶头拉力
+	F_net2 = Fz2_PQx + Fz2_PQ_x + Fz2_CDy + Fz2_CD_y  # 顶破力
 
 	# 第一阶段结束时刻各个单元消耗能量值
-	Exy1  = np.sum(E1_PQxy)   + np.sum(E1_CDxy)
-	E_xy1 = np.sum(E1_PQ_xy)  + np.sum(E1_CD_xy)
-	Ex_y1 = np.sum(E1_PQx_y)  + np.sum(E1_CDx_y)
-	E_x_y1= np.sum(E1_PQ_x_y) + np.sum(E1_CD_x_y)
-	# 顶破时刻各个单元消耗能量值
-	Exy2  = np.sum(E2_PQxy)   + np.sum(E2_CDxy)
-	E_xy2 = np.sum(E2_PQ_xy)  + np.sum(E2_CD_xy)
-	Ex_y2 = np.sum(E2_PQx_y)  + np.sum(E2_CDx_y)
-	E_x_y2= np.sum(E2_PQ_x_y) + np.sum(E2_CD_x_y)
+	E1_PQ = np.sum(E1_PQx)  + np.sum(E1_PQ_x)
+	E1_CD = np.sum(E1_CDy)  + np.sum(E1_CD_y)
 
-	E_net1 = Exy1 + E_xy1 + Ex_y1 + E_x_y1  # 第一阶段结束时刻网片耗能	
-	E_net2 = Exy2 + E_xy2 + Ex_y2 + E_x_y2  # 顶破时刻网片耗能
+	E2_PQ = np.sum(E2_PQx)  + np.sum(E2_PQ_x)
+	E2_CD = np.sum(E2_CDy)  + np.sum(E2_CD_y)
+
+	# 顶破时刻各个单元消耗能量值
+
+	E_net1 = E1_PQ + E1_CD  # 第一阶段结束时刻网片耗能	
+	E_net2 = E2_PQ + E2_CD  # 顶破时刻网片耗能
 
 	#print('Displacement1 = ', format(H_net1, '.3f'), 'm')
 	#print('Force1 = ', format(F_net1/1000, '.3f'), 'kN')
