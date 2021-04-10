@@ -99,16 +99,16 @@ if __name__ == '__main__':
 	lf0_CD_y= L0_CD_y- 2*ls0_CD
 
 	# 第一阶段纤维弹簧单元刚度
-	K1_PQx = 1/(lf0_PQx /(E1*A)+1/ks_PQ)
-	K1_PQ_x= 1/(lf0_PQ_x/(E1*A)+1/ks_PQ)
-	K1_CDy = 1/(lf0_CDy /(E1*A)+1/ks_CD)
-	K1_CD_y= 1/(lf0_CD_y/(E1*A)+1/ks_CD)
+	K1_PQx = 1/(lf0_PQx /(E1*A)+1/(ks_PQ/2))
+	K1_PQ_x= 1/(lf0_PQ_x/(E1*A)+1/(ks_PQ/2))
+	K1_CDy = 1/(lf0_CDy /(E1*A)+1/(ks_CD/2))
+	K1_CD_y= 1/(lf0_CD_y/(E1*A)+1/(ks_CD/2))
 
 	# 第二阶段纤维弹簧单元刚度
-	K2_PQx = 1/(lf0_PQx /(E2*A)+1/ks_PQ)
-	K2_PQ_x= 1/(lf0_PQ_x/(E2*A)+1/ks_PQ)
-	K2_CDy = 1/(lf0_CDy /(E2*A)+1/ks_CD)
-	K2_CD_y= 1/(lf0_CD_y/(E2*A)+1/ks_CD)
+	K2_PQx = 1/(lf0_PQx /(E2*A)+1/(ks_PQ/2))
+	K2_PQ_x= 1/(lf0_PQ_x/(E2*A)+1/(ks_PQ/2))
+	K2_CDy = 1/(lf0_CDy /(E2*A)+1/(ks_CD/2))
+	K2_CD_y= 1/(lf0_CD_y/(E2*A)+1/(ks_CD/2))
 
 	L0_sidePC  = np.concatenate((L0_PQxy ,L0_PQ_xy ,L0_CDxy ,L0_CDx_y))
 	L0_side_P_C= np.concatenate((L0_PQx_y,L0_PQ_x_y,L0_CD_xy,L0_CD_x_y))
@@ -133,20 +133,31 @@ if __name__ == '__main__':
 	min_L1 = min_L0 + gamma_N1*sigma_y*A/id_K1
 	min_L2 = min_L1 + (gamma_N2 - gamma_N1)*sigma_y*A/id_K2
 
-	z1,z2 = func_compute_z1z2(min_L1,min_L2,id_NorthEast,id_Southwest,id_PrCr)
-	# 到这里 计算出了顶破高度
-	！！！！！！！！！！！！！！！！！！！！！！！！！！！需要继续完善
+	z1,z2 = func_compute_z1z2(min_L1,min_L2,id_NorthEast,id_Southwest,2*id_PrCr)
+
 	# 第一阶段各个纤维弹簧单元长度
 	L1_PQxy  ,	L1_CDxy  = func_xyz(blockShape,'+x+y', w, kappa, Rp, a, ex, ey, z1)[:2]
 	L1_PQ_xy ,	L1_CD_xy = func_xyz(blockShape,'-x+y', w, kappa, Rp, a, ex, ey, z1)[:2]
 	L1_PQx_y ,	L1_CDx_y = func_xyz(blockShape,'+x-y', w, kappa, Rp, a, ex, ey, z1)[:2]
 	L1_PQ_x_y,	L1_CD_x_y= func_xyz(blockShape,'-x-y', w, kappa, Rp, a, ex, ey, z1)[:2]
 
+	# 各个纤维弹簧单元初始长度(全长)
+	L1_PQx = L1_PQxy + L1_PQx_y + 2*L_Pr
+	L1_PQ_x= L1_PQ_xy+ L1_PQ_x_y+ 2*L_Pr
+	L1_CDy = L1_CDxy + L1_CD_xy + 2*L_Cr
+	L1_CD_y= L1_CDx_y+ L1_CD_x_y+ 2*L_Cr
+
 	# 第二阶段各个纤维弹簧单元长度
 	L2_PQxy  ,	L2_CDxy  = func_xyz(blockShape,'+x+y', w, kappa, Rp, a, ex, ey, z2)[:2]
 	L2_PQ_xy ,	L2_CD_xy = func_xyz(blockShape,'-x+y', w, kappa, Rp, a, ex, ey, z2)[:2]
 	L2_PQx_y ,	L2_CDx_y = func_xyz(blockShape,'+x-y', w, kappa, Rp, a, ex, ey, z2)[:2]
 	L2_PQ_x_y,	L2_CD_x_y= func_xyz(blockShape,'-x-y', w, kappa, Rp, a, ex, ey, z2)[:2]
+	
+	# 各个纤维弹簧单元初始长度(全长)
+	L2_PQx = L2_PQxy + L2_PQx_y + 2*L_Pr
+	L2_PQ_x= L2_PQ_xy+ L2_PQ_x_y+ 2*L_Pr
+	L2_CDy = L2_CDxy + L2_CD_xy + 2*L_Cr
+	L2_CD_y= L2_CDx_y+ L2_CD_x_y+ 2*L_Cr
 
 	# 第一阶段各个纤维弹簧单元与加载方向的夹角
 	Ang1_PQxy  , Ang1_CDxy   = np.arccos(z1/L1_PQxy)  , np.arccos(z1/L1_CDxy)
@@ -163,34 +174,41 @@ if __name__ == '__main__':
 	chi_ang = 0.5  # chi为考虑实际顶破后环绕加载区域边缘网环内钢丝纤维与竖直方向夹角小于模型角度的修正系数
 	
 	# 第一阶段各个纤维弹簧单元内力
-	F1_PQxy  , F2_PQxy  , E1_PQxy  ,E2_PQxy   = func_vectorFiEi(L0_PQxy  ,L1_PQxy  ,L2_PQxy  ,K1_PQxy  ,K2_PQxy  ,gamma_N1,sigma_y,A)
+	print(L1_PQx)
+	print(gamma_N1*sigma_y*A/K1_PQx + L0_PQx)
+	F1_PQx  , F2_PQx  , E1_PQx  ,E2_PQx   = func_vectorFiEi(L0_PQx  ,L1_PQx  ,L2_PQx  ,K1_PQx  ,K2_PQx  ,gamma_N1,sigma_y,A)
+	F1_PQ_x , F2_PQ_x , E1_PQ_x ,E2_PQ_x  = func_vectorFiEi(L0_PQ_x ,L1_PQ_x ,L2_PQ_x ,K1_PQ_x ,K2_PQ_x ,gamma_N1,sigma_y,A)
 
-
-	F1_PQxy  , F2_PQxy  , E1_PQxy  ,E2_PQxy   = func_vectorFiEi(L0_PQxy  ,L1_PQxy  ,L2_PQxy  ,K1_PQxy  ,K2_PQxy  ,gamma_N1,sigma_y,A)
-	F1_PQ_xy , F2_PQ_xy , E1_PQ_xy ,E2_PQ_xy  = func_vectorFiEi(L0_PQ_xy ,L1_PQ_xy ,L2_PQ_xy ,K1_PQ_xy ,K2_PQ_xy ,gamma_N1,sigma_y,A)
-	F1_PQx_y , F2_PQx_y , E1_PQx_y ,E2_PQx_y  = func_vectorFiEi(L0_PQx_y ,L1_PQx_y ,L2_PQx_y ,K1_PQx_y ,K2_PQx_y ,gamma_N1,sigma_y,A)
-	F1_PQ_x_y, F2_PQ_x_y, E1_PQ_x_y,E2_PQ_x_y = func_vectorFiEi(L0_PQ_x_y,L1_PQ_x_y,L2_PQ_x_y,K1_PQ_x_y,K2_PQ_x_y,gamma_N1,sigma_y,A)
-
-	F1_CDxy  , F2_CDxy  , E1_CDxy  ,E2_CDxy   = func_vectorFiEi(L0_CDxy  ,L1_CDxy  ,L2_CDxy  ,K1_CDxy  ,K2_CDxy  ,gamma_N1,sigma_y,A)
-	F1_CD_xy , F2_CD_xy , E1_CD_xy ,E2_CD_xy  = func_vectorFiEi(L0_CD_xy ,L1_CD_xy ,L2_CD_xy ,K1_CD_xy ,K2_CD_xy ,gamma_N1,sigma_y,A)
-	F1_CDx_y , F2_CDx_y , E1_CDx_y ,E2_CDx_y  = func_vectorFiEi(L0_CDx_y ,L1_CDx_y ,L2_CDx_y ,K1_CDx_y ,K2_CDx_y ,gamma_N1,sigma_y,A)
-	F1_CD_x_y, F2_CD_x_y, E1_CD_x_y,E2_CD_x_y = func_vectorFiEi(L0_CD_x_y,L1_CD_x_y,L2_CD_x_y,K1_CD_x_y,K2_CD_x_y,gamma_N1,sigma_y,A)
+	F1_CDy  , F2_CDy  , E1_CDy  ,E2_CDy   = func_vectorFiEi(L0_CDy  ,L1_CDy  ,L2_CDy  ,K1_CDy  ,K2_CDy  ,gamma_N1,sigma_y,A)
+	F1_CD_y , F2_CD_y , E1_CD_y ,E2_CD_y  = func_vectorFiEi(L0_CD_y ,L1_CD_y ,L2_CD_y ,K1_CD_y ,K2_CD_y ,gamma_N1,sigma_y,A)
 
 	# 第一、二阶段各个纤维弹簧单元中纤维长度与弹簧长度
-	ls1_PQxy  ,ls2_PQxy  ,lf1_PQxy  ,lf2_PQxy   = func_lslf(F1_PQxy  ,F2_PQxy  ,L1_PQxy  ,L2_PQxy  ,ls0_PQ,lf0_PQxy  ,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
-	ls1_PQ_xy ,ls2_PQ_xy ,lf1_PQ_xy ,lf2_PQ_xy  = func_lslf(F1_PQ_xy ,F2_PQ_xy ,L1_PQ_xy ,L2_PQ_xy ,ls0_PQ,lf0_PQ_xy ,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
-	ls1_PQx_y ,ls2_PQx_y ,lf1_PQx_y ,lf2_PQx_y  = func_lslf(F1_PQx_y ,F2_PQx_y ,L1_PQx_y ,L2_PQx_y ,ls0_PQ,lf0_PQx_y ,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
-	ls1_PQ_x_y,ls2_PQ_x_y,lf1_PQ_x_y,lf2_PQ_x_y = func_lslf(F1_PQ_x_y,F2_PQ_x_y,L1_PQ_x_y,L2_PQ_x_y,ls0_PQ,lf0_PQ_x_y,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
+	ls1_PQx  ,ls2_PQx  ,lf1_PQx  ,lf2_PQx   = func_lslf(F1_PQx  ,F2_PQx  ,L1_PQx  ,L2_PQx  ,2*ls0_PQ,lf0_PQx  ,ks_PQ/2,E1,E2,gamma_N1,sigma_y,A)
+	ls1_PQ_x ,ls2_PQ_x ,lf1_PQ_x ,lf2_PQ_x  = func_lslf(F1_PQ_x ,F2_PQ_x ,L1_PQ_x ,L2_PQ_x ,2*ls0_PQ,lf0_PQ_x ,ks_PQ/2,E1,E2,gamma_N1,sigma_y,A)
 
-	ls1_CDxy  ,ls2_CDxy  ,lf1_CDxy  ,lf2_CDxy   = func_lslf(F1_CDxy  ,F2_CDxy  ,L1_CDxy  ,L2_CDxy  ,ls0_CD,lf0_CDxy  ,ks_CD,E1,E2,gamma_N1,sigma_y,A)
-	ls1_CD_xy ,ls2_CD_xy ,lf1_CD_xy ,lf2_CD_xy  = func_lslf(F1_CD_xy ,F2_CD_xy ,L1_CD_xy ,L2_CD_xy ,ls0_CD,lf0_CD_xy ,ks_CD,E1,E2,gamma_N1,sigma_y,A)
-	ls1_CDx_y ,ls2_CDx_y ,lf1_CDx_y ,lf2_CDx_y  = func_lslf(F1_CDx_y ,F2_CDx_y ,L1_CDx_y ,L2_CDx_y ,ls0_CD,lf0_CDx_y ,ks_CD,E1,E2,gamma_N1,sigma_y,A)
-	ls1_CD_x_y,ls2_CD_x_y,lf1_CD_x_y,lf2_CD_x_y = func_lslf(F1_CD_x_y,F2_CD_x_y,L1_CD_x_y,L2_CD_x_y,ls0_PQ,lf0_CD_x_y,ks_PQ,E1,E2,gamma_N1,sigma_y,A)
+	ls1_CDy  ,ls2_CDy  ,lf1_CDy  ,lf2_CDy   = func_lslf(F1_CDy  ,F2_CDy  ,L1_CDy  ,L2_CDy  ,ls0_CD,lf0_CDy  ,ks_CD/2,E1,E2,gamma_N1,sigma_y,A)
+	ls1_CD_y ,ls2_CD_y ,lf1_CD_y ,lf2_CD_y  = func_lslf(F1_CD_y ,F2_CD_y ,L1_CD_y ,L2_CD_y ,ls0_CD,lf0_CD_y ,ks_CD/2,E1,E2,gamma_N1,sigma_y,A)
 
 	H_net1 = z1  # 第一阶段顶头高度
 	H_net2 = z2  # 顶破高度
 
 	# 第一阶段结束时刻各个单元内力在加载方向的分量
+	cos1PQx = np.concatenate((np.cos(chi_ang*Ang1_PQxy) ,np.cos(chi_ang*Ang1_PQx_y)))
+	cos1PQ_x= np.concatenate((np.cos(chi_ang*Ang1_PQ_xy),np.cos(chi_ang*Ang1_PQ_x_y)))
+	cos1CDy = np.concatenate((np.cos(chi_ang*Ang1_CDxy) ,np.cos(chi_ang*Ang1_CD_xy)))
+	cos1CD_y= np.concatenate((np.cos(chi_ang*Ang1_CDx_y),np.cos(chi_ang*Ang1_PQ_x_y)))
+
+	cos2PQx = np.concatenate((np.cos(chi_ang*Ang2_PQxy) ,np.cos(chi_ang*Ang2_PQx_y)))
+	cos2PQ_x= np.concatenate((np.cos(chi_ang*Ang2_PQ_xy),np.cos(chi_ang*Ang2_PQ_x_y)))
+	cos2CDy = np.concatenate((np.cos(chi_ang*Ang2_CDxy) ,np.cos(chi_ang*Ang2_CD_xy)))
+	cos2CD_y= np.concatenate((np.cos(chi_ang*Ang2_CDx_y),np.cos(chi_ang*Ang2_PQ_x_y)))
+
+	F1_PQ = np.sum(F1_PQx *cos1PQx)  +np.sum(F1_PQ_x  *cos1PQ_x)
+	F2_PQ = np.sum(F2_PQx *cos2PQx)  +np.sum(F2_PQ_x  *cos2PQ_x)
+
+	F1_CD = np.sum(F1_CDy *cos1CDy)  +np.sum(F1_CD_y  *cos1CD_y)
+	F2_CD = np.sum(F2_CD_y *cos2CD_y)  +np.sum(F2_CD_y  *cos2CD_xy)
+
 	Fxy1  = np.sum(F1_PQxy  *np.cos(chi_ang*Ang1_PQxy))  +np.sum(F1_CDxy  *np.cos(chi_ang*Ang1_CDxy))
 	F_xy1 = np.sum(F1_PQ_xy *np.cos(chi_ang*Ang1_PQ_xy)) +np.sum(F1_CD_xy *np.cos(chi_ang*Ang1_CD_xy))
 	Fx_y1 = np.sum(F1_PQx_y *np.cos(chi_ang*Ang1_PQx_y)) +np.sum(F1_CDx_y *np.cos(chi_ang*Ang1_CDx_y))
