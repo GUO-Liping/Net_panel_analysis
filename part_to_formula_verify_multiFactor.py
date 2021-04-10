@@ -5,7 +5,7 @@
 Name： NetPanelAnalysis
 Function: 计算环形网片顶破力、顶破位移、耗能能力
 Note: 国际单位制
-Version: 1.0.3
+Version: 1.0.3-beta
 Author: Liping GUO
 Date: 2021/4/7
 命名方式：以平行于x方向及y方向分别作为后缀
@@ -16,8 +16,9 @@ Remark: 影响计算结果的细节因素：
 	(4) 该版本修正了一个错误：对应网环顶破试验，R3/2.2/300其实为R4/2.2/300，而R4/2.2/300其实为R4/3.0/300。
 	(5)由于(3)中的原因，剔除了网片试验RN3对应的试验结果，只保留R4/3.0/300的试验结果
 	(6)由于(3)中的原因，对于直径为2.2mm钢丝对应的网片规格R4/2.2/300，进行了单独计算
-	(7)Bug: gamma_N2的拟合结果与FN2的拟合结果存在不一致情况
-	(8)弹簧-纤维单元的双线性刚度特征，导致F_2及E_2在计算时每个单元分别修正与单元不同阶段实际刚度一致
+	(7)gamma_N2的拟合结果与FN2的拟合结果存在不一致情况
+	(8)采用该版本时，在顶头上升过程中，最短传力路径在实时发生变换，还需非常细致的验证及推导
+	(9)弹簧-纤维单元的双线性刚度特征，导致F_2及E_2在计算时每个单元分别修正与单元不同阶段实际刚度一致
 '''
 
 import numpy as np
@@ -26,7 +27,7 @@ from userfunc_NPA import *
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
 	# MULTIPLE FACTORS INPUT
-	nw = 7  # 网环圈数
+	nw = 7 # 网环圈数
 	d = func_return_d(nw)  # 制作网环的钢丝直径
 	D = 0.3  # 单个网环直径
 	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
@@ -37,17 +38,17 @@ if __name__ == '__main__':
 	ls0_PQ = 0.05  # 初始弹簧长度
 	ls0_CD = 0.05  # 初始弹簧长度
 
-	ex = 0.7 # 加载位置偏心距离
-	ey = 0.7 # 加载位置偏心距离
+	ex = 0.4 # 加载位置偏心距离
+	ey = 0.4 # 加载位置偏心距离
 	sigma_y = 1770e6  # 钢丝材料屈服强度
 
-	blockShape = 'round'  # blockShape must be 'Round' or 'Polygon'!
+	blockShape = 'Round'  # blockShape must be 'Round' or 'Polygon'!
 
 	A = nw * np.pi*d**2/4  # 单肢截面面积
 	a = np.pi*D/(2*(1+kappa))  # 变形后网环短边长度
 	mPQ, mCD = func_m(blockShape,Rp,kappa,a)  # 坐标系中x（PQ）y(CD)方向力矢量个数
 
-	boundary = 'rigid'  # boundary must be 'Rigid' or 'Flexible'!
+	boundary = 'Rigid'  # boundary must be 'Rigid' or 'Flexible'!
 
 	l0_ropePQ = kappa*w  # 钢丝绳初始长度
 	F_ropePQ = 190e3  # 钢丝绳破断力
@@ -91,6 +92,7 @@ if __name__ == '__main__':
 	L0_PQ_x= L0_PQ_xy+ L0_PQ_x_y+ 2*L_Pr
 	L0_CDy = L0_CDxy + L0_CD_xy + 2*L_Cr
 	L0_CD_y= L0_CDx_y+ L0_CD_x_y+ 2*L_Cr
+	print(L0_PQx, L0_PQ_x)
 
 	# 各个纤维弹簧单元中纤维的初始长度
 	lf0_PQx = L0_PQx - 2*ls0_PQ
@@ -121,6 +123,7 @@ if __name__ == '__main__':
 
 	# 两个方向最短纤维弹簧单元（最薄弱单元）的长度与该单元的位置，两阶段刚度，用于计算顶破高度	
 	min_L0 = np.min(L0_all)
+	print('min_L0=',min_L0)
 	id_min= np.argmin(L0_all)
 
 	id_K1 = K1_all[id_min]
@@ -140,12 +143,15 @@ if __name__ == '__main__':
 	L1_PQ_xy ,	L1_CD_xy = func_xyz(blockShape,'-x+y', w, kappa, Rp, a, ex, ey, z1)[:2]
 	L1_PQx_y ,	L1_CDx_y = func_xyz(blockShape,'+x-y', w, kappa, Rp, a, ex, ey, z1)[:2]
 	L1_PQ_x_y,	L1_CD_x_y= func_xyz(blockShape,'-x-y', w, kappa, Rp, a, ex, ey, z1)[:2]
+	print(L1_PQxy  ,L1_PQ_xy ,L1_PQx_y ,L1_PQ_x_y,L_Pr)
 
 	# 各个纤维弹簧单元初始长度(全长)
 	L1_PQx = L1_PQxy + L1_PQx_y + 2*L_Pr
 	L1_PQ_x= L1_PQ_xy+ L1_PQ_x_y+ 2*L_Pr
 	L1_CDy = L1_CDxy + L1_CD_xy + 2*L_Cr
 	L1_CD_y= L1_CDx_y+ L1_CD_x_y+ 2*L_Cr
+
+	print(L1_PQx,L1_PQ_x,L1_CDy,L1_CD_y)
 
 	# 第二阶段各个纤维弹簧单元长度
 	L2_PQxy  ,	L2_CDxy  = func_xyz(blockShape,'+x+y', w, kappa, Rp, a, ex, ey, z2)[:2]

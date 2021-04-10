@@ -335,13 +335,14 @@ def func_vectorFiEi(L0,L1,L2,K1,K2,gamma_N1,sigma_y,A):
 	gamma_N1 = gamma_N1+1e-5
 	F_gammaN1 = gamma_N1*sigma_y*A
 	L_gammaN1 = F_gammaN1/K1 + L0
+	print('F_gammaN1/K1=',F_gammaN1/K1)
 
 	F1 = K1*(L1-L0)
 	F2 = K1*(L_gammaN1-L0) + K2*(L2-L_gammaN1)
 
 	E1 = K1*(L1-L0)**2/2
 	E2 = K1*L2*(L1-L0) + K1*(L0**2-L1**2)/2 + K2*(L2-L1)**2 / 2
-
+	print('L0=',L0,'L1=',L1, 'L_gammaN1=',L_gammaN1)
 	for i in range(len(L1)):
 		if L1[i] <= L_gammaN1[i]:
 			pass
