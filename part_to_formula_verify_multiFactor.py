@@ -37,11 +37,11 @@ if __name__ == '__main__':
 	ls0_PQ = 0.05  # 初始弹簧长度
 	ls0_CD = 0.05  # 初始弹簧长度
 
-	ex = 0.1  # 加载位置偏心距离
-	ey = 0.1  # 加载位置偏心距离
+	ex = 0.5  # 加载位置偏心距离
+	ey = 0.5  # 加载位置偏心距离
 	sigma_y = 1770e6  # 钢丝材料屈服强度
 
-	blockShape = 'Polygon'  # blockShape must be 'Round' or 'Polygon'!
+	blockShape = 'round'  # blockShape must be 'Round' or 'Polygon'!
 
 	A = nw * np.pi*d**2/4  # 单肢截面面积
 	a = np.pi*D/(2*(1+kappa))  # 变形后网环短边长度
@@ -168,12 +168,13 @@ if __name__ == '__main__':
 	H_net = z2  # 顶破高度
 
 	# 顶破时刻各个单元内力在加载方向的分量
-	Fxy   = np.sum(F2_PQxy  *np.cos(chi_ang*Ang2_PQxy))  +np.sum(F2_CDxy  *np.cos(chi_ang*Ang2_CDxy))
-	F_xy  = np.sum(F2_PQ_xy *np.cos(chi_ang*Ang2_PQ_xy)) +np.sum(F2_CD_xy *np.cos(chi_ang*Ang2_CD_xy))
-	Fx_y  = np.sum(F2_PQx_y *np.cos(chi_ang*Ang2_PQx_y)) +np.sum(F2_CDx_y *np.cos(chi_ang*Ang2_CDx_y))
-	F_x_y = np.sum(F2_PQ_x_y*np.cos(chi_ang*Ang2_PQ_x_y))+np.sum(F2_CD_x_y*np.cos(chi_ang*Ang2_CD_x_y))
+	F_PQx = np.sum(F2_PQxy *np.cos(chi_ang*Ang2_PQxy)) + np.sum(F2_PQxy *np.cos(chi_ang*Ang2_PQx_y))
+	F_PQ_x= np.sum(F2_PQ_xy*np.cos(chi_ang*Ang2_PQ_xy))+ np.sum(F2_PQ_xy*np.cos(chi_ang*Ang2_PQ_x_y))
 
-	F_net = Fxy + F_xy + Fx_y + F_x_y  # 顶破力
+	F_CDy = np.sum(F2_CDxy *np.cos(chi_ang*Ang2_CDxy)) + np.sum(F2_CDxy *np.cos(chi_ang*Ang2_CD_xy))
+	F_CD_y= np.sum(F2_CDx_y*np.cos(chi_ang*Ang2_CDx_y))+ np.sum(F2_CDx_y*np.cos(chi_ang*Ang2_CD_x_y))
+
+	F_net = F_PQx + F_PQ_x + F_CDy + F_CD_y  # 顶破力
 
 	# 顶破时刻各个单元消耗能量值
 	Exy  = np.sum(E2_PQxy)   + np.sum(E2_CDxy)
