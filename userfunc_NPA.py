@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 import numpy as np
 
+
 def	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey):
 	
 	inputData = np.array([nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey])
@@ -50,7 +51,6 @@ def func_ks(BC,**kwargs):
 
 
 def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
-
 	if blockShape == 'round' or blockShape == 'Round':
 		mPQ = func_round(Rp/a)
 		index_mPQ = np.linspace(1, mPQ, mPQ, endpoint=True)
@@ -73,16 +73,18 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 		xD = np.zeros(mCD) + kappa*w/2
 		yD = w * (index_mCD-1/2)/(2*mCD + 1)
 		zD = np.zeros(mCD) + 0
-
-		LPr = abs(yP - ey)
-		LCr = abs(xC - ex)
-
+	
 		if points == '+x+y':
-
+			xP, xC = xP, xC
+			yP, yC = yP, yC
+			zP, zC = zP, zC
+			xQ, xD = xQ, xD
+			yQ, yD = yQ, yD
+			zQ, zD = zQ, zD
 			LPQ = np.sqrt((xP-xQ)**2 +(yP-yQ)**2 +(zP-zQ)**2)
 			LCD = np.sqrt((xC-xD)**2 +(yC-yD)**2 +(zC-zD)**2)
-			# print(LPQ,LCD)		
-		# 进行y轴对称坐标变换
+			return LPQ, LCD 
+	
 		elif points == '-x+y':
 			xPminusX ,xCminusX = 2*ex - xP	,2*ex - xC
 			yPminusX ,yCminusX = yP			,yC
@@ -92,8 +94,8 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 			zQminusX ,zDminusX = zQ			,zD
 			LPQ = np.sqrt((xPminusX-xQminusX)**2 +(yPminusX-yQminusX)**2 +(zPminusX-zQminusX)**2)
 			LCD = np.sqrt((xCminusX-xDminusX)**2 +(yCminusX-yDminusX)**2 +(zCminusX-zDminusX)**2)
-		
-		# 进行x轴对称坐标变换
+			return LPQ, LCD 
+	
 		elif points == '+x-y':
 			xPminusY, xCminusY = xP			, xC
 			yPminusY, yCminusY = 2*ey - yP	, 2*ey - yC
@@ -103,8 +105,8 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 			zQminusY, zDminusY = zQ			, zD
 			LPQ = np.sqrt((xPminusY-xQminusY)**2 +(yPminusY-yQminusY)**2 +(zPminusY-zQminusY)**2)
 			LCD = np.sqrt((xCminusY-xDminusY)**2 +(yCminusY-yDminusY)**2 +(zCminusY-zDminusY)**2)
-		
-		# 进行中心对称坐标变换
+			return LPQ, LCD 
+	
 		elif points == '-x-y':
 			xPminusXY, xCminusXY = 2*ex - xP, 2*ex - xC	
 			yPminusXY, yCminusXY = 2*ey - yP, 2*ey - yC	
@@ -114,11 +116,7 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 			zQminusXY, zDminusXY = zQ		, zD
 			LPQ = np.sqrt((xPminusXY-xQminusXY)**2 +(yPminusXY-yQminusXY)**2 +(zPminusXY-zQminusXY)**2)
 			LCD = np.sqrt((xCminusXY-xDminusXY)**2 +(yCminusXY-yDminusXY)**2 +(zCminusXY-zDminusXY)**2)
-		else:
-			raise ValueError		
-
-		return LPQ, LCD, LPr, LCr
-
+			return LPQ, LCD 
 	elif blockShape == 'polygon' or blockShape == 'Polygon':
 		mPQ = func_round((5*Rp/np.sqrt(34))/a)
 		mPQ1 = func_round((3*Rp/np.sqrt(34))/a)
@@ -149,10 +147,16 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 		zD = np.zeros(mCD) + 0
 	
 		if points == '+x+y':
+			xP, xC = xP, xC
+			yP, yC = yP, yC
+			zP, zC = zP, zC
+			xQ, xD = xQ, xD
+			yQ, yD = yQ, yD
+			zQ, zD = zQ, zD
 			LPQ = np.sqrt((xP-xQ)**2 +(yP-yQ)**2 +(zP-zQ)**2)
 			LCD = np.sqrt((xC-xD)**2 +(yC-yD)**2 +(zC-zD)**2)
-		
-		# 进行y轴对称坐标变换
+			return LPQ, LCD 
+	
 		elif points == '-x+y':
 			xPminusX ,xCminusX = 2*ex - xP	,2*ex - xC
 			yPminusX ,yCminusX = yP			,yC
@@ -162,8 +166,8 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 			zQminusX ,zDminusX = zQ			,zD
 			LPQ = np.sqrt((xPminusX-xQminusX)**2 +(yPminusX-yQminusX)**2 +(zPminusX-zQminusX)**2)
 			LCD = np.sqrt((xCminusX-xDminusX)**2 +(yCminusX-yDminusX)**2 +(zCminusX-zDminusX)**2)
-		
-		# 进行x轴对称坐标变换
+			return LPQ, LCD 
+	
 		elif points == '+x-y':
 			xPminusY, xCminusY = xP			, xC
 			yPminusY, yCminusY = 2*ey - yP	, 2*ey - yC
@@ -173,8 +177,8 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 			zQminusY, zDminusY = zQ			, zD
 			LPQ = np.sqrt((xPminusY-xQminusY)**2 +(yPminusY-yQminusY)**2 +(zPminusY-zQminusY)**2)
 			LCD = np.sqrt((xCminusY-xDminusY)**2 +(yCminusY-yDminusY)**2 +(zCminusY-zDminusY)**2)
-		
-		# 进行中心对称坐标变换
+			return LPQ, LCD 
+	
 		elif points == '-x-y':
 			xPminusXY, xCminusXY = 2*ex - xP, 2*ex - xC	
 			yPminusXY, yCminusXY = 2*ey - yP, 2*ey - yC	
@@ -184,64 +188,58 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 			zQminusXY, zDminusXY = zQ		, zD
 			LPQ = np.sqrt((xPminusXY-xQminusXY)**2 +(yPminusXY-yQminusXY)**2 +(zPminusXY-zQminusXY)**2)
 			LCD = np.sqrt((xCminusXY-xDminusXY)**2 +(yCminusXY-yDminusXY)**2 +(zCminusXY-zDminusXY)**2)
-				
-		LPr = abs(yP - ey)
-		LCr = abs(xC - ex)
-
-		return LPQ, LCD, LPr, LCr
+			return LPQ, LCD 		
 	else:
 		raise ValueError
 
 
-def func_ringChianDataFit(nw,sigma_y,D,d):
-	lN0 = D*3
-	A_nw = nw*np.pi*d**2/4
+def func_ringChianDataFit(nw,sigma_y,d):
+    lN0 = 0.3*3
 
-	if d == 0.003:
-		nw_array = np.array([4,5,7,9,12,16,19],dtype='float')
-		FN2_array = np.array([30.064e3,44.937e3,69.72e3,80.547e3,110.884e3,177.66e3,209.387e3],dtype='float')
-		delta_lN2_array = 0.001*np.array([515.05,518.67,508.59,489.92,490.644,475.54,472.36],dtype='float')
-		Area_array = np.pi/4*d**2*nw_array
-		# print('Area_array=',Area_array)
-		gammaN2_array = FN2_array/(sigma_y*2*Area_array)
-		# print('gammaN2_array111=', gammaN2_array)
-	elif d == 0.0022:
-		nw_array = np.array([3,4],dtype='float')
-		FN2_array = np.array([9.87e3,17.57e3],dtype='float')
-		delta_lN2_array = np.array([521.16e-3,517.36e-3],dtype='float')
-		Area_array = np.pi/4*d**2*nw_array
-		# print('Area_array=',Area_array)
-		gammaN2_array = FN2_array/(sigma_y*2*Area_array)
+    if d == 0.003:
+    	nw_array = np.array([4,5,7,9,12,16,19],dtype='float')
+    	FN2_array = np.array([30.064e3,44.937e3,69.72e3,80.547e3,110.884e3,177.66e3,209.387e3],dtype='float')
+    	delta_lN2_array = 0.001*np.array([515.05,518.67,508.59,489.92,490.644,475.54,472.36],dtype='float')
+    	Area_array = np.pi/4*d**2*nw_array
+    	# print('Area_array=',Area_array)
+    	gammaN2_array = FN2_array/(sigma_y*2*Area_array)
+    	# print('gammaN2_array111=', gammaN2_array)
+    else:
+    	nw_array = np.array([3,4],dtype='float')
+    	FN2_array = np.array([9.87e3,17.57e3],dtype='float')
+    	delta_lN2_array = np.array([521.16e-3,517.36e-3],dtype='float')
+    	Area_array = np.pi/4*d**2*nw_array
+    	# print('Area_array=',Area_array)
+    	gammaN2_array = FN2_array/(sigma_y*2*Area_array)
 
-	poly_delta_lN2_func = np.polyfit(nw_array, delta_lN2_array,1)
-	poly_gammaN2_func = np.polyfit(nw_array, gammaN2_array,1)
+    poly_delta_lN2_func = np.polyfit(nw_array, delta_lN2_array,1)
+    poly_gammaN2_func = np.polyfit(nw_array, gammaN2_array,1)
 
-	after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
-	# print('after_fit_delta_lN2=',after_fit_delta_lN2)
-	after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw)
+    after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
 
-	chi_gammaN = 0.15
-	after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw)+chi_gammaN
-	after_fit_lN2 = lN0 + after_fit_delta_lN2
-	after_fit_gammaN1 = after_fit_gammaN2 * 0.15
-	after_fit_lN1 = lN0 + after_fit_delta_lN2*0.85
-	'''
-	对比五环试验与三环试验轴向力发展程度可发现，
-	五环(5圈0.551，7圈0.554,9圈0.559)，三环(5圈0.359, 7圈0.398, 9圈0.358)
-	分别大于三环(5圈0.192, 7圈0.156, 9圈0.201,)均值约0.1至0.2之间
+    chi_gammaN = 0.15
+    after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw)+chi_gammaN
+
+    '''
+    对比五环试验与三环试验轴向力发展程度可发现，
+    五环(5圈0.551，7圈0.554,9圈0.559)，三环(5圈0.359, 7圈0.398, 9圈0.358)
+    分别大于三环(5圈0.192, 7圈0.156, 9圈0.201,)均值约0.1至0.2之间
 	'''
 
-	after_fit_FN1 = after_fit_gammaN1 * sigma_y*(2*A_nw)
-	after_fit_FN2 = after_fit_gammaN2 * sigma_y*(2*A_nw)
+    after_fit_FN2 = after_fit_gammaN2 * sigma_y*(2*nw*np.pi*d**2/4)
+    after_fit_lN2 = lN0 + after_fit_delta_lN2
+    after_fit_FN1 = after_fit_FN2*0.15
+    after_fit_lN1 = lN0 + after_fit_delta_lN2*0.85
+    after_fit_gammaN1 = after_fit_gammaN2 * 0.15
 
-	return after_fit_FN1, after_fit_FN2, lN0, after_fit_lN1, after_fit_lN2, after_fit_gammaN1, after_fit_gammaN2
+    return after_fit_FN1, after_fit_FN2, lN0, after_fit_lN1, after_fit_lN2, after_fit_gammaN1, after_fit_gammaN2
 
 def func_round(number):
-	if number % 1 == 0.5:
-		number = number + 0.5
-	else:
-		number = round(number)
-	return int(number)
+    if number % 1 == 0.5:
+        number = number + 0.5
+    else:
+        number = round(number)
+    return int(number)
 
 
 def funcXY_correct_gammaForceEnergy(mx, gamma_N2_x, F2_x, E2_x, gamma_N1, K2_x, K1_x, L2_x, L1_x, L0_x, sigma_y, A):
@@ -315,19 +313,12 @@ def func_Checkz1z2(z1PQ,z1CD,z2PQ,z2CD):
 	return z1,z2
 
 
-def func_compute_z1z2(min_L1,min_L2,a,b,c):
-	min_L1,min_L2 = min_L1+c,min_L2+c
+def func_compute_z1z2(min_L0,K1,K2,gamma_N1,gamma_N2,sigma_y,A):
 
-	C11 = ((min_L1-c)**2+b**2-a**2)**2
-	C12 = 4*(min_L1-c)**2
-	C13 = b**2
-	
-	C21 = ((min_L2-c)**2+b**2-a**2)**2
-	C22 = 4*(min_L2-c)**2
-	C23 = b**2
-
-	z1 = np.sqrt(C11/C12-C13)
-	z2 = np.sqrt(C21/C22-C23)
+	min_L1 = min_L0 + gamma_N1*sigma_y*A/K1
+	min_L2 = min_L1 + (gamma_N2 - gamma_N1)*sigma_y*A/K2
+	z1 = np.sqrt(min_L1**2 - min_L0**2)
+	z2 = np.sqrt(min_L2**2 - min_L0**2)
 
 	return z1, z2
 
@@ -386,7 +377,7 @@ def func_lslf(F1,F2,L1,L2,ls0,lf0,ks,E1,E2,gamma_N1,sigma_y,A):
 			ls2[k2] = (E2*A/lf0[k2]*(L2[k2]-lf1[k2])+ks*ls1[k2]) / (ks+E2*A/lf0[k2])
 			lf2[k2] = (ks*(L2[k2]-ls1[k2])+lf1[k2]*E2*A/lf0[k2]) / (ks+E2*A/lf0[k2])
 
-	return ls1/2,ls2/2,lf1,lf2
+	return ls1,ls2,lf1,lf2
 
 
 def func_sensitive(factor_star, factor_array,disp_array,forc_array,ener_array):
