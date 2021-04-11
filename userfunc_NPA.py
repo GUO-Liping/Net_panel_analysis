@@ -216,7 +216,7 @@ def func_ringChianDataFit(nw,sigma_y,D,d):
 	poly_delta_lN2_func = np.polyfit(nw_array, delta_lN2_array,1)
 	poly_gammaN2_func = np.polyfit(nw_array, gammaN2_array,1)
 
-	after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)*0.707
+	after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
 	# print('after_fit_delta_lN2=',after_fit_delta_lN2)
 	after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw)
 
@@ -316,6 +316,7 @@ def func_Checkz1z2(z1PQ,z1CD,z2PQ,z2CD):
 
 
 def func_compute_z1z2(min_L1,min_L2,a,b,c):
+	min_L1,min_L2 = min_L1+c,min_L2+c
 
 	C11 = ((min_L1-c)**2+b**2-a**2)**2
 	C12 = 4*(min_L1-c)**2
@@ -335,14 +336,13 @@ def func_vectorFiEi(L0,L1,L2,K1,K2,gamma_N1,sigma_y,A):
 	gamma_N1 = gamma_N1+1e-5
 	F_gammaN1 = gamma_N1*sigma_y*A
 	L_gammaN1 = F_gammaN1/K1 + L0
-	print('F_gammaN1/K1=',F_gammaN1/K1)
 
 	F1 = K1*(L1-L0)
 	F2 = K1*(L_gammaN1-L0) + K2*(L2-L_gammaN1)
 
 	E1 = K1*(L1-L0)**2/2
 	E2 = K1*L2*(L1-L0) + K1*(L0**2-L1**2)/2 + K2*(L2-L1)**2 / 2
-	print('L0=',L0,'L1=',L1, 'L_gammaN1=',L_gammaN1)
+
 	for i in range(len(L1)):
 		if L1[i] <= L_gammaN1[i]:
 			pass
@@ -386,7 +386,7 @@ def func_lslf(F1,F2,L1,L2,ls0,lf0,ks,E1,E2,gamma_N1,sigma_y,A):
 			ls2[k2] = (E2*A/lf0[k2]*(L2[k2]-lf1[k2])+ks*ls1[k2]) / (ks+E2*A/lf0[k2])
 			lf2[k2] = (ks*(L2[k2]-ls1[k2])+lf1[k2]*E2*A/lf0[k2]) / (ks+E2*A/lf0[k2])
 
-	return ls1,ls2,lf1,lf2
+	return ls1/2,ls2/2,lf1,lf2
 
 
 def func_sensitive(factor_star, factor_array,disp_array,forc_array,ener_array):
