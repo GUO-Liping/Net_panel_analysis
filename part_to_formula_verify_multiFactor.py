@@ -50,21 +50,25 @@ if __name__ == '__main__':
 	a = np.pi*D/(2*(1+kappa))  # 变形后网环短边长度
 	mPQ, mCD = func_m(blockShape,Rp,kappa,a)  # 坐标系中x（PQ）y(CD)方向力矢量个数
 
-	boundary = 'rigid'  # boundary must be 'Rigid' or 'Flexible'!
+	boundary = 'flexible'  # boundary must be 'Rigid' or 'Flexible'!
 
 	l0_ropePQ = kappa*w  # 钢丝绳初始长度
 	F_ropePQ = 91.5e3  # 钢丝绳破断力
 	sigma_ropePQ = 1720e6  # 钢丝绳应力强度
 	E_ropePQ = 150e9  # 钢丝绳弹性模量
 
+	lb_onePQ = 0.8  # 单个耗能器最大行程800mm
+	b_numPQ = 2  # 边界钢丝绳一端串联的耗能器数量（耗能器连接方式：串联！！）
+	lb_maxPQ = 2*b_numPQ * lb_onePQ  # 边界钢丝绳两端串联的耗能器总伸长量
+
 	l0_ropeCD = w  # 钢丝绳初始长度
 	F_ropeCD = 91.5e3  # 钢丝绳破断力
 	sigma_ropeCD = 1720e6  # 钢丝绳应力强度
 	E_ropeCD = 150e9  # 钢丝绳弹性模量
 
-	lb_max = 0.8  # 单个耗能器行程
-	n_b = 2  # 边界钢丝绳一端串联的耗能器数量（耗能器连接方式：串联！！）
-	lb_maxAll = 2*n_b * lb_max  # 边界钢丝绳两端串联的耗能器总伸长量
+	lb_oneCD= 0.8  # 单个耗能器最大行程800mm
+	b_numCD = 0  # 边界钢丝绳一端串联的耗能器数量（耗能器连接方式：串联！！）
+	lb_maxCD = 2*b_numCD * lb_oneCD  # 边界钢丝绳两端串联的耗能器总伸长量
 
 	# 环链试验----------------------------------------------------------------------------------- #
   	# 将三环环链试验力位移数据转换为弹簧纤维单元中的纤维双折线E1,E2应力应变关系
@@ -77,15 +81,19 @@ if __name__ == '__main__':
 	dictRigid = {'ks':1e20}
 	dictRopePQ = {'l0_rope':l0_ropePQ,'m':mPQ,'F_rope':F_ropePQ,'sigma_rope':sigma_ropePQ,'E_rope':E_ropePQ}
 	dictRopeCD = {'l0_rope':l0_ropeCD,'m':mCD,'F_rope':F_ropeCD,'sigma_rope':sigma_ropeCD,'E_rope':E_ropeCD}
+	dictBrakerPQ = {'lb_one':lb_maxPQ,'b_num':b_numPQ,'lb_max':lb_maxPQ}
+	dictBrakerCD = {'lb_one':lb_maxCD,'b_num':b_numCD,'lb_max':lb_maxCD}
+
 	dictFiber = {'gamma_ave':gamma_ave,'sigma_y':sigma_y,'gamma_N2':gamma_N2,'A':A}
-	dictBoundaryPQ = {**dictRigid,**dictRopePQ,**dictFiber}  # PQ连接的钢丝绳参数字典
-	dictBoundaryCD = {**dictRigid,**dictRopeCD,**dictFiber}  # CD连接的钢丝绳参数字典
 
-	ks_PQ = 21530
-	ks_CD = 1
-	# ks_PQ = func_ks(boundary,**dictBoundaryPQ)  # 弹簧刚度，指代刚性边界或柔性边界
-	# ks_CD = func_ks(boundary,**dictBoundaryCD)  # 弹簧刚度，指代刚性边界或柔性边界
+	dictBoundaryPQ = {**dictRigid,**dictRopePQ,**dictBrakerPQ,**dictFiber}  # PQ连接的钢丝绳参数字典
+	dictBoundaryCD = {**dictRigid,**dictRopeCD,**dictBrakerCD,**dictFiber}  # CD连接的钢丝绳参数字典
 
+	# ks_PQ = 21530
+	# ks_CD = 1
+	ks_PQ = func_ks(boundary,**dictBoundaryPQ)  # 弹簧刚度，指代刚性边界或柔性边界
+	ks_CD = func_ks(boundary,**dictBoundaryCD)  # 弹簧刚度，指代刚性边界或柔性边界
+	print('ks_PQ=',ks_PQ)
 	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey)  # 检查参数输入有无错误
 
 	# 各个纤维弹簧单元初始长度
@@ -122,6 +130,7 @@ if __name__ == '__main__':
 
 	# 找出计算模型所有单元中的最短纤维弹簧单元
 	L0min = np.min([L0minPQ,L0minCD])
+	print('z1PQ,z1CD,z2PQ,z2CD=',z1PQ,z1CD,z2PQ,z2CD)
 	z1, z2 = func_Checkz1z2(z1PQ,z1CD,z2PQ,z2CD)
 	maxTheta1 = np.arctan(z1/L0min)  # 第一阶段纤维-弹簧单元最大角度
 	maxTheta2 = np.arctan(z2/L0min)  # 第二阶段纤维-弹簧单元最大角度

@@ -41,13 +41,45 @@ def func_ks(BC,**kwargs):
 	if BC=='rigid' or BC=='Rigid':
 		return kwargs['ks']
 	elif BC=='flexible' or BC=='Flexible':
+		l0_rope = kwargs['l0_rope']
 		q_rope = kwargs['gamma_ave'] * kwargs['sigma_y']*kwargs['A']*kwargs['m']/(kwargs['l0_rope']/2)
 		A_rope = kwargs['F_rope']/kwargs['sigma_rope']
-		u_max = (3*q_rope*kwargs['l0_rope']**4/(64*kwargs['E_rope']*A_rope))**(1/3)
-		ks = kwargs['gamma_N2']*kwargs['sigma_y']*kwargs['A']/u_max
+		vr_max = (3*q_rope*kwargs['l0_rope']**4/(64*kwargs['E_rope']*A_rope))**(1/3)
+		l_ropeBmax = func_Lrope(l0_rope,vr_max) + kwargs['lb_max']
+		vr_maxB = func_vr(l_ropeBmax,l0_rope)
+		print('vr_maxB=',vr_maxB)
+		ks = kwargs['gamma_N2']*kwargs['sigma_y']*kwargs['A']/vr_maxB
 		return ks
 	else:
 		raise ValueError
+
+
+def func_Lrope(w,vr):
+	L1 = np.sqrt(w**2/4 + 4*vr**2)
+	L2 = w**2/(8*vr) * np.arcsinh(4*vr/w)
+	return L1+L2
+
+
+def func_vr(L,w):
+	up_vr = L/2
+	low_vr = 0
+	vr = (up_vr+low_vr)/2
+	test_L = func_Lrope(w,vr)
+	errL = test_L-L
+	numL = 0
+	while(abs(errL)>1e-5 and numL<1000):
+		if errL>0:
+			up_vr = vr
+			vr = (up_vr+low_vr)/2
+			errL = func_Lrope(w,vr) - L
+		elif errL<0:
+			low_vr = vr
+			vr = (up_vr+low_vr)/2
+			errL = func_Lrope(w,vr) - L
+		else:
+			raise ValueError
+		numL = numL+1
+	return vr
 
 
 def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
