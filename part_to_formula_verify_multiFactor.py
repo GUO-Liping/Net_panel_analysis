@@ -31,11 +31,11 @@ if __name__ == '__main__':
 	D = 0.3  # 单个网环直径
 	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
 	ns = 7
-	w = 5.5
+	w = 4
 	# w = (np.sqrt(2)*(ns-1)+1)*0.3+0.2-0.0455844122715714  # 矩形网片短边长度
-	print('w=',w)
+	# print('w=',w)
 
-	kappa = 10/5.5  # 网片长宽比：为大于1的常数
+	kappa = 1  # 网片长宽比：为大于1的常数
 
 	ls0_PQ = 0.05  # 初始弹簧长度
 	ls0_CD = 0.05  # 初始弹簧长度
@@ -44,13 +44,13 @@ if __name__ == '__main__':
 	ey = 0.0  # 加载位置偏心距离
 	sigma_y = 1770e6  # 钢丝材料屈服强度
 
-	blockShape = 'polygon'  # blockShape must be 'Round' or 'Polygon'!
+	blockShape = 'round'  # blockShape must be 'Round' or 'Polygon'!
 
 	A = nw * np.pi*d**2/4  # 单肢截面面积
 	a = np.pi*D/(2*(1+kappa))  # 变形后网环短边长度
 	mPQ, mCD = func_m(blockShape,Rp,kappa,a)  # 坐标系中x（PQ）y(CD)方向力矢量个数
 
-	boundary = 'flexible'  # boundary must be 'Rigid' or 'Flexible'!
+	boundary = 'rigid'  # boundary must be 'Rigid' or 'Flexible'!
 
 	l0_ropePQ = kappa*w  # 钢丝绳初始长度
 	F_ropePQ = 91.5e3  # 钢丝绳破断力
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 	E_ropeCD = 150e9  # 钢丝绳弹性模量
 
 	lb_oneCD= 0.8  # 单个耗能器最大行程800mm
-	b_numCD = 0  # 边界钢丝绳一端串联的耗能器数量（耗能器连接方式：串联！！）
+	b_numCD = 100000  # 边界钢丝绳一端串联的耗能器数量（耗能器连接方式：串联！！）
 	lb_maxCD = 2*b_numCD * lb_oneCD  # 边界钢丝绳两端串联的耗能器总伸长量
 
 	# 环链试验----------------------------------------------------------------------------------- #
@@ -94,6 +94,7 @@ if __name__ == '__main__':
 	ks_PQ = func_ks(boundary,**dictBoundaryPQ)  # 弹簧刚度，指代刚性边界或柔性边界
 	ks_CD = func_ks(boundary,**dictBoundaryCD)  # 弹簧刚度，指代刚性边界或柔性边界
 	print('ks_PQ=',ks_PQ)
+	print('ks_CD=',ks_CD)
 	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey)  # 检查参数输入有无错误
 
 	# 各个纤维弹簧单元初始长度
@@ -124,13 +125,15 @@ if __name__ == '__main__':
 	L0minPQ,idPQ,K1minPQ,K2minPQ = func_minElement(L0_PQxy, L0_PQ_xy, L0_PQx_y, L0_PQ_x_y,K1_PQxy,K2_PQxy)
 	L0minCD,idCD,K1minCD,K2minCD = func_minElement(L0_CDxy, L0_CD_xy, L0_CDx_y, L0_CD_x_y,K1_CDxy,K2_CDxy)
 
+	#print('L0minPQ,idPQ,K1minPQ,K2minPQ=',L0minPQ,idPQ,K1minPQ,K2minPQ)
+	#print('L0minCD,idCD,K1minCD,K2minCD=',L0minCD,idCD,K1minCD,K2minCD)
 	# 两个方向单元确定的两阶段高度
 	z1PQ, z2PQ = func_compute_z1z2(L0minPQ,K1minPQ,K2minPQ,gamma_N1,gamma_N2,sigma_y,A)
 	z1CD, z2CD = func_compute_z1z2(L0minCD,K1minCD,K2minCD,gamma_N1,gamma_N2,sigma_y,A)
 
 	# 找出计算模型所有单元中的最短纤维弹簧单元
 	L0min = np.min([L0minPQ,L0minCD])
-	print('z1PQ,z1CD,z2PQ,z2CD=',z1PQ,z1CD,z2PQ,z2CD)
+	#print('z1PQ,z1CD,z2PQ,z2CD=',z1PQ,z1CD,z2PQ,z2CD)
 	z1, z2 = func_Checkz1z2(z1PQ,z1CD,z2PQ,z2CD)
 	maxTheta1 = np.arctan(z1/L0min)  # 第一阶段纤维-弹簧单元最大角度
 	maxTheta2 = np.arctan(z2/L0min)  # 第二阶段纤维-弹簧单元最大角度

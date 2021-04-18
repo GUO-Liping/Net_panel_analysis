@@ -37,6 +37,7 @@ def func_m(BC,Rp,kappa,a):
 	else:
 		raise ValueError
 
+
 def func_ks(BC,**kwargs):
 	if BC=='rigid' or BC=='Rigid':
 		return kwargs['ks']
@@ -47,7 +48,7 @@ def func_ks(BC,**kwargs):
 		vr_max = (3*q_rope*kwargs['l0_rope']**4/(64*kwargs['E_rope']*A_rope))**(1/3)
 		l_ropeBmax = func_Lrope(l0_rope,vr_max) + kwargs['lb_max']
 		vr_maxB = func_vr(l_ropeBmax,l0_rope)
-		print('vr_maxB=',vr_maxB)
+		# print('vr_maxB=',vr_maxB)
 		ks = kwargs['gamma_N2']*kwargs['sigma_y']*kwargs['A']/vr_maxB
 		return ks
 	else:
@@ -334,12 +335,20 @@ def func_minElement(L0_CDxy, L0_CD_xy, L0_CDx_y, L0_CD_x_y,K1_CDxy,K2_CDxy):
 
 def func_Checkz1z2(z1PQ,z1CD,z2PQ,z2CD):
 
-	if z1PQ<=(z1CD+1e-9) and z2PQ<=(z2CD+1e-9):
-		z1 = z1PQ
-		z2 = z2PQ
-	elif z1PQ>(z1CD-1e-9) and (z2PQ>z2CD-1e-9):
-		z1 = z1CD
-		z2 = z2CD
+	if z1PQ<=(z1CD+1e-9):
+		if z2PQ<=(z2CD+1e-9):
+			z1 = z1PQ
+			z2 = z2PQ
+		else:
+			z1 = z1PQ
+			z2 = z2CD
+	elif z1PQ>(z1CD+1e-9):
+		if z2PQ>(z2CD+1e-9):
+			z1 = z1CD
+			z2 = z2CD
+		else:
+			z1 = z1CD
+			z2 = z2PQ
 	else:
 		raise ValueError
 	return z1,z2
