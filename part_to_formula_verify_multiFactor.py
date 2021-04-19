@@ -29,13 +29,13 @@ if __name__ == '__main__':
 	nw = 9  # 网环圈数
 	d = func_return_d(nw)  # 制作网环的钢丝直径
 	D = 0.3  # 单个网环直径
-	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
+	Rp = 1.374/2  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
 	ns = 7
-	w = 4
+	w = 5.5
 	# w = (np.sqrt(2)*(ns-1)+1)*0.3+0.2-0.0455844122715714  # 矩形网片短边长度
 	# print('w=',w)
 
-	kappa = 1  # 网片长宽比：为大于1的常数
+	kappa = 10/5.5  # 网片长宽比：为大于1的常数
 
 	ls0_PQ = 0.05  # 初始弹簧长度
 	ls0_CD = 0.05  # 初始弹簧长度
@@ -44,17 +44,17 @@ if __name__ == '__main__':
 	ey = 0.0  # 加载位置偏心距离
 	sigma_y = 1770e6  # 钢丝材料屈服强度
 
-	blockShape = 'round'  # blockShape must be 'Round' or 'Polygon'!
+	blockShape = 'polygon'  # blockShape must be 'Round' or 'Polygon'!
 
 	A = nw * np.pi*d**2/4  # 单肢截面面积
 	a = np.pi*D/(2*(1+kappa))  # 变形后网环短边长度
 	mPQ, mCD = func_m(blockShape,Rp,kappa,a)  # 坐标系中x（PQ）y(CD)方向力矢量个数
 
-	boundary = 'rigid'  # boundary must be 'Rigid' or 'Flexible'!
+	boundary = 'flexible'  # boundary must be 'Rigid' or 'Flexible'!
 
 	l0_ropePQ = kappa*w  # 钢丝绳初始长度
-	F_ropePQ = 91.5e3  # 钢丝绳破断力
-	sigma_ropePQ = 1720e6  # 钢丝绳应力强度
+	F_ropePQ = 308e3  # 钢丝绳破断力
+	sigma_ropePQ = 1770e6  # 钢丝绳应力强度
 	E_ropePQ = 150e9  # 钢丝绳弹性模量
 
 	lb_onePQ = 0.8  # 单个耗能器最大行程800mm
@@ -62,8 +62,8 @@ if __name__ == '__main__':
 	lb_maxPQ = 2*b_numPQ * lb_onePQ  # 边界钢丝绳两端串联的耗能器总伸长量
 
 	l0_ropeCD = w  # 钢丝绳初始长度
-	F_ropeCD = 91.5e3  # 钢丝绳破断力
-	sigma_ropeCD = 1720e6  # 钢丝绳应力强度
+	F_ropeCD = 308e3  # 钢丝绳破断力
+	sigma_ropeCD = 1770e6  # 钢丝绳应力强度
 	E_ropeCD = 150e9  # 钢丝绳弹性模量
 
 	lb_oneCD= 0.8  # 单个耗能器最大行程800mm

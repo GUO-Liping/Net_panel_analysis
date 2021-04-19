@@ -106,6 +106,7 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 		xD = np.zeros(mCD) + kappa*w/2
 		yD = w * (index_mCD-1/2)/(2*mCD + 1)
 		zD = np.zeros(mCD) + 0
+		print('xC,xD,yC,yD,zC,zD=',xC,xD,yC,yD,zC,zD)
 	
 		if points == '+x+y':
 			xP, xC = xP, xC
@@ -178,6 +179,7 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 		xD = np.zeros(mCD) + kappa*w/2
 		yD = w * (index_mCD-1/2)/(2*mCD + 1)
 		zD = np.zeros(mCD) + 0
+		print('xC,xD,yC,yD,zC,zD=',xC,xD,yC,yD,zC,zD)
 	
 		if points == '+x+y':
 			xP, xC = xP, xC
