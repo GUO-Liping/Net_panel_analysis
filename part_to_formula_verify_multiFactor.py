@@ -18,6 +18,7 @@ Remark: 影响计算结果的细节因素：
 	(6)由于(3)中的原因，对于直径为2.2mm钢丝对应的网片规格R4/2.2/300，进行了单独计算
 	(7)Bug: gamma_N2的拟合结果与FN2的拟合结果存在不一致情况
 	(8)弹簧-纤维单元的双线性刚度特征，导致F_2及E_2在计算时每个单元分别修正与单元不同阶段实际刚度一致
+	(9)钢柱摆动、残余高度、窗帘效应
 '''
 
 import numpy as np
@@ -30,8 +31,8 @@ if __name__ == '__main__':
 	d = func_return_d(nw)  # 制作网环的钢丝直径
 	D = 0.3  # 单个网环直径
 	Rp = 1.374/2  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
-	ns = 7
 	w = 5.5
+	# ns = 12
 	# w = (np.sqrt(2)*(ns-1)+1)*0.3+0.2-0.0455844122715714  # 矩形网片短边长度
 	# print('w=',w)
 
@@ -45,29 +46,35 @@ if __name__ == '__main__':
 	sigma_y = 1770e6  # 钢丝材料屈服强度
 
 	blockShape = 'polygon'  # blockShape must be 'Round' or 'Polygon'!
-
+	curtain = True  # 是否考虑窗帘效应，Ture为考虑，False为不考虑！
 	A = nw * np.pi*d**2/4  # 单肢截面面积
 	a = np.pi*D/(2*(1+kappa))  # 变形后网环短边长度
 	mPQ, mCD = func_m(blockShape,Rp,kappa,a)  # 坐标系中x（PQ）y(CD)方向力矢量个数
+	print('mPQ, mCD=',mPQ, mCD)
 
 	boundary = 'flexible'  # boundary must be 'Rigid' or 'Flexible'!
+	Rope1770Steel = {'3':5.29,'4':9.40,'5':14.7,'6':21.2,'7':28.8,'8':37.6,'9':47.6,'10':58.8,'11':71.1,'12':84.6,'13':99.3,'14':115,'16':150,'18':190,'20':235,'22':284,'24':338}
+	sigma_rope = 1770e6
+	E_rope = 150e9
 
+	d_ropePQ = 22
+	F_ropePQ = 1000*Rope1770Steel[str(d_ropePQ)]  # 1000为换算国际单位
 	l0_ropePQ = kappa*w  # 钢丝绳初始长度
-	F_ropePQ = 308e3  # 钢丝绳破断力
-	sigma_ropePQ = 1770e6  # 钢丝绳应力强度
-	E_ropePQ = 150e9  # 钢丝绳弹性模量
+	sigma_ropePQ = sigma_rope
+	E_ropePQ = E_rope  # 钢丝绳弹性模量
+
+	d_ropeCD = 22
+	F_ropeCD = 1000*Rope1770Steel[str(d_ropeCD)]  # 1000为换算国际单位,钢丝绳破断力
+	l0_ropeCD = w  # 钢丝绳初始长度
+	sigma_ropeCD = sigma_rope  # 钢丝绳应力强度
+	E_ropeCD = E_rope  # 钢丝绳弹性模量
 
 	lb_onePQ = 0.8  # 单个耗能器最大行程800mm
 	b_numPQ = 2  # 边界钢丝绳一端串联的耗能器数量（耗能器连接方式：串联！！）
 	lb_maxPQ = 2*b_numPQ * lb_onePQ  # 边界钢丝绳两端串联的耗能器总伸长量
 
-	l0_ropeCD = w  # 钢丝绳初始长度
-	F_ropeCD = 308e3  # 钢丝绳破断力
-	sigma_ropeCD = 1770e6  # 钢丝绳应力强度
-	E_ropeCD = 150e9  # 钢丝绳弹性模量
-
 	lb_oneCD= 0.8  # 单个耗能器最大行程800mm
-	b_numCD = 100000  # 边界钢丝绳一端串联的耗能器数量（耗能器连接方式：串联！！）
+	b_numCD = 10000  # 边界钢丝绳一端串联的耗能器数量（耗能器连接方式：串联！！）
 	lb_maxCD = 2*b_numCD * lb_oneCD  # 边界钢丝绳两端串联的耗能器总伸长量
 
 	# 环链试验----------------------------------------------------------------------------------- #
@@ -98,10 +105,10 @@ if __name__ == '__main__':
 	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey)  # 检查参数输入有无错误
 
 	# 各个纤维弹簧单元初始长度
-	L0_PQxy  ,	L0_CDxy  = func_xyz(blockShape, '+x+y', w, kappa, Rp, a, ex, ey, 0)
-	L0_PQ_xy ,	L0_CD_xy = func_xyz(blockShape, '-x+y', w, kappa, Rp, a, ex, ey, 0)
-	L0_PQx_y ,	L0_CDx_y = func_xyz(blockShape, '+x-y', w, kappa, Rp, a, ex, ey, 0)
-	L0_PQ_x_y,	L0_CD_x_y= func_xyz(blockShape, '-x-y', w, kappa, Rp, a, ex, ey, 0)
+	L0_PQxy  ,	L0_CDxy  = func_xyz(blockShape, curtain, '+x+y', w, kappa, Rp, a, ex, ey, 0)
+	L0_PQ_xy ,	L0_CD_xy = func_xyz(blockShape, curtain, '-x+y', w, kappa, Rp, a, ex, ey, 0)
+	L0_PQx_y ,	L0_CDx_y = func_xyz(blockShape, curtain, '+x-y', w, kappa, Rp, a, ex, ey, 0)
+	L0_PQ_x_y,	L0_CD_x_y= func_xyz(blockShape, curtain, '-x-y', w, kappa, Rp, a, ex, ey, 0)
 	
 	# 各个纤维弹簧单元中纤维的初始长度
 	lf0_PQxy  ,	lf0_CDxy  = L0_PQxy  -ls0_PQ, L0_CDxy  -ls0_CD
@@ -139,16 +146,16 @@ if __name__ == '__main__':
 	maxTheta2 = np.arctan(z2/L0min)  # 第二阶段纤维-弹簧单元最大角度
 	
 	# 第一阶段各个纤维弹簧单元长度
-	L1_PQxy  ,	L1_CDxy  = func_xyz(blockShape,'+x+y', w, kappa, Rp, a, ex, ey, z1)
-	L1_PQ_xy ,	L1_CD_xy = func_xyz(blockShape,'-x+y', w, kappa, Rp, a, ex, ey, z1)
-	L1_PQx_y ,	L1_CDx_y = func_xyz(blockShape,'+x-y', w, kappa, Rp, a, ex, ey, z1)
-	L1_PQ_x_y,	L1_CD_x_y= func_xyz(blockShape,'-x-y', w, kappa, Rp, a, ex, ey, z1)
+	L1_PQxy  ,	L1_CDxy  = func_xyz(blockShape, curtain, '+x+y', w, kappa, Rp, a, ex, ey, z1)
+	L1_PQ_xy ,	L1_CD_xy = func_xyz(blockShape, curtain, '-x+y', w, kappa, Rp, a, ex, ey, z1)
+	L1_PQx_y ,	L1_CDx_y = func_xyz(blockShape, curtain, '+x-y', w, kappa, Rp, a, ex, ey, z1)
+	L1_PQ_x_y,	L1_CD_x_y= func_xyz(blockShape, curtain, '-x-y', w, kappa, Rp, a, ex, ey, z1)
 
 	# 第二阶段各个纤维弹簧单元长度
-	L2_PQxy  ,	L2_CDxy  = func_xyz(blockShape,'+x+y', w, kappa, Rp, a, ex, ey, z2)
-	L2_PQ_xy ,	L2_CD_xy = func_xyz(blockShape,'-x+y', w, kappa, Rp, a, ex, ey, z2)
-	L2_PQx_y ,	L2_CDx_y = func_xyz(blockShape,'+x-y', w, kappa, Rp, a, ex, ey, z2)
-	L2_PQ_x_y,	L2_CD_x_y= func_xyz(blockShape,'-x-y', w, kappa, Rp, a, ex, ey, z2)
+	L2_PQxy  ,	L2_CDxy  = func_xyz(blockShape, curtain, '+x+y', w, kappa, Rp, a, ex, ey, z2)
+	L2_PQ_xy ,	L2_CD_xy = func_xyz(blockShape, curtain, '-x+y', w, kappa, Rp, a, ex, ey, z2)
+	L2_PQx_y ,	L2_CDx_y = func_xyz(blockShape, curtain, '+x-y', w, kappa, Rp, a, ex, ey, z2)
+	L2_PQ_x_y,	L2_CD_x_y= func_xyz(blockShape, curtain, '-x-y', w, kappa, Rp, a, ex, ey, z2)
 
 	# 第一阶段各个纤维弹簧单元与加载方向的夹角
 	Ang1_PQxy  , Ang1_CDxy   = np.arccos(z1/L1_PQxy)  , np.arccos(z1/L1_CDxy)

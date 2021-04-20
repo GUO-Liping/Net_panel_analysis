@@ -48,7 +48,7 @@ def func_ks(BC,**kwargs):
 		vr_max = (3*q_rope*kwargs['l0_rope']**4/(64*kwargs['E_rope']*A_rope))**(1/3)
 		l_ropeBmax = func_Lrope(l0_rope,vr_max) + kwargs['lb_max']
 		vr_maxB = func_vr(l_ropeBmax,l0_rope)
-		# print('vr_maxB=',vr_maxB)
+		print('vr_maxB=',vr_maxB)
 		ks = kwargs['gamma_N2']*kwargs['sigma_y']*kwargs['A']/vr_maxB
 		return ks
 	else:
@@ -83,7 +83,7 @@ def func_vr(L,w):
 	return vr
 
 
-def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
+def func_xyz(blockShape,curtain,points, w, kappa, Rp, a, ex, ey, z):
 	if blockShape == 'round' or blockShape == 'Round':
 		mPQ = func_round(Rp/a)
 		index_mPQ = np.linspace(1, mPQ, mPQ, endpoint=True)
@@ -92,7 +92,6 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 		yP = np.sqrt(Rp**2 - (a*index_mPQ - a/2)**2) + ey
 		zP = np.zeros(mPQ) + z
 	
-		xQ = kappa*w * (index_mPQ-1/2)/(2*mPQ + 1)
 		yQ = np.zeros(mPQ) + w/2
 		zQ = np.zeros(mPQ) + 0
 	
@@ -104,126 +103,231 @@ def func_xyz(blockShape,points, w, kappa, Rp, a, ex, ey, z):
 		zC = np.zeros(mCD) + z
 	
 		xD = np.zeros(mCD) + kappa*w/2
-		yD = w * (index_mCD-1/2)/(2*mCD + 1)
 		zD = np.zeros(mCD) + 0
-		print('xC,xD,yC,yD,zC,zD=',xC,xD,yC,yD,zC,zD)
-	
-		if points == '+x+y':
-			xP, xC = xP, xC
-			yP, yC = yP, yC
-			zP, zC = zP, zC
-			xQ, xD = xQ, xD
-			yQ, yD = yQ, yD
-			zQ, zD = zQ, zD
-			LPQ = np.sqrt((xP-xQ)**2 +(yP-yQ)**2 +(zP-zQ)**2)
-			LCD = np.sqrt((xC-xD)**2 +(yC-yD)**2 +(zC-zD)**2)
-			return LPQ, LCD 
-	
-		elif points == '-x+y':
-			xPminusX ,xCminusX = 2*ex - xP	,2*ex - xC
-			yPminusX ,yCminusX = yP			,yC
-			zPminusX ,zCminusX = zP			,zC
-			xQminusX ,xDminusX = -xQ		,-xD
-			yQminusX ,yDminusX = yQ			,yD
-			zQminusX ,zDminusX = zQ			,zD
-			LPQ = np.sqrt((xPminusX-xQminusX)**2 +(yPminusX-yQminusX)**2 +(zPminusX-zQminusX)**2)
-			LCD = np.sqrt((xCminusX-xDminusX)**2 +(yCminusX-yDminusX)**2 +(zCminusX-zDminusX)**2)
-			return LPQ, LCD 
-	
-		elif points == '+x-y':
-			xPminusY, xCminusY = xP			, xC
-			yPminusY, yCminusY = 2*ey - yP	, 2*ey - yC
-			zPminusY, zCminusY = zP			, zC
-			xQminusY, xDminusY = xQ			, xD
-			yQminusY, yDminusY = -yQ		, -yD
-			zQminusY, zDminusY = zQ			, zD
-			LPQ = np.sqrt((xPminusY-xQminusY)**2 +(yPminusY-yQminusY)**2 +(zPminusY-zQminusY)**2)
-			LCD = np.sqrt((xCminusY-xDminusY)**2 +(yCminusY-yDminusY)**2 +(zCminusY-zDminusY)**2)
-			return LPQ, LCD 
-	
-		elif points == '-x-y':
-			xPminusXY, xCminusXY = 2*ex - xP, 2*ex - xC	
-			yPminusXY, yCminusXY = 2*ey - yP, 2*ey - yC	
-			zPminusXY, zCminusXY = zP		, zC
-			xQminusXY, xDminusXY = -xQ		, -xD
-			yQminusXY, yDminusXY = -yQ		, -yD
-			zQminusXY, zDminusXY = zQ		, zD
-			LPQ = np.sqrt((xPminusXY-xQminusXY)**2 +(yPminusXY-yQminusXY)**2 +(zPminusXY-zQminusXY)**2)
-			LCD = np.sqrt((xCminusXY-xDminusXY)**2 +(yCminusXY-yDminusXY)**2 +(zCminusXY-zDminusXY)**2)
-			return LPQ, LCD 
+		#print('xC,xD,yC,yD,zC,zD=',xC,xD,yC,yD,zC,zD)
+		if curtain == True:
+			xQ = xP
+			yD = yC	
+			if points == '+x+y':
+				xP, xC = xP, xC
+				yP, yC = yP, yC
+				zP, zC = zP, zC
+				xQ, xD = xQ, xD
+				yQ, yD = yQ, yD
+				zQ, zD = zQ, zD
+				LPQ = np.sqrt((xP-xQ)**2 +(yP-yQ)**2 +(zP-zQ)**2)
+				LCD = np.sqrt((xC-xD)**2 +(yC-yD)**2 +(zC-zD)**2)
+				return LPQ, LCD 
+		
+			elif points == '-x+y':
+				xPminusX ,xCminusX = 2*ex - xP	,2*ex - xC
+				yPminusX ,yCminusX = yP			,yC
+				zPminusX ,zCminusX = zP			,zC
+				xQminusX ,xDminusX = -xQ		,-xD
+				yQminusX ,yDminusX = yQ			,yD
+				zQminusX ,zDminusX = zQ			,zD
+				LPQ = np.sqrt((xPminusX-xQminusX)**2 +(yPminusX-yQminusX)**2 +(zPminusX-zQminusX)**2)
+				LCD = np.sqrt((xCminusX-xDminusX)**2 +(yCminusX-yDminusX)**2 +(zCminusX-zDminusX)**2)
+				return LPQ, LCD 
+		
+			elif points == '+x-y':
+				xPminusY, xCminusY = xP			, xC
+				yPminusY, yCminusY = 2*ey - yP	, 2*ey - yC
+				zPminusY, zCminusY = zP			, zC
+				xQminusY, xDminusY = xQ			, xD
+				yQminusY, yDminusY = -yQ		, -yD
+				zQminusY, zDminusY = zQ			, zD
+				LPQ = np.sqrt((xPminusY-xQminusY)**2 +(yPminusY-yQminusY)**2 +(zPminusY-zQminusY)**2)
+				LCD = np.sqrt((xCminusY-xDminusY)**2 +(yCminusY-yDminusY)**2 +(zCminusY-zDminusY)**2)
+				return LPQ, LCD 
+		
+			elif points == '-x-y':
+				xPminusXY, xCminusXY = 2*ex - xP, 2*ex - xC	
+				yPminusXY, yCminusXY = 2*ey - yP, 2*ey - yC	
+				zPminusXY, zCminusXY = zP		, zC
+				xQminusXY, xDminusXY = -xQ		, -xD
+				yQminusXY, yDminusXY = -yQ		, -yD
+				zQminusXY, zDminusXY = zQ		, zD
+				LPQ = np.sqrt((xPminusXY-xQminusXY)**2 +(yPminusXY-yQminusXY)**2 +(zPminusXY-zQminusXY)**2)
+				LCD = np.sqrt((xCminusXY-xDminusXY)**2 +(yCminusXY-yDminusXY)**2 +(zCminusXY-zDminusXY)**2)
+				return LPQ, LCD
+
+		elif curtain==False:
+			xQ = kappa*w * (index_mPQ-1/2)/(2*mPQ + 1)
+			yD = w * (index_mCD-1/2)/(2*mCD + 1)
+
+			if points == '+x+y':
+				xP, xC = xP, xC
+				yP, yC = yP, yC
+				zP, zC = zP, zC
+				xQ, xD = xQ, xD
+				yQ, yD = yQ, yD
+				zQ, zD = zQ, zD
+				LPQ = np.sqrt((xP-xQ)**2 +(yP-yQ)**2 +(zP-zQ)**2)
+				LCD = np.sqrt((xC-xD)**2 +(yC-yD)**2 +(zC-zD)**2)
+				return LPQ, LCD 
+		
+			elif points == '-x+y':
+				xPminusX ,xCminusX = 2*ex - xP	,2*ex - xC
+				yPminusX ,yCminusX = yP			,yC
+				zPminusX ,zCminusX = zP			,zC
+				xQminusX ,xDminusX = -xQ		,-xD
+				yQminusX ,yDminusX = yQ			,yD
+				zQminusX ,zDminusX = zQ			,zD
+				LPQ = np.sqrt((xPminusX-xQminusX)**2 +(yPminusX-yQminusX)**2 +(zPminusX-zQminusX)**2)
+				LCD = np.sqrt((xCminusX-xDminusX)**2 +(yCminusX-yDminusX)**2 +(zCminusX-zDminusX)**2)
+				return LPQ, LCD 
+		
+			elif points == '+x-y':
+				xPminusY, xCminusY = xP			, xC
+				yPminusY, yCminusY = 2*ey - yP	, 2*ey - yC
+				zPminusY, zCminusY = zP			, zC
+				xQminusY, xDminusY = xQ			, xD
+				yQminusY, yDminusY = -yQ		, -yD
+				zQminusY, zDminusY = zQ			, zD
+				LPQ = np.sqrt((xPminusY-xQminusY)**2 +(yPminusY-yQminusY)**2 +(zPminusY-zQminusY)**2)
+				LCD = np.sqrt((xCminusY-xDminusY)**2 +(yCminusY-yDminusY)**2 +(zCminusY-zDminusY)**2)
+				return LPQ, LCD 
+		
+			elif points == '-x-y':
+				xPminusXY, xCminusXY = 2*ex - xP, 2*ex - xC	
+				yPminusXY, yCminusXY = 2*ey - yP, 2*ey - yC	
+				zPminusXY, zCminusXY = zP		, zC
+				xQminusXY, xDminusXY = -xQ		, -xD
+				yQminusXY, yDminusXY = -yQ		, -yD
+				zQminusXY, zDminusXY = zQ		, zD
+				LPQ = np.sqrt((xPminusXY-xQminusXY)**2 +(yPminusXY-yQminusXY)**2 +(zPminusXY-zQminusXY)**2)
+				LCD = np.sqrt((xCminusXY-xDminusXY)**2 +(yCminusXY-yDminusXY)**2 +(zCminusXY-zDminusXY)**2)
+				return LPQ, LCD
+
 	elif blockShape == 'polygon' or blockShape == 'Polygon':
 		mPQ = func_round((5*Rp/np.sqrt(34))/a)
 		mPQ1 = func_round((3*Rp/np.sqrt(34))/a)
 		index_mPQ = np.linspace(1, mPQ, mPQ, endpoint=True)
-
+	
 		xP = a * (index_mPQ - 1/2) + ex
 		yP1 = np.zeros(mPQ1) + (5*Rp/np.sqrt(34)) + ey
 		yP2 = 5*Rp/np.sqrt(34) -(xP[mPQ1:]-3*Rp/np.sqrt(34))+ ey
 		yP = np.concatenate((yP1,yP2),axis=0)
 		zP = np.zeros(mPQ) + z
-
-		xQ = kappa*w * (index_mPQ-1/2)/(2*mPQ + 1)
+	
 		yQ = np.zeros(mPQ) + w/2
 		zQ = np.zeros(mPQ) + 0
-	
+		
 		mCD = func_round((5*Rp/np.sqrt(34))/(kappa*a))
+		#print('mCD=',mCD)
 		mCD1 = func_round((3*Rp/np.sqrt(34))/(kappa*a))
+		#print('mCD1=',mCD1)
 		index_mCD = np.linspace(1, mCD, mCD, endpoint=True)
-	
+		
 		yC = kappa*a * (index_mCD - 1/2) + ey
-		xC1 = np.zeros(mPQ1) + 5*Rp/np.sqrt(34) + ex
+		xC1 = np.zeros(mCD1) + 5*Rp/np.sqrt(34) + ex
+		#print('xC1=',xC1)
 		xC2 = 5*Rp/np.sqrt(34) - (yC[mCD1:] - 3*Rp/np.sqrt(34))+ ex
 		xC = np.concatenate((xC1,xC2),axis=0)
 		zC = np.zeros(mCD) + z
-	
+
 		xD = np.zeros(mCD) + kappa*w/2
-		yD = w * (index_mCD-1/2)/(2*mCD + 1)
 		zD = np.zeros(mCD) + 0
-		print('xC,xD,yC,yD,zC,zD=',xC,xD,yC,yD,zC,zD)
-	
-		if points == '+x+y':
-			xP, xC = xP, xC
-			yP, yC = yP, yC
-			zP, zC = zP, zC
-			xQ, xD = xQ, xD
-			yQ, yD = yQ, yD
-			zQ, zD = zQ, zD
-			LPQ = np.sqrt((xP-xQ)**2 +(yP-yQ)**2 +(zP-zQ)**2)
-			LCD = np.sqrt((xC-xD)**2 +(yC-yD)**2 +(zC-zD)**2)
-			return LPQ, LCD 
-	
-		elif points == '-x+y':
-			xPminusX ,xCminusX = 2*ex - xP	,2*ex - xC
-			yPminusX ,yCminusX = yP			,yC
-			zPminusX ,zCminusX = zP			,zC
-			xQminusX ,xDminusX = -xQ		,-xD
-			yQminusX ,yDminusX = yQ			,yD
-			zQminusX ,zDminusX = zQ			,zD
-			LPQ = np.sqrt((xPminusX-xQminusX)**2 +(yPminusX-yQminusX)**2 +(zPminusX-zQminusX)**2)
-			LCD = np.sqrt((xCminusX-xDminusX)**2 +(yCminusX-yDminusX)**2 +(zCminusX-zDminusX)**2)
-			return LPQ, LCD 
-	
-		elif points == '+x-y':
-			xPminusY, xCminusY = xP			, xC
-			yPminusY, yCminusY = 2*ey - yP	, 2*ey - yC
-			zPminusY, zCminusY = zP			, zC
-			xQminusY, xDminusY = xQ			, xD
-			yQminusY, yDminusY = -yQ		, -yD
-			zQminusY, zDminusY = zQ			, zD
-			LPQ = np.sqrt((xPminusY-xQminusY)**2 +(yPminusY-yQminusY)**2 +(zPminusY-zQminusY)**2)
-			LCD = np.sqrt((xCminusY-xDminusY)**2 +(yCminusY-yDminusY)**2 +(zCminusY-zDminusY)**2)
-			return LPQ, LCD 
-	
-		elif points == '-x-y':
-			xPminusXY, xCminusXY = 2*ex - xP, 2*ex - xC	
-			yPminusXY, yCminusXY = 2*ey - yP, 2*ey - yC	
-			zPminusXY, zCminusXY = zP		, zC
-			xQminusXY, xDminusXY = -xQ		, -xD
-			yQminusXY, yDminusXY = -yQ		, -yD
-			zQminusXY, zDminusXY = zQ		, zD
-			LPQ = np.sqrt((xPminusXY-xQminusXY)**2 +(yPminusXY-yQminusXY)**2 +(zPminusXY-zQminusXY)**2)
-			LCD = np.sqrt((xCminusXY-xDminusXY)**2 +(yCminusXY-yDminusXY)**2 +(zCminusXY-zDminusXY)**2)
-			return LPQ, LCD 		
+		#print('xC,xD,yC,yD,zC,zD=',xC,xD,yC,yD,zC,zD)
+		if curtain == True:
+			xQ = xP
+			yD = yC
+			if points == '+x+y':
+				xP, xC = xP, xC
+				yP, yC = yP, yC
+				zP, zC = zP, zC
+				xQ, xD = xQ, xD
+				yQ, yD = yQ, yD
+				zQ, zD = zQ, zD
+				LPQ = np.sqrt((xP-xQ)**2 +(yP-yQ)**2 +(zP-zQ)**2)
+				LCD = np.sqrt((xC-xD)**2 +(yC-yD)**2 +(zC-zD)**2)
+				return LPQ, LCD 
+		
+			elif points == '-x+y':
+				xPminusX ,xCminusX = 2*ex - xP	,2*ex - xC
+				yPminusX ,yCminusX = yP			,yC
+				zPminusX ,zCminusX = zP			,zC
+				xQminusX ,xDminusX = -xQ		,-xD
+				yQminusX ,yDminusX = yQ			,yD
+				zQminusX ,zDminusX = zQ			,zD
+				LPQ = np.sqrt((xPminusX-xQminusX)**2 +(yPminusX-yQminusX)**2 +(zPminusX-zQminusX)**2)
+				LCD = np.sqrt((xCminusX-xDminusX)**2 +(yCminusX-yDminusX)**2 +(zCminusX-zDminusX)**2)
+				return LPQ, LCD 
+		
+			elif points == '+x-y':
+				xPminusY, xCminusY = xP			, xC
+				yPminusY, yCminusY = 2*ey - yP	, 2*ey - yC
+				zPminusY, zCminusY = zP			, zC
+				xQminusY, xDminusY = xQ			, xD
+				yQminusY, yDminusY = -yQ		, -yD
+				zQminusY, zDminusY = zQ			, zD
+				LPQ = np.sqrt((xPminusY-xQminusY)**2 +(yPminusY-yQminusY)**2 +(zPminusY-zQminusY)**2)
+				LCD = np.sqrt((xCminusY-xDminusY)**2 +(yCminusY-yDminusY)**2 +(zCminusY-zDminusY)**2)
+				return LPQ, LCD 
+		
+			elif points == '-x-y':
+				xPminusXY, xCminusXY = 2*ex - xP, 2*ex - xC	
+				yPminusXY, yCminusXY = 2*ey - yP, 2*ey - yC	
+				zPminusXY, zCminusXY = zP		, zC
+				xQminusXY, xDminusXY = -xQ		, -xD
+				yQminusXY, yDminusXY = -yQ		, -yD
+				zQminusXY, zDminusXY = zQ		, zD
+				LPQ = np.sqrt((xPminusXY-xQminusXY)**2 +(yPminusXY-yQminusXY)**2 +(zPminusXY-zQminusXY)**2)
+				LCD = np.sqrt((xCminusXY-xDminusXY)**2 +(yCminusXY-yDminusXY)**2 +(zCminusXY-zDminusXY)**2)
+				return LPQ, LCD 
+
+		elif curtain == False:
+			xQ = kappa*w * (index_mPQ-1/2)/(2*mPQ + 1)
+			yD = w * (index_mCD-1/2)/(2*mCD + 1)
+		
+			if points == '+x+y':
+				xP, xC = xP, xC
+				yP, yC = yP, yC
+				zP, zC = zP, zC
+				xQ, xD = xQ, xD
+				yQ, yD = yQ, yD
+				zQ, zD = zQ, zD
+				LPQ = np.sqrt((xP-xQ)**2 +(yP-yQ)**2 +(zP-zQ)**2)
+				LCD = np.sqrt((xC-xD)**2 +(yC-yD)**2 +(zC-zD)**2)
+				return LPQ, LCD 
+		
+			elif points == '-x+y':
+				xPminusX ,xCminusX = 2*ex - xP	,2*ex - xC
+				yPminusX ,yCminusX = yP			,yC
+				zPminusX ,zCminusX = zP			,zC
+				xQminusX ,xDminusX = -xQ		,-xD
+				yQminusX ,yDminusX = yQ			,yD
+				zQminusX ,zDminusX = zQ			,zD
+				LPQ = np.sqrt((xPminusX-xQminusX)**2 +(yPminusX-yQminusX)**2 +(zPminusX-zQminusX)**2)
+				LCD = np.sqrt((xCminusX-xDminusX)**2 +(yCminusX-yDminusX)**2 +(zCminusX-zDminusX)**2)
+				return LPQ, LCD 
+		
+			elif points == '+x-y':
+				xPminusY, xCminusY = xP			, xC
+				yPminusY, yCminusY = 2*ey - yP	, 2*ey - yC
+				zPminusY, zCminusY = zP			, zC
+				xQminusY, xDminusY = xQ			, xD
+				yQminusY, yDminusY = -yQ		, -yD
+				zQminusY, zDminusY = zQ			, zD
+				LPQ = np.sqrt((xPminusY-xQminusY)**2 +(yPminusY-yQminusY)**2 +(zPminusY-zQminusY)**2)
+				LCD = np.sqrt((xCminusY-xDminusY)**2 +(yCminusY-yDminusY)**2 +(zCminusY-zDminusY)**2)
+				return LPQ, LCD 
+		
+			elif points == '-x-y':
+				xPminusXY, xCminusXY = 2*ex - xP, 2*ex - xC	
+				yPminusXY, yCminusXY = 2*ey - yP, 2*ey - yC	
+				zPminusXY, zCminusXY = zP		, zC
+				xQminusXY, xDminusXY = -xQ		, -xD
+				yQminusXY, yDminusXY = -yQ		, -yD
+				zQminusXY, zDminusXY = zQ		, zD
+				LPQ = np.sqrt((xPminusXY-xQminusXY)**2 +(yPminusXY-yQminusXY)**2 +(zPminusXY-zQminusXY)**2)
+				LCD = np.sqrt((xCminusXY-xDminusXY)**2 +(yCminusXY-yDminusXY)**2 +(zCminusXY-zDminusXY)**2)
+				return LPQ, LCD 
+			else:
+				raise ValueError
+		else:
+			raise ValueError		
 	else:
 		raise ValueError
 
