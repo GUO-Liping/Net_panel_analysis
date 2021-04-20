@@ -46,7 +46,13 @@ def func_ks(BC,**kwargs):
 		q_rope = kwargs['gamma_ave'] * kwargs['sigma_y']*kwargs['A']*kwargs['m']/(kwargs['l0_rope']/2)
 		A_rope = kwargs['F_rope']/kwargs['sigma_rope']
 		vr_max = (3*q_rope*kwargs['l0_rope']**4/(64*kwargs['E_rope']*A_rope))**(1/3)
-		l_ropeBmax = func_Lrope(l0_rope,vr_max) + kwargs['lb_max']
+		l_rope = func_Lrope(l0_rope,vr_max)
+		T_rx = kwargs['E_rope']*A_rope*(l_rope-l0_rope)/l0_rope
+		T_r = T_rx*np.sqrt(1+((q_rope*l0_rope)/(2*T_rx))**2)
+		delta_l_rope = T_rx*l0_rope/(kwargs['E_rope']*A_rope)  # 两边跨钢丝绳弹性伸长量
+		print('l0_rope=',l0_rope)
+		print('delta_l_rope=',delta_l_rope)
+		l_ropeBmax = l_rope + kwargs['lb_max'] + (2)*delta_l_rope  # 两边跨钢丝绳弹性伸长量
 		vr_maxB = func_vr(l_ropeBmax,l0_rope)
 		print('vr_maxB=',vr_maxB)
 		ks = kwargs['gamma_N2']*kwargs['sigma_y']*kwargs['A']/vr_maxB

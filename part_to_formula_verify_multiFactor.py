@@ -69,7 +69,7 @@ if __name__ == '__main__':
 	sigma_ropeCD = sigma_rope  # 钢丝绳应力强度
 	E_ropeCD = E_rope  # 钢丝绳弹性模量
 
-	lb_onePQ = 0.8  # 单个耗能器最大行程800mm
+	lb_onePQ = 1.0  # 单个耗能器最大行程800mm
 	b_numPQ = 2  # 边界钢丝绳一端串联的耗能器数量（耗能器连接方式：串联！！）
 	lb_maxPQ = 2*b_numPQ * lb_onePQ  # 边界钢丝绳两端串联的耗能器总伸长量
 
