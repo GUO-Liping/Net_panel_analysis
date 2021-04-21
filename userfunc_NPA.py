@@ -52,7 +52,7 @@ def func_ks(BC,**kwargs):
 		delta_l_rope = T_rx*l0_rope/(kwargs['E_rope']*A_rope)  # 两边跨钢丝绳弹性伸长量
 		print('l0_rope=',l0_rope)
 		print('delta_l_rope=',delta_l_rope)
-		l_ropeBmax = l_rope + kwargs['lb_max'] + (2)*delta_l_rope  # 两边跨钢丝绳弹性伸长量
+		l_ropeBmax = l_rope + kwargs['lb_max'] + (3)*delta_l_rope  # 两边跨钢丝绳弹性伸长量
 		vr_maxB = func_vr(l_ropeBmax,l0_rope)
 		print('vr_maxB=',vr_maxB)
 		ks = kwargs['gamma_N2']*kwargs['sigma_y']*kwargs['A']/vr_maxB

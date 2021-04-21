@@ -27,10 +27,10 @@ from userfunc_NPA import *
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
 	# MULTIPLE FACTORS INPUT
-	nw = 9  # 网环圈数
+	nw = 12  # 网环圈数
 	d = func_return_d(nw)  # 制作网环的钢丝直径
 	D = 0.3  # 单个网环直径
-	Rp = 1.374/2  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
+	Rp = 1.30/2  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
 	w = 5.5
 	# ns = 12
 	# w = (np.sqrt(2)*(ns-1)+1)*0.3+0.2-0.0455844122715714  # 矩形网片短边长度
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 	sigma_y = 1770e6  # 钢丝材料屈服强度
 
 	blockShape = 'polygon'  # blockShape must be 'Round' or 'Polygon'!
-	curtain = True  # 是否考虑窗帘效应，Ture为考虑，False为不考虑！
+	curtain = False  # 是否考虑窗帘效应，Ture为考虑，False为不考虑！
 	A = nw * np.pi*d**2/4  # 单肢截面面积
 	a = np.pi*D/(2*(1+kappa))  # 变形后网环短边长度
 	mPQ, mCD = func_m(blockShape,Rp,kappa,a)  # 坐标系中x（PQ）y(CD)方向力矢量个数
@@ -55,27 +55,27 @@ if __name__ == '__main__':
 	boundary = 'flexible'  # boundary must be 'Rigid' or 'Flexible'!
 	Rope1770Steel = {'3':5.29,'4':9.40,'5':14.7,'6':21.2,'7':28.8,'8':37.6,'9':47.6,'10':58.8,'11':71.1,'12':84.6,'13':99.3,'14':115,'16':150,'18':190,'20':235,'22':284,'24':338}
 	sigma_rope = 1770e6
-	E_rope = 150e9
+	E_rope = 94.118e9
 
-	d_ropePQ = 22
+	d_ropePQ = 20
 	F_ropePQ = 1000*Rope1770Steel[str(d_ropePQ)]  # 1000为换算国际单位
 	l0_ropePQ = kappa*w  # 钢丝绳初始长度
 	sigma_ropePQ = sigma_rope
 	E_ropePQ = E_rope  # 钢丝绳弹性模量
 
-	d_ropeCD = 22
+	d_ropeCD = 20
 	F_ropeCD = 1000*Rope1770Steel[str(d_ropeCD)]  # 1000为换算国际单位,钢丝绳破断力
 	l0_ropeCD = w  # 钢丝绳初始长度
 	sigma_ropeCD = sigma_rope  # 钢丝绳应力强度
 	E_ropeCD = E_rope  # 钢丝绳弹性模量
 
-	lb_onePQ = 1.0  # 单个耗能器最大行程800mm
-	b_numPQ = 2  # 边界钢丝绳一端串联的耗能器数量（耗能器连接方式：串联！！）
-	lb_maxPQ = 2*b_numPQ * lb_onePQ  # 边界钢丝绳两端串联的耗能器总伸长量
+	lb_onePQ = 0.8  # 单个耗能器最大行程800mm
+	b_numPQ = 4  # 边界钢丝绳两端串联的耗能器数量（耗能器连接方式：串联！！）
+	lb_maxPQ = b_numPQ * lb_onePQ  # 边界钢丝绳两端串联的耗能器总伸长量
 
 	lb_oneCD= 0.8  # 单个耗能器最大行程800mm
 	b_numCD = 10000  # 边界钢丝绳一端串联的耗能器数量（耗能器连接方式：串联！！）
-	lb_maxCD = 2*b_numCD * lb_oneCD  # 边界钢丝绳两端串联的耗能器总伸长量
+	lb_maxCD = b_numCD * lb_oneCD  # 边界钢丝绳两端串联的耗能器总伸长量
 
 	# 环链试验----------------------------------------------------------------------------------- #
   	# 将三环环链试验力位移数据转换为弹簧纤维单元中的纤维双折线E1,E2应力应变关系
@@ -96,8 +96,6 @@ if __name__ == '__main__':
 	dictBoundaryPQ = {**dictRigid,**dictRopePQ,**dictBrakerPQ,**dictFiber}  # PQ连接的钢丝绳参数字典
 	dictBoundaryCD = {**dictRigid,**dictRopeCD,**dictBrakerCD,**dictFiber}  # CD连接的钢丝绳参数字典
 
-	# ks_PQ = 21530
-	# ks_CD = 1
 	ks_PQ = func_ks(boundary,**dictBoundaryPQ)  # 弹簧刚度，指代刚性边界或柔性边界
 	ks_CD = func_ks(boundary,**dictBoundaryCD)  # 弹簧刚度，指代刚性边界或柔性边界
 	print('ks_PQ=',ks_PQ)
