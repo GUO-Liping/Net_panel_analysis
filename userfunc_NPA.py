@@ -55,7 +55,7 @@ def func_ks(BC,**kwargs):
 		l_ropeBmax = l_rope + kwargs['lb_max'] + (3)*delta_l_rope  # 两边跨钢丝绳弹性伸长量
 		vr_maxB = func_vr(l_ropeBmax,l0_rope)
 		print('vr_maxB=',vr_maxB)
-		ks = kwargs['gamma_N2']*kwargs['sigma_y']*kwargs['A']/vr_maxB
+		ks = kwargs['gamma_N2']*kwargs['sigma_y']*kwargs['A']/(vr_maxB)
 		return ks
 	else:
 		raise ValueError
@@ -362,7 +362,7 @@ def func_ringChianDataFit(nw,sigma_y,d):
 
     after_fit_delta_lN2 = np.polyval(poly_delta_lN2_func, nw)
 
-    chi_gammaN = 0.15
+    chi_gammaN = 0.18
     after_fit_gammaN2 = np.polyval(poly_gammaN2_func, nw)+chi_gammaN
 
     '''
