@@ -27,7 +27,7 @@ from userfunc_NPA import *
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
 	# MULTIPLE FACTORS INPUT
-	nw = 9  # 网环圈数
+	nw = 5  # 网环圈数
 	d = func_return_d(nw)  # 制作网环的钢丝直径
 	D = 0.3  # 单个网环直径
 	Rp = 1.0/2  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
 	blockShape = 'round'  # blockShape must be 'Round' or 'Polygon'!
 	curtain = False  # 是否考虑窗帘效应，True为考虑，False为不考虑！
-	boundary = 'rigid'  # boundary must be 'Rigid' or 'Flexible'!
+	boundary = 'Flexible'  # boundary must be 'Rigid' or 'Flexible'!
 
 	A = nw * np.pi*d**2/4  # 单肢截面面积
 	a = np.pi*D/(2*(1+kappa))  # 变形后网环短边长度
@@ -97,11 +97,11 @@ if __name__ == '__main__':
 	dictBoundaryPQ = {**dictRigid,**dictRopePQ,**dictBrakerPQ,**dictFiber}  # PQ连接的钢丝绳参数字典
 	dictBoundaryCD = {**dictRigid,**dictRopeCD,**dictBrakerCD,**dictFiber}  # CD连接的钢丝绳参数字典
 
-	#ks_PQ = func_ks(boundary,**dictBoundaryPQ)  # 弹簧刚度，指代刚性边界或柔性边界
-	#ks_CD = func_ks(boundary,**dictBoundaryCD)  # 弹簧刚度，指代刚性边界或柔性边界
-	ks11 = 2**2
-	ks_PQ = ks11
-	ks_CD = ks11
+	ks_PQ = func_ks(boundary,**dictBoundaryPQ)  # 弹簧刚度，指代刚性边界或柔性边界
+	ks_CD = func_ks(boundary,**dictBoundaryCD)  # 弹簧刚度，指代刚性边界或柔性边界
+	#ks11 = 50000000
+	#ks_PQ = ks11
+	#ks_CD = ks11
 	print('ks_PQ=',ks_PQ)
 	print('ks_CD=',ks_CD)
 	func_inputCheck(nw,d,D,Rp,w,kappa,ks_PQ,ks_CD,ls0_PQ,ls0_CD,ex,ey)  # 检查参数输入有无错误
