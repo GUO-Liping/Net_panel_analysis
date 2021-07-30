@@ -217,4 +217,3 @@ if __name__ == '__main__':
 	print('Displacement = ', format(H_net, '.3f'), 'm')
 	print('Force = ', format(F_net/1000, '.3f'), 'kN')
 	print('Energy = ', format(E_net/1000, '.3f'), 'kJ')
-
