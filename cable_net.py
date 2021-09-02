@@ -25,34 +25,25 @@ Remark: 影响计算结果的细节因素：
 import numpy as np
 from userfunc_NPA import *
 
-# 参数输入----------------------------------------------------------------------------------- #
-if __name__ == '__main__':
-
-	w = 3.0
-	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
-	a = 0.3
-	m = 2*func_round(Rp/a)
+def func_cablenet_xyz(theta, H, w, Rp, Rs, a, m):
 	i_arr = np.arange(1,m+0.1,step=1)
-	H = 0
 
-	xP_arr = a/2*(i_arr - (m+1)/2)
+	xP_arr = a/2*(2*i_arr - m - 1)
 	yP_arr = np.sqrt(Rp**2 - xP_arr**2)
 	zP_arr = H*np.ones_like(xP_arr)
 
-	theta = np.pi/4
-
 	theta_1 = np.arcsin(xP_arr[-1]/(w/np.sqrt(2)))
 	theta_2 = np.arccos(xP_arr[-1]/(w/np.sqrt(2)))
+	if theta>=0 and theta<theta_1:
+		m1 = int(m/2 - 1/2*func_round(np.sqrt(2)*w*np.sin(theta)/a))
 
-	if theta>0 and theta<theta_1:
-		m1 = m/2 - 1/2*func_round(np.sqrt(2)*w*np.sin(theta)/a)
 		i1_arr = np.arange(1,m1+0.1,step=1)
 		i2_arr = np.arange(m1+1,m+0.1,step=1)
 		yQ1_arr = w/np.sqrt(2)*np.cos(theta) - abs(xP_arr[0] +w/np.sqrt(2)*np.sin(theta))*np.tan(np.pi/4+theta) + a*(i1_arr-1)*np.tan(np.pi/4+theta)
 		yQ2_arr = w/np.sqrt(2)*np.cos(theta) - abs(xP_arr[m1]+w/np.sqrt(2)*np.sin(theta))*np.tan(np.pi/4-theta) - a*(i2_arr-m1-1)*np.tan(np.pi/4-theta)
 	
 		xQ_arr = xP_arr
-		yQ_arr = np.concatenate(yQ1_arr,yQ2_arr)
+		yQ_arr = np.concatenate((yQ1_arr,yQ2_arr))
 		zQ_arr = np.zeros_like(xP_arr)
 
 	elif theta>=theta_1 and theta<=theta_2:
@@ -62,15 +53,44 @@ if __name__ == '__main__':
 
 	elif theta>theta_2 and theta<np.pi/2:
 		m1 = m/2 - 1/2*func_round(np.sqrt(2)*w*np.cos(theta)/a)
+
 		i1_arr = np.arange(1,m1+0.1,step=1)
 		i2_arr = np.arange(m1+1,m+0.1,step=1)
 		yQ1_arr = w/np.sqrt(2)*np.sin(theta) - abs(xP_arr[0] -w/np.sqrt(2)*np.cos(theta))*np.tan(theta-np.pi/4) + a*(i1_arr-1)*np.tan(theta-np.pi/4)
 		yQ2_arr = w/np.sqrt(2)*np.sin(theta) - abs(xP_arr[m1]-w/np.sqrt(2)*np.cos(theta))*np.tan(3*np.pi/4-theta) - a*(i2_arr-m1-1)*np.tan(3*np.pi/4-theta)
 			
 		xQ_arr = xP_arr
-		yQ_arr1 = np.concatenate(yQ1_arr,yQ2_arr)
+		yQ_arr1 = np.concatenate((yQ1_arr,yQ2_arr))
 		zQ_arr = np.zeros_like(xP_arr)
+	else:
+		raise ValueError
 
-	print('xP_arr=',xP_arr)
-	print('yP_arr=',yP_arr)
-	print('zP_arr=',zP_arr)
+	Lu_PQ = np.sqrt((xQ_arr-xP_arr)**2 + (yQ_arr-yP_arr)**2 + (zQ_arr-zP_arr)**2)
+	Ld_PQ = Lu_PQ[::-1]
+
+	if H == 0:
+		Lc_PQ = 2*yP_arr
+		print('Lc_PQ=',Lc_PQ)
+	else:
+		Lc_PQ = 2*np.sqrt(Rs**2-xP_arr**2) * np.arctan(np.sqrt(Rp**2-xP_arr**2)/np.sqrt(Rs**2-Rp**2))		
+		print('Lc_PQ=',Lc_PQ)
+
+	return Lu_PQ, Lc_PQ, Ld_PQ
+
+
+# 参数输入----------------------------------------------------------------------------------- #
+if __name__ == '__main__':
+
+	w = 3.0
+	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
+	Rs = 1.2
+	a = 0.3
+	m = 2*func_round(Rp/a)
+	theta = 0.25*np.pi
+
+	Lu_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a, m)[0]
+	Lc_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a, m)[1]
+	Ld_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a, m)[2]
+
+	L_PQ0 = Lu_PQ0 + Lc_PQ0 + Ld_PQ0
+	print('L_PQ0=',L_PQ0)
