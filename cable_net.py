@@ -78,6 +78,25 @@ def func_cablenet_xyz(theta, H, w, Rp, Rs, a, m):
 	return Lu_PQ, Lc_PQ, Ld_PQ
 
 
+
+def func_xPlus_y():
+
+	xP_arr = a/2*(2*i_arr - m - 1)
+	yP_arr = np.sqrt(Rp**2 - xP_arr**2)
+	zP_arr = H*np.ones_like(xP_arr)
+	pass
+
+def func_xPlus_y():
+	pass
+
+def func_xMinus_y():
+	pass
+
+def func_x_yPlus():
+	pass
+
+def func_x_yMinus():
+	pass
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
 
