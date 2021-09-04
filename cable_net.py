@@ -78,13 +78,122 @@ def func_cablenet_xyz(theta, H, w, Rp, Rs, a, m):
 	return Lu_PQ, Lc_PQ, Ld_PQ
 
 
+def func_xPlus_y(x1,y1,x2,y2,x3,y3,x4,y4):
 
-def func_xPlus_y():
+	xP_PlusY = a_PlusY/2*(2*i_PlusY - m_PlusY - 1)
+	yP_PlusY = np.sqrt(Rp**2 - xP_PlusY**2)
+	zP_PlusY = H*np.ones_like(xP_PlusY)
+	
+	xQ_PlusY,xQ_MinusY = xP_PlusY,xP_PlusY
+	zQ_PlusY,zQ_MinusY = np.zeros_like(xP_PlusY),np.zeros_like(xP_PlusY)
 
-	xP_arr = a/2*(2*i_arr - m - 1)
-	yP_arr = np.sqrt(Rp**2 - xP_arr**2)
-	zP_arr = H*np.ones_like(xP_arr)
+	for i in range(len(xP_PlusY)):
+
+		if (xP_PlusY[i]>x1 and xP_PlusY[i]<x2) or (xP_PlusY[i]<x1 and xP_PlusY[i]>x2):
+			yQ_Y[i] = y1 + (xP_PlusY[i]-x1)*(y2-y1)/(x2-x1)
+			if yQ_Y[i]>yP_PlusY[i]:
+				yQ_PlusY = yQ_Y[i]
+			elif yQ_Y[i]<yP_MinusY[i]:
+				yQ_MinusY = yQ_Y[i]
+			else:
+				raise ValueError
+
+		elif (xP_PlusY[i]>x2 and xP_PlusY[i]<x3) or (xP_PlusY[i]<x2 and xP_PlusY[i]>x3):
+			yQ_Y[i] =  y2 + (xP_PlusY-x2)*(y3-y2)/(x3-x2)
+			if yQ_Y[i]>yP_PlusY[i]:
+				yQ_PlusY = yQ_Y[i]
+			elif yQ_Y[i]<yP_MinusY[i]:
+				yQ_MinusY = yQ_Y[i]
+			else:
+				raise ValueError
+
+		elif (xP_PlusY[i]>x3 and xP_PlusY[i]<x4) or (xP_PlusY[i]<x3 and xP_PlusY[i]>x4):
+			yQ_Y[i] =  y3 + (xP_PlusY-x3)*(y4-y3)/(x4-x3)
+			if yQ_Y[i]>yP_PlusY[i]:
+				yQ_PlusY = yQ_Y[i]
+			elif yQ_Y[i]<yP_MinusY[i]:
+				yQ_MinusY = yQ_Y[i]
+			else:
+				raise ValueError
+
+		elif (xP_PlusY[i]>x4 and xP_PlusY[i]<x1) or (xP_PlusY[i]<x4 and xP_PlusY[i]>x1):
+			yQ_Y[i] =  y4 + (xP_PlusY-x4)*(y1-y4)/(x1-x4)
+			if yQ_Y[i]>yP_PlusY[i]:
+				yQ_PlusY = yQ_Y[i]
+			elif yQ_Y[i]<yP_MinusY[i]:
+				yQ_MinusY = yQ_Y[i]
+			else:
+				raise ValueError
+
+		else:
+			raise ValueError
+
+	yQ_PlusX,yQ_MinusX = yP_PlusX,yP_PlusX
+	zQ_PlusX,zQ_MinusX = np.zeros_like(yP_PlusX),np.zeros_like(yP_PlusX)
+
+	for j in range(len(yP_PlusX)):
+		if (yP_PlusX[i]>y1 and yP_PlusX[i]<y2) or (yP_PlusX[i]<y1 and yP_PlusX[i]>y2):
+			xQ_X[i] = x1 + (yP_PlusX[i] - y1)*(x2-x1)/(y2-y1)
+			if xQ_X[i] > xP_PlusX[i]:
+				xQ_PlusX[i] = xQ_X[i]
+			elif xQ_X[i] < xP_MinusX[i]:
+				xQ_MinusX[i] = xQ_X[i]
+			else:
+				raise ValueError
+		elif (yP_PlusX[i]>y2 and yP_PlusX[i]<y3) or (yP_PlusX[i]<y2 and yP_PlusX[i]>y3):
+			xQ_X[i] = x2 + (yP_PlusX[i] - y2)*(x3-x2)/(y3-y2)
+			if xQ_X[i] > xP_PlusX[i]:
+				xQ_PlusX[i] = xQ_X[i]
+			elif xQ_X[i] < xP_MinusX[i]:
+				xQ_MinusX[i] = xQ_X[i]
+			else:
+				raise ValueError
+
+		elif (yP_PlusX[i]>y3 and yP_PlusX[i]<y4) or (yP_PlusX[i]<y3 and yP_PlusX[i]>y4):
+			xQ_X[i] = x3 + (yP_PlusX[i] - y3)*(x4-x3)/(y4-y3)
+			if xQ_X[i] > xP_PlusX[i]:
+				xQ_PlusX[i] = xQ_X[i]
+			elif xQ_X[i] < xP_MinusX[i]:
+				xQ_MinusX[i] = xQ_X[i]
+			else:
+				raise ValueError
+
+		elif (yP_PlusX[i]>y4 and yP_PlusX[i]<y1) or (yP_PlusX[i]<y4 and yP_PlusX[i]>y1):
+			xQ_X[i] =  x4 + (yP_PlusX[i] - y4)*(x1-x4)/(y1-y4)
+			if xQ_X[i] > xP_PlusX[i]:
+				xQ_PlusX[i] = xQ_X[i]
+			elif xQ_X[i] < xP_MinusX[i]:
+				xQ_MinusX[i] = xQ_X[i]
+			else:
+				raise ValueError
+
+		else:
+			raise ValueError
+	
+	xP_MinusY = xP_PlusY
+	yP_MinusY = -yP_PlusY
+	zP_MinusY = zP_PlusY
+
+	yP_PlusX = a_PlusX/2*(2*i_PlusX - m_PlusX - 1)
+	xP_PlusX = np.sqrt(Rp**2 - yP_PlusX**2)
+	zP_PlusX = H*np.ones_like(yP_PlusX)
+
+	yP_MinusX = yP_PlusX
+	xP_MinusX = -xP_PlusX
+	zP_MinusX = zP_PlusX
+
+	y_line12 = y1 + (x_line12-x1)*(y2-y1)/(x2-x1)
+	y_line23 = y2 + (x_line23-x2)*(y3-y2)/(x3-x2)
+	y_line34 = y3 + (x_line34-x3)*(y4-y3)/(x4-x3)
+	y_line41 = y4 + (x_line41-x4)*(y1-y4)/(x1-x4)
+
+	x_line12 = x1 + (y_line12 - y1)*(x2-x1)/(y2-y1) 
+	x_line23 = x2 + (y_line23 - y2)*(x3-x2)/(y3-y2) 
+	x_line34 = x3 + (y_line34 - y3)*(x4-x3)/(y4-y3) 
+	x_line41 = x4 + (y_line41 - y4)*(x1-x4)/(y1-y4)
+
 	pass
+
 
 def func_xPlus_y():
 	pass
