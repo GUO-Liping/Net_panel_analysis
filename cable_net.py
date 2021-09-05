@@ -80,6 +80,7 @@ def func_cablenet_xyz(theta, H, w, Rp, Rs, a, m):
 
 def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusY,m_PlusY,a_PlusX,m_PlusX,H):
 	i_PlusY = np.arange(1,m_PlusY+0.1,step=1)
+	
 	xP_PlusY = a_PlusY/2*(2*i_PlusY - m_PlusY - 1)
 	yP_PlusY = np.sqrt(Rp**2 - xP_PlusY**2)
 	zP_PlusY = H*np.ones_like(xP_PlusY)
@@ -102,36 +103,41 @@ def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusY,m_PlusY,a_PlusX,m_PlusX,H):
 				yQ_MinusY[i] = yQ_Y
 			else:
 				raise ValueError
-
-		elif (xP_PlusY[i]>x2 and xP_PlusY[i]<x3) or (xP_PlusY[i]<x2 and xP_PlusY[i]>x3):
-			yQ_Y =  y2 + (xP_PlusY-x2)*(y3-y2)/(x3-x2)
-			if yQ_Y>yP_PlusY[i]:
-				yQ_PlusY[i] = yQ_Y
-			elif yQ_Y<yP_MinusY[i]:
-				yQ_MinusY[i] = yQ_Y
-			else:
-				raise ValueError
-
-		elif (xP_PlusY[i]>x3 and xP_PlusY[i]<x4) or (xP_PlusY[i]<x3 and xP_PlusY[i]>x4):
-			yQ_Y =  y3 + (xP_PlusY-x3)*(y4-y3)/(x4-x3)
-			if yQ_Y>yP_PlusY[i]:
-				yQ_PlusY[i] = yQ_Y
-			elif yQ_Y<yP_MinusY[i]:
-				yQ_MinusY[i] = yQ_Y
-			else:
-				raise ValueError
-
-		elif (xP_PlusY[i]>x4 and xP_PlusY[i]<x1) or (xP_PlusY[i]<x4 and xP_PlusY[i]>x1):
-			yQ_Y =  y4 + (xP_PlusY-x4)*(y1-y4)/(x1-x4)
-			if yQ_Y>yP_PlusY[i]:
-				yQ_PlusY[i] = yQ_Y
-			elif yQ_Y<yP_MinusY[i]:
-				yQ_MinusY[i] = yQ_Y
-			else:
-				raise ValueError
-
 		else:
-			raise ValueError
+			pass
+
+		if (xP_PlusY[i]>x2 and xP_PlusY[i]<x3) or (xP_PlusY[i]<x2 and xP_PlusY[i]>x3):
+			yQ_Y =  y2 + (xP_PlusY[i]-x2)*(y3-y2)/(x3-x2)
+			if yQ_Y>yP_PlusY[i]:
+				yQ_PlusY[i] = yQ_Y
+			elif yQ_Y<yP_MinusY[i]:
+				yQ_MinusY[i] = yQ_Y
+			else:
+				raise ValueError
+		else:
+			pass
+
+		if (xP_PlusY[i]>x3 and xP_PlusY[i]<x4) or (xP_PlusY[i]<x3 and xP_PlusY[i]>x4):
+			yQ_Y =  y3 + (xP_PlusY[i]-x3)*(y4-y3)/(x4-x3)
+			if yQ_Y>yP_PlusY[i]:
+				yQ_PlusY[i] = yQ_Y
+			elif yQ_Y<yP_MinusY[i]:
+				yQ_MinusY[i] = yQ_Y
+			else:
+				raise ValueError
+		else:
+			pass
+
+		if (xP_PlusY[i]>x4 and xP_PlusY[i]<x1) or (xP_PlusY[i]<x4 and xP_PlusY[i]>x1):
+			yQ_Y =  y4 + (xP_PlusY[i]-x4)*(y1-y4)/(x1-x4)
+			if yQ_Y>yP_PlusY[i]:
+				yQ_PlusY[i] = yQ_Y
+			elif yQ_Y<yP_MinusY[i]:
+				yQ_MinusY[i] = yQ_Y
+			else:
+				raise ValueError
+		else:
+			pass
 
 	i_PlusX = np.arange(1,m_PlusX+0.1,step=1)
 	yP_PlusX = a_PlusX/2*(2*i_PlusX - m_PlusX - 1)
@@ -147,43 +153,53 @@ def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusY,m_PlusY,a_PlusX,m_PlusX,H):
 	zQ_PlusX,zQ_MinusX = np.zeros_like(yP_PlusX),np.zeros_like(yP_PlusX)
 
 	for j in range(len(yP_PlusX)):
-		if (yP_PlusX[i]>y1 and yP_PlusX[i]<y2) or (yP_PlusX[i]<y1 and yP_PlusX[i]>y2):
-			xQ_X[i] = x1 + (yP_PlusX[i] - y1)*(x2-x1)/(y2-y1)
-			if xQ_X[i] > xP_PlusX[i]:
-				xQ_PlusX[i] = xQ_X[i]
-			elif xQ_X[i] < xP_MinusX[i]:
-				xQ_MinusX[i] = xQ_X[i]
+		if (yP_PlusX[j]>y1 and yP_PlusX[j]<y2) or (yP_PlusX[j]<y1 and yP_PlusX[j]>y2):
+			xQ_X = x1 + (yP_PlusX[j] - y1)*(x2-x1)/(y2-y1)
+			if xQ_X > xP_PlusX[j]:
+				xQ_PlusX[j] = xQ_X
+			elif xQ_X < xP_MinusX[j]:
+				xQ_MinusX[j] = xQ_X
 			else:
 				raise ValueError
-		elif (yP_PlusX[i]>y2 and yP_PlusX[i]<y3) or (yP_PlusX[i]<y2 and yP_PlusX[i]>y3):
-			xQ_X = x2 + (yP_PlusX[i] - y2)*(x3-x2)/(y3-y2)
-			if xQ_X > xP_PlusX[i]:
-				xQ_PlusX[i] = xQ_X
-			elif xQ_X < xP_MinusX[i]:
-				xQ_MinusX[i] = xQ_X
-			else:
-				raise ValueError
-
-		elif (yP_PlusX[i]>y3 and yP_PlusX[i]<y4) or (yP_PlusX[i]<y3 and yP_PlusX[i]>y4):
-			xQ_X[i] = x3 + (yP_PlusX[i] - y3)*(x4-x3)/(y4-y3)
-			if xQ_X > xP_PlusX[i]:
-				xQ_PlusX[i] = xQ_X
-			elif xQ_X < xP_MinusX[i]:
-				xQ_MinusX[i] = xQ_X
-			else:
-				raise ValueError
-
-		elif (yP_PlusX[i]>y4 and yP_PlusX[i]<y1) or (yP_PlusX[i]<y4 and yP_PlusX[i]>y1):
-			xQ_X[i] =  x4 + (yP_PlusX[i] - y4)*(x1-x4)/(y1-y4)
-			if xQ_X > xP_PlusX[i]:
-				xQ_PlusX[i] = xQ_X
-			elif xQ_X < xP_MinusX[i]:
-				xQ_MinusX[i] = xQ_X
-			else:
-				raise ValueError
-
 		else:
-			raise ValueError
+			pass
+
+		if (yP_PlusX[j]>y2 and yP_PlusX[j]<y3) or (yP_PlusX[j]<y2 and yP_PlusX[j]>y3):
+			xQ_X = x2 + (yP_PlusX[j] - y2)*(x3-x2)/(y3-y2)
+			if xQ_X > xP_PlusX[j]:
+				xQ_PlusX[j] = xQ_X
+			elif xQ_X < xP_MinusX[j]:
+				xQ_MinusX[j] = xQ_X
+			else:
+				raise ValueError
+		else:
+			pass
+
+		if (yP_PlusX[j]>y3 and yP_PlusX[j]<y4) or (yP_PlusX[j]<y3 and yP_PlusX[j]>y4):
+			xQ_X = x3 + (yP_PlusX[j] - y3)*(x4-x3)/(y4-y3)
+			if xQ_X > xP_PlusX[j]:
+				xQ_PlusX[j] = xQ_X
+			elif xQ_X < xP_MinusX[j]:
+				xQ_MinusX[j] = xQ_X
+			else:
+				raise ValueError
+		else:
+			pass
+
+		if (yP_PlusX[j]>y4 and yP_PlusX[j]<y1) or (yP_PlusX[j]<y4 and yP_PlusX[j]>y1):
+			xQ_X =  x4 + (yP_PlusX[j] - y4)*(x1-x4)/(y1-y4)
+			if xQ_X > xP_PlusX[j]:
+				xQ_PlusX[j] = xQ_X
+			elif xQ_X < xP_MinusX[j]:
+				xQ_MinusX[j] = xQ_X
+			else:
+				raise ValueError
+		else:
+			pass
+
+
+	print('xQ_PlusX=',xQ_PlusX)
+	print('xQ_MinusX=',xQ_MinusX)
 
 	length_PQ_PlusX = np.sqrt((xP_PlusX-xQ_PlusX)**2+(yP_PlusX-yQ_PlusX)**2+(zP_PlusX-zQ_PlusX)**2)
 	length_PQ_PlusY = np.sqrt((xP_PlusY-xQ_PlusY)**2+(yP_PlusY-yQ_PlusY)**2+(zP_PlusY-zQ_PlusY)**2)
@@ -223,22 +239,23 @@ if __name__ == '__main__':
 	w = 3.0
 	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
 	Rs = 1.2
+
 	a_DireX = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
 	a_DireY = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
 	H0 = 0  # 网片初始位置（初始高度）
 	m_DireX = 2*func_round(Rp/a_DireX)  # 本程序可以用于计算两侧不同数量的力矢量
 	m_DireY = 2*func_round(Rp/a_DireY)  # 本程序可以用于计算两侧不同数量的力矢量
 
-	theta = 0.25*np.pi
-	x1, y1 = 1.5, 1.5
-	x2, y2 = -1.5, 1.5
-	x3, y3 = -1.5, -1.5
-	x4, y4 = 1.5, -1.5
+	theta = 0*np.pi
+	x1, y1 = 1.5*np.sqrt(2), 0
+	x2, y2 = 0, 1.5*np.sqrt(2)
+	x3, y3 = -1.5*np.sqrt(2), 0
+	x4, y4 = 0, -1.5*np.sqrt(2)
 
 	length_PQ_PlusX  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[0]
-	length_PQ_MinusX = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[0]
-	length_PQ_PlusY  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[0]
-	length_PQ_MinusY = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[0]
+	length_PQ_MinusX = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[1]
+	length_PQ_PlusY  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[2]
+	length_PQ_MinusY = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[3]
 
 	length_Arc_DireX = func_lengthArc(H0,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
 	length_Arc_DireY = func_lengthArc(H0,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
@@ -250,4 +267,4 @@ if __name__ == '__main__':
 	L_PQ0 = Lu_PQ0 + Lc_PQ0 + Ld_PQ0
 	L_DireX = length_PQ_PlusX + length_PQ_MinusX + length_Arc_DireX
 	print('L_PQ0=',Lu_PQ0)
-	print('L_DireX=',length_PQ_MinusX)
+	print('length_PQ_PlusX=',length_PQ_PlusX)
