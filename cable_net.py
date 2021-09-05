@@ -260,11 +260,26 @@ if __name__ == '__main__':
 	length_Arc_DireX = func_lengthArc(H0,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
 	length_Arc_DireY = func_lengthArc(H0,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
 
+	########################################################################
+	# 本部分代码用于校准另一种方法
 	Lu_PQ0 = func_cablenet_xyz(theta, H0, w, Rp, Rs, a_DireY, m_DireY)[0]
 	Lc_PQ0 = func_cablenet_xyz(theta, H0, w, Rp, Rs, a_DireY, m_DireY)[1]
 	Ld_PQ0 = func_cablenet_xyz(theta, H0, w, Rp, Rs, a_DireY, m_DireY)[2]
-
 	L_PQ0 = Lu_PQ0 + Lc_PQ0 + Ld_PQ0
+	########################################################################
+
 	L_DireX = length_PQ_PlusX + length_PQ_MinusX + length_Arc_DireX
+	L_DireY = length_PQ_PlusY + length_PQ_MinusY + length_Arc_DireY
+
+	min_xi = np.argmin(L_DireX)
+	min_yi = np.argmin(L_DireY)
+
+	if L_DireX[min_xi] > L_DireY[min_xi]:
+		min_L0 = L_DireY[min_xi]
+	elif L_DireX[min_xi] < L_DireY[min_xi]:
+		min_L0 = L_DireX[min_xi]
+	else:
+		raise ValueError
+
 	print('L_PQ0=',Lu_PQ0)
 	print('length_PQ_PlusX=',length_PQ_PlusX)
