@@ -78,57 +78,72 @@ def func_cablenet_xyz(theta, H, w, Rp, Rs, a, m):
 	return Lu_PQ, Lc_PQ, Ld_PQ
 
 
-def func_xPlus_y(x1,y1,x2,y2,x3,y3,x4,y4):
-
+def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusY,m_PlusY,a_PlusX,m_PlusX,H):
+	i_PlusY = np.arange(1,m_PlusY+0.1,step=1)
 	xP_PlusY = a_PlusY/2*(2*i_PlusY - m_PlusY - 1)
 	yP_PlusY = np.sqrt(Rp**2 - xP_PlusY**2)
 	zP_PlusY = H*np.ones_like(xP_PlusY)
-	
+
+	xP_MinusY = xP_PlusY
+	yP_MinusY = -yP_PlusY
+	zP_MinusY = zP_PlusY
+
 	xQ_PlusY,xQ_MinusY = xP_PlusY,xP_PlusY
+	yQ_PlusY,yQ_MinusY =  np.zeros_like(xP_PlusY),np.zeros_like(xP_PlusY)
 	zQ_PlusY,zQ_MinusY = np.zeros_like(xP_PlusY),np.zeros_like(xP_PlusY)
 
 	for i in range(len(xP_PlusY)):
 
 		if (xP_PlusY[i]>x1 and xP_PlusY[i]<x2) or (xP_PlusY[i]<x1 and xP_PlusY[i]>x2):
-			yQ_Y[i] = y1 + (xP_PlusY[i]-x1)*(y2-y1)/(x2-x1)
-			if yQ_Y[i]>yP_PlusY[i]:
-				yQ_PlusY = yQ_Y[i]
-			elif yQ_Y[i]<yP_MinusY[i]:
-				yQ_MinusY = yQ_Y[i]
+			yQ_Y = y1 + (xP_PlusY[i]-x1)*(y2-y1)/(x2-x1)
+			if yQ_Y>yP_PlusY[i]:
+				yQ_PlusY[i] = yQ_Y
+			elif yQ_Y<yP_MinusY[i]:
+				yQ_MinusY[i] = yQ_Y
 			else:
 				raise ValueError
 
 		elif (xP_PlusY[i]>x2 and xP_PlusY[i]<x3) or (xP_PlusY[i]<x2 and xP_PlusY[i]>x3):
-			yQ_Y[i] =  y2 + (xP_PlusY-x2)*(y3-y2)/(x3-x2)
-			if yQ_Y[i]>yP_PlusY[i]:
-				yQ_PlusY = yQ_Y[i]
-			elif yQ_Y[i]<yP_MinusY[i]:
-				yQ_MinusY = yQ_Y[i]
+			yQ_Y =  y2 + (xP_PlusY-x2)*(y3-y2)/(x3-x2)
+			if yQ_Y>yP_PlusY[i]:
+				yQ_PlusY[i] = yQ_Y
+			elif yQ_Y<yP_MinusY[i]:
+				yQ_MinusY[i] = yQ_Y
 			else:
 				raise ValueError
 
 		elif (xP_PlusY[i]>x3 and xP_PlusY[i]<x4) or (xP_PlusY[i]<x3 and xP_PlusY[i]>x4):
-			yQ_Y[i] =  y3 + (xP_PlusY-x3)*(y4-y3)/(x4-x3)
-			if yQ_Y[i]>yP_PlusY[i]:
-				yQ_PlusY = yQ_Y[i]
-			elif yQ_Y[i]<yP_MinusY[i]:
-				yQ_MinusY = yQ_Y[i]
+			yQ_Y =  y3 + (xP_PlusY-x3)*(y4-y3)/(x4-x3)
+			if yQ_Y>yP_PlusY[i]:
+				yQ_PlusY[i] = yQ_Y
+			elif yQ_Y<yP_MinusY[i]:
+				yQ_MinusY[i] = yQ_Y
 			else:
 				raise ValueError
 
 		elif (xP_PlusY[i]>x4 and xP_PlusY[i]<x1) or (xP_PlusY[i]<x4 and xP_PlusY[i]>x1):
-			yQ_Y[i] =  y4 + (xP_PlusY-x4)*(y1-y4)/(x1-x4)
-			if yQ_Y[i]>yP_PlusY[i]:
-				yQ_PlusY = yQ_Y[i]
-			elif yQ_Y[i]<yP_MinusY[i]:
-				yQ_MinusY = yQ_Y[i]
+			yQ_Y =  y4 + (xP_PlusY-x4)*(y1-y4)/(x1-x4)
+			if yQ_Y>yP_PlusY[i]:
+				yQ_PlusY[i] = yQ_Y
+			elif yQ_Y<yP_MinusY[i]:
+				yQ_MinusY[i] = yQ_Y
 			else:
 				raise ValueError
 
 		else:
 			raise ValueError
 
+	i_PlusX = np.arange(1,m_PlusX+0.1,step=1)
+	yP_PlusX = a_PlusX/2*(2*i_PlusX - m_PlusX - 1)
+	xP_PlusX = np.sqrt(Rp**2 - yP_PlusX**2)
+	zP_PlusX = H*np.ones_like(yP_PlusX)
+
+	yP_MinusX = yP_PlusX
+	xP_MinusX = -xP_PlusX
+	zP_MinusX = zP_PlusX
+
 	yQ_PlusX,yQ_MinusX = yP_PlusX,yP_PlusX
+	xQ_PlusX,xQ_MinusX = np.zeros_like(yP_PlusX),np.zeros_like(yP_PlusX)
 	zQ_PlusX,zQ_MinusX = np.zeros_like(yP_PlusX),np.zeros_like(yP_PlusX)
 
 	for j in range(len(yP_PlusX)):
@@ -141,84 +156,98 @@ def func_xPlus_y(x1,y1,x2,y2,x3,y3,x4,y4):
 			else:
 				raise ValueError
 		elif (yP_PlusX[i]>y2 and yP_PlusX[i]<y3) or (yP_PlusX[i]<y2 and yP_PlusX[i]>y3):
-			xQ_X[i] = x2 + (yP_PlusX[i] - y2)*(x3-x2)/(y3-y2)
-			if xQ_X[i] > xP_PlusX[i]:
-				xQ_PlusX[i] = xQ_X[i]
-			elif xQ_X[i] < xP_MinusX[i]:
-				xQ_MinusX[i] = xQ_X[i]
+			xQ_X = x2 + (yP_PlusX[i] - y2)*(x3-x2)/(y3-y2)
+			if xQ_X > xP_PlusX[i]:
+				xQ_PlusX[i] = xQ_X
+			elif xQ_X < xP_MinusX[i]:
+				xQ_MinusX[i] = xQ_X
 			else:
 				raise ValueError
 
 		elif (yP_PlusX[i]>y3 and yP_PlusX[i]<y4) or (yP_PlusX[i]<y3 and yP_PlusX[i]>y4):
 			xQ_X[i] = x3 + (yP_PlusX[i] - y3)*(x4-x3)/(y4-y3)
-			if xQ_X[i] > xP_PlusX[i]:
-				xQ_PlusX[i] = xQ_X[i]
-			elif xQ_X[i] < xP_MinusX[i]:
-				xQ_MinusX[i] = xQ_X[i]
+			if xQ_X > xP_PlusX[i]:
+				xQ_PlusX[i] = xQ_X
+			elif xQ_X < xP_MinusX[i]:
+				xQ_MinusX[i] = xQ_X
 			else:
 				raise ValueError
 
 		elif (yP_PlusX[i]>y4 and yP_PlusX[i]<y1) or (yP_PlusX[i]<y4 and yP_PlusX[i]>y1):
 			xQ_X[i] =  x4 + (yP_PlusX[i] - y4)*(x1-x4)/(y1-y4)
-			if xQ_X[i] > xP_PlusX[i]:
-				xQ_PlusX[i] = xQ_X[i]
-			elif xQ_X[i] < xP_MinusX[i]:
-				xQ_MinusX[i] = xQ_X[i]
+			if xQ_X > xP_PlusX[i]:
+				xQ_PlusX[i] = xQ_X
+			elif xQ_X < xP_MinusX[i]:
+				xQ_MinusX[i] = xQ_X
 			else:
 				raise ValueError
 
 		else:
 			raise ValueError
-	
-	xP_MinusY = xP_PlusY
-	yP_MinusY = -yP_PlusY
-	zP_MinusY = zP_PlusY
 
-	yP_PlusX = a_PlusX/2*(2*i_PlusX - m_PlusX - 1)
-	xP_PlusX = np.sqrt(Rp**2 - yP_PlusX**2)
-	zP_PlusX = H*np.ones_like(yP_PlusX)
+	length_PQ_PlusX = np.sqrt((xP_PlusX-xQ_PlusX)**2+(yP_PlusX-yQ_PlusX)**2+(zP_PlusX-zQ_PlusX)**2)
+	length_PQ_PlusY = np.sqrt((xP_PlusY-xQ_PlusY)**2+(yP_PlusY-yQ_PlusY)**2+(zP_PlusY-zQ_PlusY)**2)
+	length_PQ_MinusX = np.sqrt((xP_MinusX-xQ_MinusX)**2+(yP_MinusX-yQ_MinusX)**2+(zP_MinusX-zQ_MinusX)**2)
+	length_PQ_MinusY = np.sqrt((xP_MinusY-xQ_MinusY)**2+(yP_MinusY-yQ_MinusY)**2+(zP_MinusY-zQ_MinusY)**2)
 
-	yP_MinusX = yP_PlusX
-	xP_MinusX = -xP_PlusX
-	zP_MinusX = zP_PlusX
+	return length_PQ_PlusX, length_PQ_PlusY, length_PQ_MinusX, length_PQ_MinusY
 
-	y_line12 = y1 + (x_line12-x1)*(y2-y1)/(x2-x1)
-	y_line23 = y2 + (x_line23-x2)*(y3-y2)/(x3-x2)
-	y_line34 = y3 + (x_line34-x3)*(y4-y3)/(x4-x3)
-	y_line41 = y4 + (x_line41-x4)*(y1-y4)/(x1-x4)
+def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 
-	x_line12 = x1 + (y_line12 - y1)*(x2-x1)/(y2-y1) 
-	x_line23 = x2 + (y_line23 - y2)*(x3-x2)/(y3-y2) 
-	x_line34 = x3 + (y_line34 - y3)*(x4-x3)/(y4-y3) 
-	x_line41 = x4 + (y_line41 - y4)*(x1-x4)/(y1-y4)
+	i_DireX = np.arange(1,m_DireX+0.1,step=1)
+	i_DireY = np.arange(1,m_DireY+0.1,step=1)
 
-	pass
+	d_DireX = abs(a_DireX/2*(2*i_DireX - m_DireX - 1))
+	d_DireY = abs(a_DireY/2*(2*i_DireY - m_DireY - 1))
+
+	minH = Rs-np.sqrt(Rs**2-Rp**2)
+	if H>0 and H < minH:
+		beta_DireX = 2*np.arctan(np.sqrt((2*H*Rs-H**2-d_DireX**2)/(Rs-H)))
+		arc_length_DireX = beta_DireX*np.sqrt(Rs**2-d_DireX**2)
+	elif H >= minH:
+		alpha_DireX = 2*np.arctan(np.sqrt((Rp**2-d_DireX**2)/(Rs**2-Rp**2)))
+		alpha_DireY = 2*np.arctan(np.sqrt((Rp**2-d_DireY**2)/(Rs**2-Rp**2)))
+		arc_length_DireX = alpha_DireX*np.sqrt(Rs**2-d_DireX**2)
+		arc_length_DireY = alpha_DireY*np.sqrt(Rs**2-d_DireY**2)
+	elif H == 0:
+		arc_length_DireX = 2*np.sqrt(Rp**2 - d_DireX**2)
+		arc_length_DireY = 2*np.sqrt(Rp**2 - d_DireY**2)
+	else:
+		raise ValueError
+	return arc_length_DireX,arc_length_DireY
 
 
-def func_xPlus_y():
-	pass
-
-def func_xMinus_y():
-	pass
-
-def func_x_yPlus():
-	pass
-
-def func_x_yMinus():
-	pass
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
 
 	w = 3.0
 	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
 	Rs = 1.2
-	a = 0.3
-	m = 2*func_round(Rp/a)
-	theta = 0.25*np.pi
+	a_DireX = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
+	a_DireY = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
+	H0 = 0  # 网片初始位置（初始高度）
+	m_DireX = 2*func_round(Rp/a_DireX)  # 本程序可以用于计算两侧不同数量的力矢量
+	m_DireY = 2*func_round(Rp/a_DireY)  # 本程序可以用于计算两侧不同数量的力矢量
 
-	Lu_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a, m)[0]
-	Lc_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a, m)[1]
-	Ld_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a, m)[2]
+	theta = 0.25*np.pi
+	x1, y1 = 1.5, 1.5
+	x2, y2 = -1.5, 1.5
+	x3, y3 = -1.5, -1.5
+	x4, y4 = 1.5, -1.5
+
+	length_PQ_PlusX  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[0]
+	length_PQ_MinusX = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[0]
+	length_PQ_PlusY  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[0]
+	length_PQ_MinusY = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[0]
+
+	length_Arc_DireX = func_lengthArc(H0,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
+	length_Arc_DireY = func_lengthArc(H0,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
+
+	Lu_PQ0 = func_cablenet_xyz(theta, H0, w, Rp, Rs, a_DireY, m_DireY)[0]
+	Lc_PQ0 = func_cablenet_xyz(theta, H0, w, Rp, Rs, a_DireY, m_DireY)[1]
+	Ld_PQ0 = func_cablenet_xyz(theta, H0, w, Rp, Rs, a_DireY, m_DireY)[2]
 
 	L_PQ0 = Lu_PQ0 + Lc_PQ0 + Ld_PQ0
-	print('L_PQ0=',L_PQ0)
+	L_DireX = length_PQ_PlusX + length_PQ_MinusX + length_Arc_DireX
+	print('L_PQ0=',Lu_PQ0)
+	print('L_DireX=',length_PQ_MinusX)
