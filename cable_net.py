@@ -197,10 +197,6 @@ def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusY,m_PlusY,a_PlusX,m_PlusX,H):
 		else:
 			pass
 
-
-	print('xQ_PlusX=',xQ_PlusX)
-	print('xQ_MinusX=',xQ_MinusX)
-
 	length_PQ_PlusX = np.sqrt((xP_PlusX-xQ_PlusX)**2+(yP_PlusX-yQ_PlusX)**2+(zP_PlusX-zQ_PlusX)**2)
 	length_PQ_PlusY = np.sqrt((xP_PlusY-xQ_PlusY)**2+(yP_PlusY-yQ_PlusY)**2+(zP_PlusY-zQ_PlusY)**2)
 	length_PQ_MinusX = np.sqrt((xP_MinusX-xQ_MinusX)**2+(yP_MinusX-yQ_MinusX)**2+(zP_MinusX-zQ_MinusX)**2)
@@ -242,7 +238,6 @@ if __name__ == '__main__':
 
 	a_DireX = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
 	a_DireY = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
-	H0 = 0  # 网片初始位置（初始高度）
 	m_DireX = 2*func_round(Rp/a_DireX)  # 本程序可以用于计算两侧不同数量的力矢量
 	m_DireY = 2*func_round(Rp/a_DireY)  # 本程序可以用于计算两侧不同数量的力矢量
 
@@ -252,24 +247,52 @@ if __name__ == '__main__':
 	x3, y3 = -1.5*np.sqrt(2), 0
 	x4, y4 = 0, -1.5*np.sqrt(2)
 
-	length_PQ_PlusX  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[0]
-	length_PQ_MinusX = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[1]
-	length_PQ_PlusY  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[2]
-	length_PQ_MinusY = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,H0)[3]
+	length_PQ_PlusX0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,0)[0]
+	length_PQ_MinusX0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,0)[1]
+	length_PQ_PlusY0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,0)[2]
+	length_PQ_MinusY0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,0)[3]
 
-	length_Arc_DireX = func_lengthArc(H0,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
-	length_Arc_DireY = func_lengthArc(H0,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
+	length_Arc_DireX0 = func_lengthArc(0,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
+	length_Arc_DireY0 = func_lengthArc(0,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
 
 	########################################################################
 	# 本部分代码用于校准另一种方法
-	Lu_PQ0 = func_cablenet_xyz(theta, H0, w, Rp, Rs, a_DireY, m_DireY)[0]
-	Lc_PQ0 = func_cablenet_xyz(theta, H0, w, Rp, Rs, a_DireY, m_DireY)[1]
-	Ld_PQ0 = func_cablenet_xyz(theta, H0, w, Rp, Rs, a_DireY, m_DireY)[2]
+	Lu_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a_DireY, m_DireY)[0]
+	Lc_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a_DireY, m_DireY)[1]
+	Ld_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a_DireY, m_DireY)[2]
 	L_PQ0 = Lu_PQ0 + Lc_PQ0 + Ld_PQ0
 	########################################################################
 
-	L_DireX = length_PQ_PlusX + length_PQ_MinusX + length_Arc_DireX
-	L_DireY = length_PQ_PlusY + length_PQ_MinusY + length_Arc_DireY
+	L_DireX0 = length_PQ_PlusX0 + length_PQ_MinusX0 + length_Arc_DireX0
+	L_DireY0 = length_PQ_PlusY0 + length_PQ_MinusY0 + length_Arc_DireY0
+	
+	global n_loop, Height
+
+	n_loop = 0
+	epsilon_f = 0.25
+	epsilon_0 = 0.0
+	Height = 0.0  # 网片初始位置（初始高度）
+
+	while(n_loop<10 and epsilon_0<epsilon_f):
+		n_loop = n_loop+1
+		#Height += 0.1
+
+		length_PQ_PlusX  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height)[0]
+		length_PQ_MinusX = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height)[1]
+		length_PQ_PlusY  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height)[2]
+		length_PQ_MinusY = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height)[3]
+
+		length_Arc_DireX = func_lengthArc(Height,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
+		length_Arc_DireY = func_lengthArc(Height,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
+
+		L_DireX = length_PQ_PlusX + length_PQ_MinusX + length_Arc_DireX
+		L_DireY = length_PQ_PlusY + length_PQ_MinusY + length_Arc_DireY
+
+		epsilon_X = np.amax((L_DireX-L_DireX0)/L_DireX0)
+		epsilon_Y = np.amax((L_DireY-L_DireY0)/L_DireY0)
+
+		epsilon_0 = np.amax((epsilon_X,epsilon_Y))
+
 
 	min_xi = np.argmin(L_DireX)
 	min_yi = np.argmin(L_DireY)
