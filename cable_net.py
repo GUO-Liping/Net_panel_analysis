@@ -274,10 +274,13 @@ if __name__ == '__main__':
 	min_xi = np.argmin(L_DireX)
 	min_yi = np.argmin(L_DireY)
 
-	if L_DireX[min_xi] > L_DireY[min_xi]:
-		min_L0 = L_DireY[min_xi]
-	elif L_DireX[min_xi] < L_DireY[min_xi]:
+	if L_DireX[min_xi] <= L_DireY[min_yi]:
 		min_L0 = L_DireX[min_xi]
+		key_arg = min_xi
+	elif L_DireX[min_xi] > L_DireY[min_yi]:
+		min_L0 = L_DireY[min_yi]
+		key_arg = min_yi
+
 	else:
 		raise ValueError
 
