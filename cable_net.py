@@ -280,7 +280,6 @@ if __name__ == '__main__':
 	elif L_DireX[min_xi] > L_DireY[min_yi]:
 		min_L0 = L_DireY[min_yi]
 		key_arg = min_yi
-
 	else:
 		raise ValueError
 
