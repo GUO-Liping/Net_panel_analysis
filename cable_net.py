@@ -211,14 +211,25 @@ def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 
 	minH = Rs-np.sqrt(Rs**2-Rp**2)
 	if H>0.0 and H < minH:
-		Rp_H = Rs - np.sqrt(Rs**2-(Rs-H)**2)
-		for iD in range(len(d_DireX)):
-			if d_DireX[iD]<Rp_H:
-				beta_DireX = 2*np.arccos((Rs-H)/np.sqrt(Rs**2-d_DireX**2))
-			else  d_DireX[iD]>Rp_H
-		beta_DireY = 2*np.arccos((Rs-H)/np.sqrt(Rs**2-d_DireY**2))
-		arc_length_DireX = beta_DireX*np.sqrt(Rs**2-d_DireX**2)
-		arc_length_DireY = beta_DireY*np.sqrt(Rs**2-d_DireY**2)
+		Rp_H = np.sqrt(Rs**2-(Rs-H)**2)
+		beta_DireX = np.zeros_like(d_DireX)
+		beta_DireY = np.zeros_like(d_DireY)
+		arc_length_DireX = np.zeros_like(d_DireX)
+		arc_length_DireY = np.zeros_like(d_DireY)
+		for iDX in range(len(d_DireX)):
+			if d_DireX[iDX]<Rp_H:
+				beta_DireX[iDX] = 2*np.arccos((Rs-H)/np.sqrt(Rs**2-d_DireX[iDX]**2))
+				arc_length_DireX[iDX] = beta_DireX[iDX]*np.sqrt(Rs**2-d_DireX[iDX]**2)
+			else:
+				arc_length_DireX[iDX] = 2*np.sqrt(Rp**2 - d_DireX[iDX]**2)
+		
+		for iDY in range(len(d_DireY)):
+			if d_DireY[iDY]<Rp_H:
+				beta_DireY[iDY] = 2*np.arccos((Rs-H)/np.sqrt(Rs**2-d_DireY[iDY]**2))
+				arc_length_DireY[iDY] = beta_DireY[iDY]*np.sqrt(Rs**2-d_DireY[iDY]**2)
+			else:
+				arc_length_DireY[iDY] = 2*np.sqrt(Rp**2 - d_DireY[iDY]**2)
+
 	elif H >= minH:
 		alpha_DireX = 2*np.arctan(np.sqrt((Rp**2-d_DireX**2)/(Rs**2-Rp**2)))
 		alpha_DireY = 2*np.arctan(np.sqrt((Rp**2-d_DireY**2)/(Rs**2-Rp**2)))
@@ -272,11 +283,11 @@ if __name__ == '__main__':
 	global n_loop, Height
 
 	n_loop = 0
-	epsilon_f = 0.25
+	epsilon_f = 0.0235
 	epsilon = 0.0
 	Height = np.arange(0,10,step=0.01)  # 网片初始位置（初始高度）
 
-	while(n_loop<1000 and epsilon<epsilon_f):
+	while(n_loop<100 and epsilon<epsilon_f):
 		n_loop = n_loop+1
 
 		length_PQ_PlusX  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height[n_loop])[0]
@@ -289,9 +300,9 @@ if __name__ == '__main__':
 		L_DireX = length_PQ_PlusX + length_PQ_MinusX + length_Arc_DireX
 		L_DireY = length_PQ_PlusY + length_PQ_MinusY + length_Arc_DireY
 
-		epsilon_X = np.amax((L_DireX-L_DireX0)/L_DireX0)
-		epsilon_Y = np.amax((L_DireY-L_DireY0)/L_DireY0)
+		epsilon_X = (L_DireX-L_DireX0)/L_DireX0
+		epsilon_Y = (L_DireY-L_DireY0)/L_DireY0
 
-		epsilon = np.amax((epsilon_X,epsilon_Y))
-		print('It the',n_loop, 'th loop,','epsilon=',epsilon)
+		#epsilon = np.amax((epsilon_X,epsilon_Y))
+		print('It the',n_loop, 'th loop,','\n','epsilon_X=',epsilon_X,'\n', 'epsilon_Y=',epsilon_Y,'Height=',Height[n_loop])
 
