@@ -210,9 +210,13 @@ def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 	d_DireY = abs(a_DireY/2*(2*i_DireY - m_DireY - 1))
 
 	minH = Rs-np.sqrt(Rs**2-Rp**2)
-	if H>0 and H < minH:
-		beta_DireX = 2*np.arctan(np.sqrt((2*H*Rs-H**2-d_DireX**2)/(Rs-H)))
-		beta_DireY = 2*np.arctan(np.sqrt((2*H*Rs-H**2-d_DireY**2)/(Rs-H)))
+	if H>0.0 and H < minH:
+		Rp_H = Rs - np.sqrt(Rs**2-(Rs-H)**2)
+		for iD in range(len(d_DireX)):
+			if d_DireX[iD]<Rp_H:
+				beta_DireX = 2*np.arccos((Rs-H)/np.sqrt(Rs**2-d_DireX**2))
+			else  d_DireX[iD]>Rp_H
+		beta_DireY = 2*np.arccos((Rs-H)/np.sqrt(Rs**2-d_DireY**2))
 		arc_length_DireX = beta_DireX*np.sqrt(Rs**2-d_DireX**2)
 		arc_length_DireY = beta_DireY*np.sqrt(Rs**2-d_DireY**2)
 	elif H >= minH:
@@ -220,7 +224,7 @@ def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 		alpha_DireY = 2*np.arctan(np.sqrt((Rp**2-d_DireY**2)/(Rs**2-Rp**2)))
 		arc_length_DireX = alpha_DireX*np.sqrt(Rs**2-d_DireX**2)
 		arc_length_DireY = alpha_DireY*np.sqrt(Rs**2-d_DireY**2)
-	elif H == 0:
+	elif H == 0.0:
 		arc_length_DireX = 2*np.sqrt(Rp**2 - d_DireX**2)
 		arc_length_DireY = 2*np.sqrt(Rp**2 - d_DireY**2)
 	else:
