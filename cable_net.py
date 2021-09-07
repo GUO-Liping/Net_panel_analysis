@@ -70,10 +70,8 @@ def func_cablenet_xyz(theta, H, w, Rp, Rs, a, m):
 
 	if H == 0:
 		Lc_PQ = 2*yP_arr
-		print('Lc_PQ=',Lc_PQ)
 	else:
 		Lc_PQ = 2*np.sqrt(Rs**2-xP_arr**2) * np.arctan(np.sqrt(Rp**2-xP_arr**2)/np.sqrt(Rs**2-Rp**2))		
-		print('Lc_PQ=',Lc_PQ)
 
 	return Lu_PQ, Lc_PQ, Ld_PQ
 
@@ -205,7 +203,6 @@ def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusY,m_PlusY,a_PlusX,m_PlusX,H):
 	return length_PQ_PlusX, length_PQ_PlusY, length_PQ_MinusX, length_PQ_MinusY
 
 def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
-
 	i_DireX = np.arange(1,m_DireX+0.1,step=1)
 	i_DireY = np.arange(1,m_DireY+0.1,step=1)
 
@@ -215,7 +212,9 @@ def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 	minH = Rs-np.sqrt(Rs**2-Rp**2)
 	if H>0 and H < minH:
 		beta_DireX = 2*np.arctan(np.sqrt((2*H*Rs-H**2-d_DireX**2)/(Rs-H)))
+		beta_DireY = 2*np.arctan(np.sqrt((2*H*Rs-H**2-d_DireY**2)/(Rs-H)))
 		arc_length_DireX = beta_DireX*np.sqrt(Rs**2-d_DireX**2)
+		arc_length_DireY = beta_DireY*np.sqrt(Rs**2-d_DireY**2)
 	elif H >= minH:
 		alpha_DireX = 2*np.arctan(np.sqrt((Rp**2-d_DireX**2)/(Rs**2-Rp**2)))
 		alpha_DireY = 2*np.arctan(np.sqrt((Rp**2-d_DireY**2)/(Rs**2-Rp**2)))
@@ -270,20 +269,18 @@ if __name__ == '__main__':
 
 	n_loop = 0
 	epsilon_f = 0.25
-	epsilon_0 = 0.0
-	Height = 0.0  # 网片初始位置（初始高度）
+	epsilon = 0.0
+	Height = np.arange(0,10,step=0.01)  # 网片初始位置（初始高度）
 
-	while(n_loop<10 and epsilon_0<epsilon_f):
+	while(n_loop<1000 and epsilon<epsilon_f):
 		n_loop = n_loop+1
-		#Height += 0.1
 
-		length_PQ_PlusX  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height)[0]
-		length_PQ_MinusX = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height)[1]
-		length_PQ_PlusY  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height)[2]
-		length_PQ_MinusY = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height)[3]
-
-		length_Arc_DireX = func_lengthArc(Height,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
-		length_Arc_DireY = func_lengthArc(Height,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
+		length_PQ_PlusX  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height[n_loop])[0]
+		length_PQ_MinusX = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height[n_loop])[1]
+		length_PQ_PlusY  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height[n_loop])[2]
+		length_PQ_MinusY = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height[n_loop])[3]
+		length_Arc_DireX = func_lengthArc(Height[n_loop],Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
+		length_Arc_DireY = func_lengthArc(Height[n_loop],Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
 
 		L_DireX = length_PQ_PlusX + length_PQ_MinusX + length_Arc_DireX
 		L_DireY = length_PQ_PlusY + length_PQ_MinusY + length_Arc_DireY
@@ -291,20 +288,6 @@ if __name__ == '__main__':
 		epsilon_X = np.amax((L_DireX-L_DireX0)/L_DireX0)
 		epsilon_Y = np.amax((L_DireY-L_DireY0)/L_DireY0)
 
-		epsilon_0 = np.amax((epsilon_X,epsilon_Y))
+		epsilon = np.amax((epsilon_X,epsilon_Y))
+		print('It the',n_loop, 'th loop,','epsilon=',epsilon)
 
-
-	min_xi = np.argmin(L_DireX)
-	min_yi = np.argmin(L_DireY)
-
-	if L_DireX[min_xi] <= L_DireY[min_yi]:
-		min_L0 = L_DireX[min_xi]
-		key_arg = min_xi
-	elif L_DireX[min_xi] > L_DireY[min_yi]:
-		min_L0 = L_DireY[min_yi]
-		key_arg = min_yi
-	else:
-		raise ValueError
-
-	print('L_PQ0=',Lu_PQ0)
-	print('length_PQ_PlusX=',length_PQ_PlusX)
