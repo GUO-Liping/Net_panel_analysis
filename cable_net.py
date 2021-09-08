@@ -25,6 +25,15 @@ Remark: 影响计算结果的细节因素：
 import numpy as np
 from userfunc_NPA import *
 
+
+def func_Rp(Rs, H, hR):
+	if H<h:
+		return np.sqrt(Rs**2-(Rs-H)**2)
+	else:
+		return  np.sqrt(Rs**2-(Rs-hR)**2)
+
+######################################################################################################################################################
+# 本部分代码用于校准另一种方法
 def func_cablenet_xyz(theta, H, w, Rp, Rs, a, m):
 	i_arr = np.arange(1,m+0.1,step=1)
 
@@ -74,9 +83,18 @@ def func_cablenet_xyz(theta, H, w, Rp, Rs, a, m):
 		Lc_PQ = 2*np.sqrt(Rs**2-xP_arr**2) * np.arctan(np.sqrt(Rp**2-xP_arr**2)/np.sqrt(Rs**2-Rp**2))		
 
 	return Lu_PQ, Lc_PQ, Ld_PQ
+######################################################################################################################################################
 
 
-def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusY,m_PlusY,a_PlusX,m_PlusX,H):
+def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusY,m_PlusY,a_PlusX,m_PlusX,Rs,Rp,H):
+	h = Rs-np.sqrt(Rs**2-Rp**2)
+	if H>=0.0 and H < h:
+		Rp_H = np.sqrt(Rs**2-(Rs-H)**2)
+	elif H>=h:
+		Rp_H = Rp
+	else:
+		raise ValueError
+
 	i_PlusY = np.arange(1,m_PlusY+0.1,step=1)
 	
 	xP_PlusY = a_PlusY/2*(2*i_PlusY - m_PlusY - 1)
@@ -88,10 +106,15 @@ def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusY,m_PlusY,a_PlusX,m_PlusX,H):
 	zP_MinusY = zP_PlusY
 
 	xQ_PlusY,xQ_MinusY = xP_PlusY,xP_PlusY
-	yQ_PlusY,yQ_MinusY =  np.zeros_like(xP_PlusY),np.zeros_like(xP_PlusY)
+	yQ_PlusY,yQ_MinusY = np.zeros_like(xP_PlusY),np.zeros_like(xP_PlusY)
 	zQ_PlusY,zQ_MinusY = np.zeros_like(xP_PlusY),np.zeros_like(xP_PlusY)
 
 	for i in range(len(xP_PlusY)):
+		if abs(xP_PlusY[i])<Rp_H:
+			yP_PlusY[i] = np.sqrt(Rp_H**2 - xP_PlusY[i]**2)
+			yP_MinusY[i] = -yP_PlusY[i]
+		else:
+			pass
 
 		if (xP_PlusY[i]>x1 and xP_PlusY[i]<x2) or (xP_PlusY[i]<x1 and xP_PlusY[i]>x2):
 			yQ_Y = y1 + (xP_PlusY[i]-x1)*(y2-y1)/(x2-x1)
@@ -137,8 +160,8 @@ def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusY,m_PlusY,a_PlusX,m_PlusX,H):
 		else:
 			pass
 
-	i_PlusX = np.arange(1,m_PlusX+0.1,step=1)
-	yP_PlusX = a_PlusX/2*(2*i_PlusX - m_PlusX - 1)
+	j_PlusX = np.arange(1,m_PlusX+0.1,step=1)
+	yP_PlusX = a_PlusX/2*(2*j_PlusX - m_PlusX - 1)
 	xP_PlusX = np.sqrt(Rp**2 - yP_PlusX**2)
 	zP_PlusX = H*np.ones_like(yP_PlusX)
 
@@ -151,6 +174,13 @@ def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusY,m_PlusY,a_PlusX,m_PlusX,H):
 	zQ_PlusX,zQ_MinusX = np.zeros_like(yP_PlusX),np.zeros_like(yP_PlusX)
 
 	for j in range(len(yP_PlusX)):
+
+		if abs(yP_PlusX[j])<Rp_H:
+			xP_PlusX[j] = np.sqrt(Rp_H**2 - yP_PlusX[j]**2)
+			xP_MinusX[j] = -xP_PlusX[j]
+		else:
+			pass
+
 		if (yP_PlusX[j]>y1 and yP_PlusX[j]<y2) or (yP_PlusX[j]<y1 and yP_PlusX[j]>y2):
 			xQ_X = x1 + (yP_PlusX[j] - y1)*(x2-x1)/(y2-y1)
 			if xQ_X > xP_PlusX[j]:
@@ -216,15 +246,16 @@ def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 		beta_DireY = np.zeros_like(d_DireY)
 		arc_length_DireX = np.zeros_like(d_DireX)
 		arc_length_DireY = np.zeros_like(d_DireY)
+
 		for iDX in range(len(d_DireX)):
-			if d_DireX[iDX]<Rp_H:
+			if abs(d_DireX[iDX])<Rp_H:
 				beta_DireX[iDX] = 2*np.arccos((Rs-H)/np.sqrt(Rs**2-d_DireX[iDX]**2))
 				arc_length_DireX[iDX] = beta_DireX[iDX]*np.sqrt(Rs**2-d_DireX[iDX]**2)
 			else:
 				arc_length_DireX[iDX] = 2*np.sqrt(Rp**2 - d_DireX[iDX]**2)
 		
 		for iDY in range(len(d_DireY)):
-			if d_DireY[iDY]<Rp_H:
+			if abs(d_DireY[iDY])<Rp_H:
 				beta_DireY[iDY] = 2*np.arccos((Rs-H)/np.sqrt(Rs**2-d_DireY[iDY]**2))
 				arc_length_DireY[iDY] = beta_DireY[iDY]*np.sqrt(Rs**2-d_DireY[iDY]**2)
 			else:
@@ -247,62 +278,64 @@ def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 if __name__ == '__main__':
 
 	w = 3.0
-	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
 	Rs = 1.2
-
+	Rh = Rs-np.sqrt(Rs**2-(Rs-0.5**2))  # 球冠形加载顶头高度
 	a_DireX = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
 	a_DireY = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
+	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
+
 	m_DireX = 2*func_round(Rp/a_DireX)  # 本程序可以用于计算两侧不同数量的力矢量
 	m_DireY = 2*func_round(Rp/a_DireY)  # 本程序可以用于计算两侧不同数量的力矢量
 
-	theta = 0*np.pi
 	x1, y1 = 1.5*np.sqrt(2), 0
 	x2, y2 = 0, 1.5*np.sqrt(2)
 	x3, y3 = -1.5*np.sqrt(2), 0
 	x4, y4 = 0, -1.5*np.sqrt(2)
 
-	length_PQ_PlusX0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,0)[0]
-	length_PQ_MinusX0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,0)[1]
-	length_PQ_PlusY0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,0)[2]
-	length_PQ_MinusY0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,0)[3]
+	length_PQ_PlusX0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,0)[0]
+	length_PQ_MinusX0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,0)[1]
+	length_PQ_PlusY0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,0)[2]
+	length_PQ_MinusY0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,0)[3]
 
 	length_Arc_DireX0 = func_lengthArc(0,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
 	length_Arc_DireY0 = func_lengthArc(0,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
 
 	########################################################################
 	# 本部分代码用于校准另一种方法
+	theta = 0*np.pi
 	Lu_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a_DireY, m_DireY)[0]
 	Lc_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a_DireY, m_DireY)[1]
 	Ld_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a_DireY, m_DireY)[2]
 	L_PQ0 = Lu_PQ0 + Lc_PQ0 + Ld_PQ0
+	print('L_PQ0=',L_PQ0)
 	########################################################################
 
 	L_DireX0 = length_PQ_PlusX0 + length_PQ_MinusX0 + length_Arc_DireX0
 	L_DireY0 = length_PQ_PlusY0 + length_PQ_MinusY0 + length_Arc_DireY0
-	
-	global n_loop, Height
 
 	n_loop = 0
 	epsilon_f = 0.0235
 	epsilon = 0.0
-	Height = np.arange(0,10,step=0.01)  # 网片初始位置（初始高度）
+	Height = 0  # 网片初始位置（初始高度）
 
 	while(n_loop<100 and epsilon<epsilon_f):
 		n_loop = n_loop+1
+		Height = Height+0.01
 
-		length_PQ_PlusX  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height[n_loop])[0]
-		length_PQ_MinusX = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height[n_loop])[1]
-		length_PQ_PlusY  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height[n_loop])[2]
-		length_PQ_MinusY = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Height[n_loop])[3]
-		length_Arc_DireX = func_lengthArc(Height[n_loop],Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
-		length_Arc_DireY = func_lengthArc(Height[n_loop],Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
+		length_PQ_PlusX  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,Height)[0]
+		length_PQ_MinusX = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,Height)[1]
+		length_PQ_PlusY  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,Height)[2]
+		length_PQ_MinusY = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,Height)[3]
+		length_Arc_DireX = func_lengthArc(Height,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
+		length_Arc_DireY = func_lengthArc(Height,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
 
 		L_DireX = length_PQ_PlusX + length_PQ_MinusX + length_Arc_DireX
 		L_DireY = length_PQ_PlusY + length_PQ_MinusY + length_Arc_DireY
+		print('L_DireX=',L_DireX,'L_DireX0=',L_DireX0)
 
 		epsilon_X = (L_DireX-L_DireX0)/L_DireX0
 		epsilon_Y = (L_DireY-L_DireY0)/L_DireY0
 
-		#epsilon = np.amax((epsilon_X,epsilon_Y))
-		print('It the',n_loop, 'th loop,','\n','epsilon_X=',epsilon_X,'\n', 'epsilon_Y=',epsilon_Y,'Height=',Height[n_loop])
+		epsilon = np.amax((epsilon_X,epsilon_Y))
+		print('It the',n_loop, 'th loop,','\n','epsilon_X=',epsilon_X,'\n', 'epsilon_Y=',epsilon_Y,'Height=',Height)
 
