@@ -4,7 +4,7 @@
 
 '''
 Name： NetPanelAnalysis
-Function: 计算环形网片顶破力、顶破位移、耗能能力
+Function: 计算柔性防护系统中任意四边形钢丝绳网片顶破力、顶破位移、耗能能力
 Note: 国际单位制
 Version: 1.2.1
 Author: Liping GUO
