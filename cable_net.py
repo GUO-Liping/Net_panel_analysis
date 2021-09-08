@@ -277,12 +277,18 @@ def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
 
-	w = 3.0
+	#w = 10.0
 	Rs = 1.2
-	Rh = Rs-np.sqrt(Rs**2-(Rs-0.5**2))  # 球冠形加载顶头高度
 	a_DireX = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
 	a_DireY = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
 	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
+
+	n_loop = 0 # 初始增量步数
+	epsilon = 0.0  # 钢丝绳初始应变
+	epsilon_f = 0.05  # 钢丝绳失效应变
+	init_H = 0.2  # 钢丝绳网初始挠度（初始高度)
+	step_H = 0.001  # 网片位移加载增量步长，单位：m
+	Height = 0.0  # 网片加载位移
 
 	m_DireX = 2*func_round(Rp/a_DireX)  # 本程序可以用于计算两侧不同数量的力矢量
 	m_DireY = 2*func_round(Rp/a_DireY)  # 本程序可以用于计算两侧不同数量的力矢量
@@ -292,35 +298,20 @@ if __name__ == '__main__':
 	x3, y3 = -1.5*np.sqrt(2), 0
 	x4, y4 = 0, -1.5*np.sqrt(2)
 
-	length_PQ_PlusX0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,0)[0]
-	length_PQ_MinusX0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,0)[1]
-	length_PQ_PlusY0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,0)[2]
-	length_PQ_MinusY0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,0)[3]
+	length_PQ_PlusX0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[0]
+	length_PQ_MinusX0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[1]
+	length_PQ_PlusY0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[2]
+	length_PQ_MinusY0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[3]
 
-	length_Arc_DireX0 = func_lengthArc(0,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
-	length_Arc_DireY0 = func_lengthArc(0,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
-
-	########################################################################
-	# 本部分代码用于校准另一种方法
-	theta = 0*np.pi
-	Lu_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a_DireY, m_DireY)[0]
-	Lc_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a_DireY, m_DireY)[1]
-	Ld_PQ0 = func_cablenet_xyz(theta, 0, w, Rp, Rs, a_DireY, m_DireY)[2]
-	L_PQ0 = Lu_PQ0 + Lc_PQ0 + Ld_PQ0
-	print('L_PQ0=',L_PQ0)
-	########################################################################
+	length_Arc_DireX0 = func_lengthArc(init_H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
+	length_Arc_DireY0 = func_lengthArc(init_H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
 
 	L_DireX0 = length_PQ_PlusX0 + length_PQ_MinusX0 + length_Arc_DireX0
 	L_DireY0 = length_PQ_PlusY0 + length_PQ_MinusY0 + length_Arc_DireY0
 
-	n_loop = 0
-	epsilon_f = 0.0235
-	epsilon = 0.0
-	Height = 0  # 网片初始位置（初始高度）
-
-	while(n_loop<100 and epsilon<epsilon_f):
+	while(n_loop<1000 and epsilon<epsilon_f):
 		n_loop = n_loop+1
-		Height = Height+0.01
+		Height = Height+step_H
 
 		length_PQ_PlusX  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,Height)[0]
 		length_PQ_MinusX = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,Height)[1]
@@ -331,11 +322,26 @@ if __name__ == '__main__':
 
 		L_DireX = length_PQ_PlusX + length_PQ_MinusX + length_Arc_DireX
 		L_DireY = length_PQ_PlusY + length_PQ_MinusY + length_Arc_DireY
-		print('L_DireX=',L_DireX,'L_DireX0=',L_DireX0)
 
 		epsilon_X = (L_DireX-L_DireX0)/L_DireX0
 		epsilon_Y = (L_DireY-L_DireY0)/L_DireY0
 
 		epsilon = np.amax((epsilon_X,epsilon_Y))
-		print('It the',n_loop, 'th loop,','\n','epsilon_X=',epsilon_X,'\n', 'epsilon_Y=',epsilon_Y,'Height=',Height)
+	
+	########################################################################
+	# 本部分代码用于校准另一种方法
+	w =  np.sqrt((x1-x2)**2+(y1-y2)**2)
+	theta = 0*np.pi
+	Lu_PQ0 = func_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[0]
+	Lc_PQ0 = func_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[1]
+	Ld_PQ0 = func_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[2]
+	L_PQ0 = Lu_PQ0 + Lc_PQ0 + Ld_PQ0
+	ED = np.linalg.norm((L_PQ0-L_DireX0),ord=2, axis=0, keepdims=False)
+	if ED<1e-5:
+		print('Test is passed')
+	else:
+		print('Test is failed')
+	########################################################################
+
+	print('It the',n_loop, 'th loop,','\n','epsilon_X=',epsilon_X,'\n', 'epsilon_Y=',epsilon_Y,'\n','Height=',Height)
 
