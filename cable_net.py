@@ -272,9 +272,9 @@ def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 if __name__ == '__main__':
 
 	Rs = 1.2
-	a_DireX = 0.1  # 本程序可以用于计算两侧不同的a值（网孔间距）
+	a_DireX = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
 	a_DireY = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
-	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
+	Rp = 0.9  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
 
 	n_loop = 0 # 初始增量步数
 	epsilon = 0.0  # 钢丝绳初始应变
@@ -331,7 +331,7 @@ if __name__ == '__main__':
 	########################################################################
 	# 本部分代码用于校准另一种方法
 	w =  np.sqrt((x1-x2)**2+(y1-y2)**2)
-	theta = 0*np.pi
+	theta = np.arctan(y1/x1)
 	Lu_PQ0 = func_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[0]
 	Lc_PQ0 = func_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[1]
 	Ld_PQ0 = func_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[2]
