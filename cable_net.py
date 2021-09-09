@@ -26,12 +26,6 @@ import numpy as np
 from userfunc_NPA import *
 
 
-def func_Rp(Rs, H, hR):
-	if H<h:
-		return np.sqrt(Rs**2-(Rs-H)**2)
-	else:
-		return  np.sqrt(Rs**2-(Rs-hR)**2)
-
 ######################################################################################################################################################
 # 本部分代码用于校准另一种方法
 def func_cablenet_xyz(theta, H, w, Rp, Rs, a, m):
@@ -86,7 +80,7 @@ def func_cablenet_xyz(theta, H, w, Rp, Rs, a, m):
 ######################################################################################################################################################
 
 
-def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusY,m_PlusY,a_PlusX,m_PlusX,Rs,Rp,H):
+def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusX,m_PlusX,a_PlusY,m_PlusY,Rs,Rp,H):
 	h = Rs-np.sqrt(Rs**2-Rp**2)
 	if H>=0.0 and H < h:
 		Rp_H = np.sqrt(Rs**2-(Rs-H)**2)
@@ -230,7 +224,7 @@ def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusY,m_PlusY,a_PlusX,m_PlusX,Rs,Rp,
 	length_PQ_MinusX = np.sqrt((xP_MinusX-xQ_MinusX)**2+(yP_MinusX-yQ_MinusX)**2+(zP_MinusX-zQ_MinusX)**2)
 	length_PQ_MinusY = np.sqrt((xP_MinusY-xQ_MinusY)**2+(yP_MinusY-yQ_MinusY)**2+(zP_MinusY-zQ_MinusY)**2)
 
-	return length_PQ_PlusX, length_PQ_PlusY, length_PQ_MinusX, length_PQ_MinusY
+	return length_PQ_PlusX, length_PQ_MinusX, length_PQ_PlusY, length_PQ_MinusY
 
 def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 	i_DireX = np.arange(1,m_DireX+0.1,step=1)
@@ -279,7 +273,7 @@ if __name__ == '__main__':
 
 	#w = 10.0
 	Rs = 1.2
-	a_DireX = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
+	a_DireX = 0.1  # 本程序可以用于计算两侧不同的a值（网孔间距）
 	a_DireY = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
 	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
 
@@ -317,6 +311,7 @@ if __name__ == '__main__':
 		length_PQ_MinusX = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,Height)[1]
 		length_PQ_PlusY  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,Height)[2]
 		length_PQ_MinusY = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,Height)[3]
+		
 		length_Arc_DireX = func_lengthArc(Height,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
 		length_Arc_DireY = func_lengthArc(Height,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
 
@@ -326,7 +321,7 @@ if __name__ == '__main__':
 		epsilon_X = (L_DireX-L_DireX0)/L_DireX0
 		epsilon_Y = (L_DireY-L_DireY0)/L_DireY0
 
-		epsilon = np.amax((epsilon_X,epsilon_Y))
+		epsilon = np.amax(np.concatenate((epsilon_X,epsilon_Y)))
 	
 	########################################################################
 	# 本部分代码用于校准另一种方法
@@ -336,7 +331,7 @@ if __name__ == '__main__':
 	Lc_PQ0 = func_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[1]
 	Ld_PQ0 = func_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[2]
 	L_PQ0 = Lu_PQ0 + Lc_PQ0 + Ld_PQ0
-	ED = np.linalg.norm((L_PQ0-L_DireX0),ord=2, axis=0, keepdims=False)
+	ED = np.linalg.norm((L_PQ0-L_DireY0),ord=2, axis=0, keepdims=False)
 	if ED<1e-5:
 		print('Test is passed')
 	else:
