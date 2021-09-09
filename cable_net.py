@@ -271,7 +271,6 @@ def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
 
-	#w = 10.0
 	Rs = 1.2
 	a_DireX = 0.1  # 本程序可以用于计算两侧不同的a值（网孔间距）
 	a_DireY = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
@@ -280,17 +279,22 @@ if __name__ == '__main__':
 	n_loop = 0 # 初始增量步数
 	epsilon = 0.0  # 钢丝绳初始应变
 	epsilon_f = 0.05  # 钢丝绳失效应变
-	init_H = 0.2  # 钢丝绳网初始挠度（初始高度)
+	init_H = 0.0  # 钢丝绳网初始挠度（初始高度)
 	step_H = 0.001  # 网片位移加载增量步长，单位：m
 	Height = 0.0  # 网片加载位移
 
 	m_DireX = 2*func_round(Rp/a_DireX)  # 本程序可以用于计算两侧不同数量的力矢量
 	m_DireY = 2*func_round(Rp/a_DireY)  # 本程序可以用于计算两侧不同数量的力矢量
 
-	x1, y1 = 1.5*np.sqrt(2), 0
-	x2, y2 = 0, 1.5*np.sqrt(2)
-	x3, y3 = -1.5*np.sqrt(2), 0
-	x4, y4 = 0, -1.5*np.sqrt(2)
+	#x1, y1 = 1.5*np.sqrt(2), 0
+	#x2, y2 = 0, 1.5*np.sqrt(2)
+	#x3, y3 = -1.5*np.sqrt(2), 0
+	#x4, y4 = 0, -1.5*np.sqrt(2)
+
+	x1, y1 = 1.5,1.5
+	x2, y2 = -1.5,1.5
+	x3, y3 = -1.5,-1.5
+	x4, y4 = 1.5,-1.5
 
 	length_PQ_PlusX0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[0]
 	length_PQ_MinusX0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[1]
@@ -303,7 +307,7 @@ if __name__ == '__main__':
 	L_DireX0 = length_PQ_PlusX0 + length_PQ_MinusX0 + length_Arc_DireX0
 	L_DireY0 = length_PQ_PlusY0 + length_PQ_MinusY0 + length_Arc_DireY0
 
-	while(n_loop<1000 and epsilon<epsilon_f):
+	while(n_loop<=1000 and epsilon<=epsilon_f):
 		n_loop = n_loop+1
 		Height = Height+step_H
 
@@ -322,7 +326,8 @@ if __name__ == '__main__':
 		epsilon_Y = (L_DireY-L_DireY0)/L_DireY0
 
 		epsilon = np.amax(np.concatenate((epsilon_X,epsilon_Y)))
-	
+		print('It the',n_loop, 'th loop,','\n','L_DireX0=',L_DireX0,'\n', 'L_DireX=',L_DireX,'\n','Height=',Height)
+
 	########################################################################
 	# 本部分代码用于校准另一种方法
 	w =  np.sqrt((x1-x2)**2+(y1-y2)**2)
@@ -332,11 +337,10 @@ if __name__ == '__main__':
 	Ld_PQ0 = func_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[2]
 	L_PQ0 = Lu_PQ0 + Lc_PQ0 + Ld_PQ0
 	ED = np.linalg.norm((L_PQ0-L_DireY0),ord=2, axis=0, keepdims=False)
-	if ED<1e-5:
+	if ED<1e-3:
 		print('Test is passed')
 	else:
 		print('Test is failed')
 	########################################################################
 
-	print('It the',n_loop, 'th loop,','\n','epsilon_X=',epsilon_X,'\n', 'epsilon_Y=',epsilon_Y,'\n','Height=',Height)
 
