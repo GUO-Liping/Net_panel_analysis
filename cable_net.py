@@ -260,19 +260,31 @@ def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 		raise ValueError
 	return arc_length_DireX,arc_length_DireY
 
+def func_sigma(epsilon, sigma_y, E1, E2):
+	epsilon1 = sigma_y/E1
+	sigma_XY = np.zeros_like(epsilon)
+	for i in range (int(len(epsilon))):
+		if epsilon[i]>0 and epsilon[i]<=epsilon1:
+			sigma_XY[i] = E1*epsilon[i]
+		elif epsilon[i]>epsilon1:
+			sigma_XY[i] = sigma_y+E2*(epsilon[i]-epsilon1)
+		else:
+			raise ValueError
+	return sigma_XY
+
 
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
 
 	Rs = 1.2
-	a_DireX = 0.2  # 本程序可以用于计算两侧不同的a值（网孔间距）
+	a_DireX = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
 	a_DireY = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
-	Rp = 0.9  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
+	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
 
 	n_loop = 0 # 初始增量步数
-	epsilon = 0.0  # 钢丝绳初始应变
-	epsilon_f = 0.05  # 钢丝绳失效应变
-	init_H = 0.0  # 钢丝绳网初始挠度（初始高度)
+	epsilon_max = 0.0  # 钢丝绳初始应变
+	epsilon_f = 0.0235  # 钢丝绳失效应变
+	init_H = 0.3  # 钢丝绳网初始挠度（初始高度)
 	step_H = 0.001  # 网片位移加载增量步长，单位：m
 	Height = 0.0  # 网片加载位移
 
@@ -289,6 +301,12 @@ if __name__ == '__main__':
 	#x3, y3 = -1.5,-1.5
 	#x4, y4 = 1.5,-1.5
 
+	E1, E2 = 91.304e9, 25.0e9
+	sigma_y = 1050e6
+	sigma_f = 1350e6
+	fail_force = 40700
+	A_rope = fail_force/sigma_f
+
 	length_PQ_PlusX0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[0]
 	length_PQ_MinusX0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[1]
 	length_PQ_PlusY0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[2]
@@ -300,7 +318,7 @@ if __name__ == '__main__':
 	L_DireX0 = length_PQ_PlusX0 + length_PQ_MinusX0 + length_Arc_DireX0
 	L_DireY0 = length_PQ_PlusY0 + length_PQ_MinusY0 + length_Arc_DireY0
 
-	while(n_loop<=1000 and epsilon<=epsilon_f):
+	while(n_loop<=1000 and epsilon_max<=epsilon_f):
 		n_loop = n_loop+1
 		Height = Height+step_H
 
@@ -318,8 +336,16 @@ if __name__ == '__main__':
 		epsilon_X = (L_DireX-L_DireX0)/L_DireX0
 		epsilon_Y = (L_DireY-L_DireY0)/L_DireY0
 
-		epsilon = np.amax(np.concatenate((epsilon_X,epsilon_Y)))
-		print('It the',n_loop, 'th loop,','\n','L_DireX0=',L_DireX0,'\n', 'L_DireX=',L_DireX,'\n','Height=',Height)
+		epsilon_XY = np.concatenate((epsilon_X,epsilon_X,epsilon_Y,epsilon_Y),axis=0)
+		epsilon_max = np.amax(epsilon_XY)
+		#print('It the',n_loop, 'th loop,','epsilon_XY=',epsilon_XY,'Height=',Height)
+
+
+	sigma_XY = func_sigma(epsilon_XY, sigma_y, E1, E2)
+	force_XY = sigma_XY * A_rope
+	length_PQ = np.concatenate((length_PQ_PlusX,length_PQ_MinusX,length_PQ_PlusY,length_PQ_MinusY),axis=0)
+	max_height = Height
+	max_force = np.sum(force_XY*max_height/length_PQ)
 
 	########################################################################
 	# 本部分代码用于校准另一种方法
@@ -337,3 +363,5 @@ if __name__ == '__main__':
 	########################################################################
 
 
+	print('max_height=',max_height)
+	print('max_force=',max_force)
