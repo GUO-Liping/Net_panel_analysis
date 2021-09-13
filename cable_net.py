@@ -264,10 +264,12 @@ def func_sigma(epsilon, sigma_y, E1, E2):
 	epsilon1 = sigma_y/E1
 	sigma_XY = np.zeros_like(epsilon)
 	for i in range (int(len(epsilon))):
-		if epsilon[i]>0 and epsilon[i]<=epsilon1:
+		if epsilon[i]>=0 and epsilon[i]<=epsilon1:
 			sigma_XY[i] = E1*epsilon[i]
 		elif epsilon[i]>epsilon1:
 			sigma_XY[i] = sigma_y+E2*(epsilon[i]-epsilon1)
+		elif epsilon[i]<0:
+			pass
 		else:
 			raise ValueError
 	return sigma_XY
@@ -284,8 +286,8 @@ if __name__ == '__main__':
 	n_loop = 0 # 初始增量步数
 	epsilon_max = 0.0  # 钢丝绳初始应变
 	epsilon_f = 0.0235  # 钢丝绳失效应变
-	init_H = 0.3  # 钢丝绳网初始挠度（初始高度)
-	step_H = 0.001  # 网片位移加载增量步长，单位：m
+	init_H = 9  # 钢丝绳网初始挠度（初始高度)
+	step_H = 1e-4  # 网片位移加载增量步长，单位：m
 	Height = 0.0  # 网片加载位移
 
 	m_DireX = 2*func_round(Rp/a_DireX)  # 本程序可以用于计算两侧不同数量的力矢量
@@ -318,7 +320,7 @@ if __name__ == '__main__':
 	L_DireX0 = length_PQ_PlusX0 + length_PQ_MinusX0 + length_Arc_DireX0
 	L_DireY0 = length_PQ_PlusY0 + length_PQ_MinusY0 + length_Arc_DireY0
 
-	while(n_loop<=1000 and epsilon_max<=epsilon_f):
+	while(n_loop<=1e5 and epsilon_max<=epsilon_f):
 		n_loop = n_loop+1
 		Height = Height+step_H
 
@@ -338,7 +340,7 @@ if __name__ == '__main__':
 
 		epsilon_XY = np.concatenate((epsilon_X,epsilon_X,epsilon_Y,epsilon_Y),axis=0)
 		epsilon_max = np.amax(epsilon_XY)
-		#print('It the',n_loop, 'th loop,','epsilon_XY=',epsilon_XY,'Height=',Height)
+		print('It the',n_loop, 'th loop,','epsilon_XY=',epsilon_XY,'Height=',Height)
 
 
 	sigma_XY = func_sigma(epsilon_XY, sigma_y, E1, E2)
