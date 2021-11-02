@@ -27,7 +27,7 @@ from userfunc_NPA import *
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
 	# MULTIPLE FACTORS INPUT
-	nw = 5  # 网环圈数
+	nw = 15  # 网环圈数
 	d = func_return_d(nw)  # 制作网环的钢丝直径
 	D = 0.3  # 单个网环直径
 	Rp = 1.0/2  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
@@ -58,23 +58,23 @@ if __name__ == '__main__':
 	sigma_rope = 1770e6
 	E_rope = 94.5e9
 
-	d_ropePQ = 18
+	d_ropePQ = 16
 	F_ropePQ = 1000*Rope1770Steel[str(d_ropePQ)]  # 1000为换算国际单位
 	l0_ropePQ = kappa*w  # 钢丝绳初始长度
 	sigma_ropePQ = sigma_rope
 	E_ropePQ = E_rope  # 钢丝绳弹性模量
 
-	d_ropeCD = 18
+	d_ropeCD = 16
 	F_ropeCD = 1000*Rope1770Steel[str(d_ropeCD)]  # 1000为换算国际单位,钢丝绳破断力
 	l0_ropeCD = w  # 钢丝绳初始长度
 	sigma_ropeCD = sigma_rope  # 钢丝绳应力强度
 	E_ropeCD = E_rope  # 钢丝绳弹性模量
 
-	lb_onePQ = 0.8  # 单个耗能器最大行程800mm
-	b_numPQ = 0  # 边界钢丝绳两端串联的耗能器数量（耗能器连接方式：串联！！）
+	lb_onePQ = 2.8  # 单个耗能器最大行程800mm
+	b_numPQ = 2  # 边界钢丝绳两端串联的耗能器数量（耗能器连接方式：串联！！）
 	lb_maxPQ = b_numPQ * lb_onePQ  # 边界钢丝绳两端串联的耗能器总伸长量
 
-	lb_oneCD= 0.8  # 单个耗能器最大行程800mm
+	lb_oneCD= 2.8  # 单个耗能器最大行程800mm
 	b_numCD = 0  # 边界钢丝绳一端串联的耗能器数量（耗能器连接方式：串联！！）
 	lb_maxCD = b_numCD * lb_oneCD  # 边界钢丝绳两端串联的耗能器总伸长量
 
