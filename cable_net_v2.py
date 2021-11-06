@@ -74,7 +74,7 @@ def func_cablenet_xyz(theta, H, w, Rp, Rs, a, m):
 
 
 def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusX,m_PlusX,a_PlusY,m_PlusY,Rs,Rp,H):
-	h = Rs-np.sqrt(Rs**2-Rp**2)
+	h = Rs-np.sqrt(Rs**2-Rp**2)  # 加载顶头自身高度
 	if H>=0.0 and H < h:
 		Rp_H = np.sqrt(Rs**2-(Rs-H)**2)
 	elif H>=h:
@@ -82,7 +82,7 @@ def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusX,m_PlusX,a_PlusY,m_PlusY,Rs,Rp,
 	else:
 		raise ValueError
 
-	i_PlusY = np.arange(1,m_PlusY+0.1,step=1)
+	i_PlusY = np.arange(1,m_PlusY1,step=1)
 	
 	xP_PlusY = a_PlusY/2*(2*i_PlusY - m_PlusY - 1)
 	yP_PlusY = np.sqrt(Rp**2 - xP_PlusY**2)
@@ -219,6 +219,102 @@ def func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusX,m_PlusX,a_PlusY,m_PlusY,Rs,Rp,
 
 	return length_PQ_PlusX, length_PQ_MinusX, length_PQ_PlusY, length_PQ_MinusY
 
+def func_Pxyz(x1,y1,x2,y2,x3,y3,x4,y4,a_PlusX,m_PlusX,a_PlusY,m_PlusY,Rs,Rp,H):
+	h = Rs-np.sqrt(Rs**2-Rp**2)  # 加载顶头自身高度
+	if H>=0.0 and H < h:
+		Rp_H = np.sqrt(Rs**2-(Rs-H)**2)
+	elif H>=h:
+		Rp_H = Rp
+	else:
+		raise ValueError
+
+	i_Plus1 = np.arange(1,m_Plus1+0.1,step=1)
+
+	yP_Plus1 = a_Plus1/2*(2*i_Plus1 - m_Plus1 - 1)
+	xP_Plus1 = np.sqrt(Rp**2 - yP_Plus1**2)
+	zP_Plus1 = H*np.ones_like(yP_Plus1)
+
+	yP_Minu1 = yP_Plus1
+	xP_Minu1 = -xP_Plus1
+	zP_Minu1 = zP_Plus1
+
+	xP_Plus1_rotate = xP_Plus1*np.cos(alpha1) - yP_Plus1*np.sin(alpha1)
+	yP_Plus1_rotate = xP_Plus1*np.sin(alpha1) + yP_Plus1*np.cos(alpha1)
+	zP_Plus1_rotate = zP_Plus1
+
+	xP_Minu1_rotate = xP_Minu1*np.cos(alpha1) - yP_Minu1*np.sin(alpha1)
+	yP_Minu1_rotate = xP_Minu1*np.sin(alpha1) + yP_Minu1*np.cos(alpha1)
+	zP_Minu1_rotate = zP_Minu1
+
+	return xP_Plus1_rotate, yP_Plus1_rotate, zP_Plus1_rotate, xP_Minu1_rotate, yP_Minu1_rotate, zP_Minu1_rotate
+
+
+def func_cross_line_point(A1, B1, C1, A2, B2, C2):
+	x_cross = (B1*C2-B2*C1)/(A1*B2-A2*B1)
+	y_cross = (A2*C1-A1*C2)/(A1*B2-A2*B1)
+	return x_cross, y_cross
+
+def func_Qxyz(xP_Plus, yP_Plus, zP_Plus, xP_Minu, yP_Minu, zP_Minu):
+	# 以下A B C均为只想方程Ax+By+C = 0的系数
+	A1_arr = (yP_Plus-yP_Minu)/(xP_Plus-xP_Minu)
+	B1_arr = -1+np.zeros_like(A1_arr)
+	C1_arr = yP_Minu-(yP_Plus-yP_Minu)/(xP_Plus-xP_Minu)*xP_Minu
+
+	A2_line12 = (y2-y1)/(x2-x1)
+	B2_line12 = -1+np.zeros_like(A2_line12)
+	C2_line12 = y1-(y2-y1)/(x2-x1)*x1
+	xQ_line12 = (B1_arr*C2_line12-B2_line12*C1_arr)/(A1_arr*B2_line12-A2_line12*B1_arr)
+	yQ_line12 = (A2_line12*C1_arr-A1_arr*C2_line12)/(A1_arr*B2_line12-A2_line12*B1_arr)
+
+	A2_line23 = (y3-y2)/(x3-x2)
+	B2_line23 = -1+np.zeros_like(A2_line23)
+	C2_line23 = y2-(y3-y2)/(x3-x2)*x2
+	xQ_line23 = (B1_arr*C2_line23-B2_line23*C1_arr)/(A1_arr*B2_line23-A2_line23*B1_arr)
+	yQ_line23 = (A2_line23*C1_arr-A1_arr*C2_line23)/(A1_arr*B2_line23-A2_line23*B1_arr)
+
+	A2_line34 = (y4-y3)/(x4-x3)
+	B2_line34 = -1+np.zeros_like(A2_line34)
+	C2_line34 = y3-(y4-y3)/(x4-x3)*x3
+	xQ_line34 = (B1_arr*C2_line34-B2_line34*C1_arr)/(A1_arr*B2_line34-A2_line34*B1_arr)
+	yQ_line34 = (A2_line34*C1_arr-A1_arr*C2_line34)/(A1_arr*B2_line34-A2_line34*B1_arr)
+
+	A2_line41 = (y4-y1)/(x4-x1)
+	B2_line41 = -1+np.zeros_like(A2_line41)
+	C2_line41 = y1-(y4-y1)/(x4-x1)*x1
+	xQ_line41 = (B1_arr*C2_line41-B2_line41*C1_arr)/(A1_arr*B2_line41-A2_line41*B1_arr)
+	yQ_line41 = (A2_line41*C1_arr-A1_arr*C2_line41)/(A1_arr*B2_line41-A2_line41*B1_arr)
+
+	for i1 in range(m1):
+		for i12 in range(xQ_line12):
+			if xQ_line12[i12]<x1 and xQ_line12[i12]<x2:
+				pass
+			elif  xQ_line12[i12]>x1 and xQ_line12[i12]>x2:
+				pass
+			else:
+				xQ1[i1] = xQ_line12[i12]
+		for i23 in range(xQ_line23):
+			if xQ_line23[i23]<x2 and xQ_line23[i23]<x3:
+				pass
+			elif  xQ_line23[i23]>x2 and xQ_line23[i23]>x3:
+				pass
+			else:
+				xQ1[i1] = xQ_line23[i23]
+		for i34 in range(xQ_line34):
+			if xQ_line34[i34]<x3 and xQ_line34[i34]<x4:
+				pass
+			elif  xQ_line34[i34]>x3 and xQ_line34[i34]>x4:
+				pass
+			else:
+				xQ1[i1] = xQ_line34[i34]				
+		for i41 in range(xQ_line41):
+			if xQ_line41[i41]<x1 and xQ_line41[i41]<x4:
+				pass
+			elif  xQ_line41[i41]>x1 and xQ_line41[i41]>x4:
+				pass
+			else:
+				xQ1[i1] = xQ_line41[i41]
+
+
 def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 	i_DireX = np.arange(1,m_DireX+0.1,step=1)
 	i_DireY = np.arange(1,m_DireY+0.1,step=1)
@@ -278,36 +374,197 @@ def func_sigma(epsilon, sigma_y, E1, E2):
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
 
-	Rs = 1.2
-	a_DireX = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
-	a_DireY = 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
+	d1, d2 = 0.3, 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
+	alpha1, alpha2 = 0, np.pi/2
+
+	ex, ey = 0, 0
+	Rs = 1.2  # 球罐形加载顶头半径
 	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
 
 	n_loop = 0 # 初始增量步数
 	epsilon_max = 0.0  # 钢丝绳初始应变
 	epsilon_f = 0.0235  # 钢丝绳失效应变
-	init_H = 0.3  # 钢丝绳网初始挠度（初始高度)
+	init_H = 0.55  # 钢丝绳网初始挠度（初始高度)
 	step_H = 1e-3  # 网片位移加载增量步长，单位：m
 	Height = 0.0  # 网片加载位移
 
-	m_DireX = 2*func_round(Rp/a_DireX)  # 本程序可以用于计算两侧不同数量的力矢量
-	m_DireY = 2*func_round(Rp/a_DireY)  # 本程序可以用于计算两侧不同数量的力矢量
+	m1 = 2*func_round(Rp/d1)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
+	m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
 
-	x1, y1 = 1.5*np.sqrt(2), 0
-	x2, y2 = 0, 1.5*np.sqrt(2)
-	x3, y3 = -1.5*np.sqrt(2), 0
-	x4, y4 = 0, -1.5*np.sqrt(2)
+	#x1, y1 = 1.5*np.sqrt(2), 0
+	#x2, y2 = 0, 1.5*np.sqrt(2)
+	#x3, y3 = -1.5*np.sqrt(2), 0
+	#x4, y4 = 0, -1.5*np.sqrt(2)
 
-	#x1, y1 = 1.5,1.5
-	#x2, y2 = -1.5,1.5
-	#x3, y3 = -1.5,-1.5
-	#x4, y4 = 1.5,-1.5
+	x1, y1 = 1.5, 0
+	x2, y2 = 0, 1.5
+	x3, y3 = -1.5, 0
+	x4, y4 = 0, -1.5
 
 	E1, E2 = 91.304e9, 25.0e9
 	sigma_y = 1050e6
 	sigma_f = 1350e6
 	fail_force = 40700
 	A_rope = fail_force/sigma_f
+
+
+
+	m_Plus1 = m1
+	a_Plus1 = d1
+	H = 0
+	i_Plus1 = np.arange(1,m_Plus1+0.1,step=1)  # 第一方向上与加载区域相交的钢丝绳序列（从1开始）
+	dist1_arr = d1/2*(2*i_Plus1 - m_Plus1 - 1)
+
+	yP_Plus1 = a_Plus1/2*(2*i_Plus1 - m_Plus1 - 1)
+	xP_Plus1 = np.sqrt(Rp**2 - yP_Plus1**2)
+	zP_Plus1 = H*np.ones_like(yP_Plus1)
+
+	yP_Minu1 = yP_Plus1
+	xP_Minu1 = -xP_Plus1
+	zP_Minu1 = zP_Plus1
+
+	xP_Plus = ex + xP_Plus1*np.cos(alpha1) - yP_Plus1*np.sin(alpha1)
+	yP_Plus = ey + xP_Plus1*np.sin(alpha1) + yP_Plus1*np.cos(alpha1)
+	zP_Plus = zP_Plus1
+
+	xP_Minu = ex + xP_Minu1*np.cos(alpha1) - yP_Minu1*np.sin(alpha1)
+	yP_Minu = ey + xP_Minu1*np.sin(alpha1) + yP_Minu1*np.cos(alpha1)
+	zP_Minu = zP_Minu1
+
+	print('xP_Minu=',xP_Minu)
+
+
+
+
+
+
+
+	A1_arr = (yP_Plus-yP_Minu)/(xP_Plus-xP_Minu)
+	B1_arr = -1+np.zeros_like(A1_arr)
+	C1_arr = yP_Minu-(yP_Plus-yP_Minu)/(xP_Plus-xP_Minu)*xP_Minu
+
+	A2_line12 = (y2-y1)/(x2-x1)
+	B2_line12 = -1+np.zeros_like(A2_line12)
+	C2_line12 = y1-(y2-y1)/(x2-x1)*x1
+	xQ_line12 = (B1_arr*C2_line12-B2_line12*C1_arr)/(A1_arr*B2_line12-A2_line12*B1_arr)
+	yQ_line12 = (A2_line12*C1_arr-A1_arr*C2_line12)/(A1_arr*B2_line12-A2_line12*B1_arr)
+
+	A2_line23 = (y3-y2)/(x3-x2)
+	B2_line23 = -1+np.zeros_like(A2_line23)
+	C2_line23 = y2-(y3-y2)/(x3-x2)*x2
+	xQ_line23 = (B1_arr*C2_line23-B2_line23*C1_arr)/(A1_arr*B2_line23-A2_line23*B1_arr)
+	yQ_line23 = (A2_line23*C1_arr-A1_arr*C2_line23)/(A1_arr*B2_line23-A2_line23*B1_arr)
+
+	A2_line34 = (y4-y3)/(x4-x3)
+	B2_line34 = -1+np.zeros_like(A2_line34)
+	C2_line34 = y3-(y4-y3)/(x4-x3)*x3
+	xQ_line34 = (B1_arr*C2_line34-B2_line34*C1_arr)/(A1_arr*B2_line34-A2_line34*B1_arr)
+	yQ_line34 = (A2_line34*C1_arr-A1_arr*C2_line34)/(A1_arr*B2_line34-A2_line34*B1_arr)
+
+	A2_line41 = (y4-y1)/(x4-x1)
+	B2_line41 = -1+np.zeros_like(A2_line41)
+	C2_line41 = y1-(y4-y1)/(x4-x1)*x1
+	xQ_line41 = (B1_arr*C2_line41-B2_line41*C1_arr)/(A1_arr*B2_line41-A2_line41*B1_arr)
+	yQ_line41 = (A2_line41*C1_arr-A1_arr*C2_line41)/(A1_arr*B2_line41-A2_line41*B1_arr)
+
+	xQ1 = np.zeros(2*m1)
+	yQ1 = np.zeros(2*m1)
+	i1 = 0
+	for i12 in range(len(xQ_line12)):
+		if xQ_line12[i12]<x1 and xQ_line12[i12]<x2:
+			pass
+		elif  xQ_line12[i12]>x1 and xQ_line12[i12]>x2:
+			pass
+		else:
+			xQ1[i1] = xQ_line12[i12]
+			yQ1[i1] = y1 + (y2-y1)/(x2-x1)*(xQ_line12[i12]-x1)
+			i1 = i1 + 1
+	for i23 in range(len(xQ_line23)):
+		if xQ_line23[i23]<x2 and xQ_line23[i23]<x3:
+			pass
+		elif  xQ_line23[i23]>x2 and xQ_line23[i23]>x3:
+			pass
+		else:
+			xQ1[i1] = xQ_line23[i23]
+			yQ1[i1] = y2 + (y3-y2)/(x3-x2)*(xQ_line23[i23]-x2)
+			i1 = i1 + 1
+	for i34 in range(len(xQ_line34)):
+		if xQ_line34[i34]<x3 and xQ_line34[i34]<x4:
+			pass
+		elif  xQ_line34[i34]>x3 and xQ_line34[i34]>x4:
+			pass
+		else:
+			xQ1[i1] = xQ_line34[i34]				
+			yQ1[i1] = y3 + (y4-y3)/(x4-x3)*(xQ_line34[i34]-x3)
+			i1 = i1 + 1
+	for i41 in range(len(xQ_line41)):
+		if xQ_line41[i41]<x1 and xQ_line41[i41]<x4:
+			pass
+		elif  xQ_line41[i41]>x1 and xQ_line41[i41]>x4:
+			pass
+		else:
+			xQ1[i1] = xQ_line41[i41]
+			yQ1[i1] = y1 + (y4-y1)/(x4-x1)*(xQ_line41[i41]-x1)
+			i1 = i1 + 1
+
+	print('xQ1=',xQ1)
+	print('yQ1=',yQ1)
+
+	print('xP_Plus1=',xP_Plus1)
+	print('yP_Plus1=',yP_Plus1)
+
+	i_plus = 0
+	i_minu = 0
+	xQ1_Plus = np.zeros(2*m1)
+	xQ1_Minu = np.zeros(2*m1)
+	yQ1_Plus = np.zeros(2*m1)
+	yQ1_Minu = np.zeros(2*m1)
+	for i in range(len(xP_Plus1)):
+		for j in range(len(xQ1)):
+			k_search = (yQ1[j] - yP_Plus1[i])/(xQ1[j] - xP_Plus1[i])
+			k_target = (yP_Plus1[i] - yP_Minu1[i])/(xP_Plus1[i] - xP_Minu1[i])
+			if abs(k_search-k_target) < 1e-8:
+				xQ1_Plus[i+i_plus] = xQ1[j]
+				yQ1_Plus[i+i_plus] = yQ1[j]
+				print('xQ1_Plus=',xQ1_Plus)
+				print('yQ1_Plus=',yQ1_Plus)
+				i_plus = i_plus + 1
+			else:
+				pass
+	'''					
+	for i in range(len(xP_Plus1)):
+		for j in range(len(xQ1)):
+			k_search = (yQ1[j] - yP_Plus1[i])/(xQ1[j] - xP_Plus1[i])
+			k_target = (yP_Plus1[i] - yP_Minu1[i])/(xP_Plus1[i] - xP_Minu1[i])
+			if abs(k_search-k_target) < 1e-8:
+				if yQ1[j] >= yP_Plus1[i]:
+					xQ1_Plus[i+i_plus] = xQ1[j]
+					yQ1_Plus[i+i_plus] = yQ1[j]
+					print('xQ1_Plus=',xQ1_Plus)
+					print('yQ1_Plus=',yQ1_Plus)
+					i_plus = i_plus + 1
+				elif yQ1[j] < yP_Plus1[i]:
+					xQ1_Minu[i+i_minu] = xQ1[j]
+					yQ1_Minu[i+i_minu] = yQ1[j]
+					print('xQ1_Minu=',xQ1_Minu)
+					print('yQ1_Minu=',yQ1_Minu)
+					i_minu = i_minu + 1		
+				else:
+					raise ValueError			
+			else:
+				pass
+	'''
+
+
+
+
+
+
+	xP_dire1_plus = ex + Rp*np.cos(alpha1-np.arcsin(dist1_arr/Rp**2))
+	yP_dire1_plus = ey + Rp*np.sin(alpha1-np.arcsin(dist1_arr/Rp**2))
+
+	xP_dire1_minu = ex - Rp*np.cos(alpha1-np.arcsin(dist1_arr/Rp**2))
+	yP_dire1_minu = ey - Rp*np.sin(alpha1-np.arcsin(dist1_arr/Rp**2))
 
 	length_PQ_PlusX0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[0]
 	length_PQ_MinusX0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[1]
