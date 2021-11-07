@@ -370,47 +370,8 @@ def func_sigma(epsilon, sigma_y, E1, E2):
 			raise ValueError
 	return sigma_XY
 
-
-# 参数输入----------------------------------------------------------------------------------- #
-if __name__ == '__main__':
-
-	d1, d2 = 0.3, 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
-	alpha1, alpha2 = 0, np.pi/2  # 钢丝绳方向角，取值范围为半闭半开区间[0,pi)
-
-	ex, ey = 0, 0
-	Rs = 1.2  # 球罐形加载顶头半径
-	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
-
-	n_loop = 0 # 初始增量步数
-	epsilon_max = 0.0  # 钢丝绳初始应变
-	epsilon_f = 0.0235  # 钢丝绳失效应变
-	init_H = 0.55  # 钢丝绳网初始挠度（初始高度)
-	step_H = 1e-3  # 网片位移加载增量步长，单位：m
-	Height = 0.0  # 网片加载位移
-
-	m1 = 2*func_round(Rp/d1)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
-	m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
-
-	#x1, y1 = 1.5*np.sqrt(2), 0
-	#x2, y2 = 0, 1.5*np.sqrt(2)
-	#x3, y3 = -1.5*np.sqrt(2), 0
-	#x4, y4 = 0, -1.5*np.sqrt(2)
-
-	x1, y1 = 1.5, 0
-	x2, y2 = 0, 1.5
-	x3, y3 = -1.5, 0
-	x4, y4 = 0, -1.5
-
-	E1, E2 = 91.304e9, 25.0e9
-	sigma_y = 1050e6
-	sigma_f = 1350e6
-	fail_force = 40700
-	A_rope = fail_force/sigma_f
-
-
-	H = 0
+def func_loaded_xPyP(m1, d1, alpha1, Rp, H, ex, ey):
 	i1_arr = np.arange(1,m1+0.1,step=1)  # 第一方向上与加载区域相交的钢丝绳序列（从1开始）
-	dist1_arr = d1/2*(2*i1_arr - m1 - 1)
 
 	yP1_plus_origin = d1/2*(2*i1_arr - m1 - 1)
 	xP1_plus_origin = np.sqrt(Rp**2 - yP1_plus_origin**2)
@@ -428,41 +389,32 @@ if __name__ == '__main__':
 	yP1_minu = ey + xP1_minu_origin*np.sin(alpha1) + yP1_minu_origin*np.cos(alpha1)
 	zP1_minu = zP1_minu_origin
 
+	return xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu
+
+def func_solve_ABC(para_x1, para_y1, para_x2, para_y2):
+	if np.min(abs(para_x2-para_x1))==0:
+		A1_arr = np.ones_like(para_x1)
+		B1_arr = np.zeros_like(para_x1)
+		C1_arr = -para_x1+np.zeros_like(para_x1)
+	else:
+		A1_arr = (para_y2-para_y1)/(para_x2-para_x1)
+		B1_arr = -1+np.zeros_like(A1_arr)
+		C1_arr = para_y1-(para_y2-para_y1)/(para_x2-para_x1)*para_x1
+	return A1_arr, B1_arr, C1_arr
 
 
+def func_xy_intersection(A1, B1, C1, A2, B2, C2):
+	if np.min(abs(A1*B2-A2*B1))==0:
+		x_point = A1 + A2 + 10**100  # 采用大数淹没，避免除0报警
+		y_point = A1 + A2 + 10**100  # 采用大数淹没，避免除0报警
+	else:
+		x_point =  (B1*C2-B2*C1)/(A1*B2-A2*B1)
+		y_point =  (A2*C1-A1*C2)/(A1*B2-A2*B1)
+	return x_point, y_point
 
 
-
-
-
-	A1_arr = (yP1_plus-yP1_minu)/(xP1_plus-xP1_minu)
-	B1_arr = -1+np.zeros_like(A1_arr)
-	C1_arr = yP1_minu-(yP1_plus-yP1_minu)/(xP1_plus-xP1_minu)*xP1_minu
-
-	A2_line12 = (y2-y1)/(x2-x1)
-	B2_line12 = -1+np.zeros_like(A2_line12)
-	C2_line12 = y1-(y2-y1)/(x2-x1)*x1
-	xQ_line12 = (B1_arr*C2_line12-B2_line12*C1_arr)/(A1_arr*B2_line12-A2_line12*B1_arr)
-	yQ_line12 = (A2_line12*C1_arr-A1_arr*C2_line12)/(A1_arr*B2_line12-A2_line12*B1_arr)
-
-	A2_line23 = (y3-y2)/(x3-x2)
-	B2_line23 = -1+np.zeros_like(A2_line23)
-	C2_line23 = y2-(y3-y2)/(x3-x2)*x2
-	xQ_line23 = (B1_arr*C2_line23-B2_line23*C1_arr)/(A1_arr*B2_line23-A2_line23*B1_arr)
-	yQ_line23 = (A2_line23*C1_arr-A1_arr*C2_line23)/(A1_arr*B2_line23-A2_line23*B1_arr)
-
-	A2_line34 = (y4-y3)/(x4-x3)
-	B2_line34 = -1+np.zeros_like(A2_line34)
-	C2_line34 = y3-(y4-y3)/(x4-x3)*x3
-	xQ_line34 = (B1_arr*C2_line34-B2_line34*C1_arr)/(A1_arr*B2_line34-A2_line34*B1_arr)
-	yQ_line34 = (A2_line34*C1_arr-A1_arr*C2_line34)/(A1_arr*B2_line34-A2_line34*B1_arr)
-
-	A2_line41 = (y4-y1)/(x4-x1)
-	B2_line41 = -1+np.zeros_like(A2_line41)
-	C2_line41 = y1-(y4-y1)/(x4-x1)*x1
-	xQ_line41 = (B1_arr*C2_line41-B2_line41*C1_arr)/(A1_arr*B2_line41-A2_line41*B1_arr)
-	yQ_line41 = (A2_line41*C1_arr-A1_arr*C2_line41)/(A1_arr*B2_line41-A2_line41*B1_arr)
-
+# 本函数用于删除钢丝绳网与锚固点之间边界线延长线上的交点
+def func_pick_xQyQ(m1, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34, yQ_line34, xQ_line41, yQ_line41, x1, y1, x2, y2, x3, y3, x4, y4):
 	xQ1 = np.zeros(2*m1)
 	yQ1 = np.zeros(2*m1)
 	i1 = 0
@@ -473,7 +425,7 @@ if __name__ == '__main__':
 			pass
 		else:
 			xQ1[i1] = xQ_line12[i12]
-			yQ1[i1] = y1 + (y2-y1)/(x2-x1)*(xQ_line12[i12]-x1)
+			yQ1[i1] = yQ_line12[i12]
 			i1 = i1 + 1
 	for i23 in range(len(xQ_line23)):
 		if xQ_line23[i23]<x2 and xQ_line23[i23]<x3:
@@ -482,7 +434,7 @@ if __name__ == '__main__':
 			pass
 		else:
 			xQ1[i1] = xQ_line23[i23]
-			yQ1[i1] = y2 + (y3-y2)/(x3-x2)*(xQ_line23[i23]-x2)
+			yQ1[i1] = yQ_line23[i23]
 			i1 = i1 + 1
 	for i34 in range(len(xQ_line34)):
 		if xQ_line34[i34]<x3 and xQ_line34[i34]<x4:
@@ -491,7 +443,7 @@ if __name__ == '__main__':
 			pass
 		else:
 			xQ1[i1] = xQ_line34[i34]				
-			yQ1[i1] = y3 + (y4-y3)/(x4-x3)*(xQ_line34[i34]-x3)
+			yQ1[i1] = yQ_line34[i34]	
 			i1 = i1 + 1
 	for i41 in range(len(xQ_line41)):
 		if xQ_line41[i41]<x1 and xQ_line41[i41]<x4:
@@ -500,24 +452,16 @@ if __name__ == '__main__':
 			pass
 		else:
 			xQ1[i1] = xQ_line41[i41]
-			yQ1[i1] = y1 + (y4-y1)/(x4-x1)*(xQ_line41[i41]-x1)
+			yQ1[i1] = yQ_line41[i41]
 			i1 = i1 + 1
+	return xQ1, yQ1
 
-	print('xQ1=',xQ1)
-	print('yQ1=',yQ1)
 
-	print('xP1_plus=',xP1_plus)
-	print('yP1_plus=',yP1_plus)
-
-	print('xP1_minu=',xP1_minu)
-	print('yP1_minu=',yP1_minu)
-
+def func_sort_xQyQ(xQ1, yQ1):
 	xQ1_plus = np.zeros(m1)
 	yQ1_plus = np.zeros(m1)
-	zQ1_plus = zP1_minu_origin
 	yQ1_minu = np.zeros(m1)
 	xQ1_minu = np.zeros(m1)
-	zQ1_minu = zP1_minu_origin
 
 	for i in range(len(xP1_plus)):
 
@@ -553,6 +497,89 @@ if __name__ == '__main__':
 					raise ValueError	
 			else:
 				pass
+	return xQ1_plus, yQ1_plus, xQ1_minu, yQ1_minu
+
+# 参数输入----------------------------------------------------------------------------------- #
+if __name__ == '__main__':
+
+	d1, d2 = 0.3, 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
+	alpha1, alpha2 = 0, np.pi/2  # 钢丝绳方向角，取值范围为半闭半开区间[0,pi)
+
+	ex, ey = 0, 0
+	Rs = 1.2  # 球罐形加载顶头半径
+	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
+
+	n_loop = 0 # 初始增量步数
+	epsilon_max = 0.0  # 钢丝绳初始应变
+	epsilon_f = 0.0235  # 钢丝绳失效应变
+	init_H = 0.55  # 钢丝绳网初始挠度（初始高度)
+	step_H = 1e-3  # 网片位移加载增量步长，单位：m
+	Height = 0.0  # 网片加载位移
+
+	m1 = 2*func_round(Rp/d1)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
+	m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
+
+	#x1, y1 = 1.5*np.sqrt(2), 0
+	#x2, y2 = 0, 1.5*np.sqrt(2)
+	#x3, y3 = -1.5*np.sqrt(2), 0
+	#x4, y4 = 0, -1.5*np.sqrt(2)
+
+	x1, y1 = 1.5, -1.5
+	x2, y2 = 1.5, 1.5
+	x3, y3 = -1.5, 1.5
+	x4, y4 = -1.5, -1.5
+
+	E1, E2 = 91.304e9, 25.0e9
+	sigma_y = 1050e6
+	sigma_f = 1350e6
+	fail_force = 40700
+	A_rope = fail_force/sigma_f
+
+
+	H = 0
+
+	xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_loaded_xPyP(m1, d1, alpha1, Rp, H, ex, ey)
+	xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_loaded_xPyP(m2, d2, alpha2, Rp, H, ex, ey)
+
+
+
+	A1_arr, B1_arr, C1_arr = func_solve_ABC(xP1_minu, yP1_minu, xP1_plus, yP1_plus)  # 与加载区域边缘相交的1方向的钢丝绳直线方程系数A1x+B1y+C1=0
+	A2_arr, B2_arr, C2_arr = func_solve_ABC(xP2_minu, yP2_minu, xP2_plus, yP2_plus)  # 与加载区域边缘相交的2方向的钢丝绳直线方程系数A2x+B2y+C2=0
+
+	A_line12, B_line12, C_line12 = func_solve_ABC(x1, y1, x2, y2)
+	A_line23, B_line23, C_line23 = func_solve_ABC(x2, y2, x3, y3)
+	A_line34, B_line34, C_line34 = func_solve_ABC(x3, y3, x4, y4)
+	A_line41, B_line41, C_line41 = func_solve_ABC(x4, y4, x1, y1)
+
+	xQ1_line12, yQ1_line12 = func_xy_intersection(A1_arr, B1_arr, C1_arr, A_line12, B_line12, C_line12)
+	xQ1_line23, yQ1_line23 = func_xy_intersection(A1_arr, B1_arr, C1_arr, A_line23, B_line23, C_line23)
+	xQ1_line34, yQ1_line34 = func_xy_intersection(A1_arr, B1_arr, C1_arr, A_line34, B_line34, C_line34)
+	xQ1_line41, yQ1_line41 = func_xy_intersection(A1_arr, B1_arr, C1_arr, A_line41, B_line41, C_line41)
+
+	xQ2_line12, yQ2_line12 = func_xy_intersection(A2_arr, B2_arr, C2_arr, A_line12, B_line12, C_line12)
+	xQ2_line23, yQ2_line23 = func_xy_intersection(A2_arr, B2_arr, C2_arr, A_line23, B_line23, C_line23)
+	xQ2_line34, yQ2_line34 = func_xy_intersection(A2_arr, B2_arr, C2_arr, A_line34, B_line34, C_line34)
+	xQ2_line41, yQ2_line41 = func_xy_intersection(A2_arr, B2_arr, C2_arr, A_line41, B_line41, C_line41)
+
+
+
+
+
+
+
+	xQ1_pick, yQ1_pick = func_pick_xQyQ(m1, xQ1_line12, yQ1_line12, xQ1_line23, yQ1_line23, xQ1_line34, yQ1_line34, xQ1_line41, yQ1_line41, x1, y1, x2, y2, x3, y3, x4, y4)
+	xQ2_pick, yQ2_pick = func_pick_xQyQ(m2, xQ2_line12, yQ2_line12, xQ2_line23, yQ2_line23, xQ2_line34, yQ2_line34, xQ2_line41, yQ2_line41, x1, y1, x2, y2, x3, y3, x4, y4)
+
+	xQ1_plus, yQ1_plus, xQ1_minu, yQ1_minu = func_sort_xQyQ(xQ1_pick, yQ1_pick)
+	xQ2_plus, yQ2_plus, xQ2_minu, yQ2_minu = func_sort_xQyQ(xQ2_pick, yQ2_pick)
+
+	zQ1_plus = zP1_minu_origin
+	zQ1_minu = zP1_minu_origin
+
+	xQ2_plus, yQ2_plus, xQ2_minu, yQ2_minu = func_sort_xQyQ(xQ2_pick, yQ2_pick)
+	zQ2_plus = zP2_minu_origin
+	zQ2_minu = zP2_minu_origin
+
 	print('xQ1_plus=',xQ1_plus)
 	print('yQ1_plus=',yQ1_plus)
 	print('xQ1_minu=',xQ1_minu)
@@ -566,6 +593,9 @@ if __name__ == '__main__':
 
 	length_PQ1_plus = np.sqrt((xP1_plus-xQ1_plus)**2+(yP1_plus-yQ1_plus)**2+(zP1_plus-zQ1_plus)**2)
 	length_PQ1_minu = np.sqrt((xP1_minu-xQ1_minu)**2+(yP1_minu-yQ1_minu)**2+(zP1_minu-zQ1_minu)**2)
+
+	length_PQ2_plus = np.sqrt((xP2_plus-xQ2_plus)**2+(yP2_plus-yQ2_plus)**2+(zP2_plus-zQ2_plus)**2)
+	length_PQ2_minu = np.sqrt((xP2_minu-xQ2_minu)**2+(yP2_minu-yQ2_minu)**2+(zP2_minu-zQ2_minu)**2)
 
 
 
