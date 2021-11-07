@@ -572,13 +572,9 @@ if __name__ == '__main__':
 
 	xQ1_plus, yQ1_plus, xQ1_minu, yQ1_minu = func_sort_xQyQ(xQ1_pick, yQ1_pick)
 	xQ2_plus, yQ2_plus, xQ2_minu, yQ2_minu = func_sort_xQyQ(xQ2_pick, yQ2_pick)
+	zQ1_plus, zQ1_minu, zQ2_plus, zQ2_minu = zP1_plus, zP1_minu, zP1_plus, zP1_minu
 
-	zQ1_plus = zP1_minu_origin
-	zQ1_minu = zP1_minu_origin
 
-	xQ2_plus, yQ2_plus, xQ2_minu, yQ2_minu = func_sort_xQyQ(xQ2_pick, yQ2_pick)
-	zQ2_plus = zP2_minu_origin
-	zQ2_minu = zP2_minu_origin
 
 	print('xQ1_plus=',xQ1_plus)
 	print('yQ1_plus=',yQ1_plus)
@@ -601,15 +597,8 @@ if __name__ == '__main__':
 
 
 
-
-
-	length_PQ_plusX0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[0]
-	length_PQ_minusX0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[1]
-	length_PQ_plusY0  = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[2]
-	length_PQ_minusY0 = func_lengthPQ(x1,y1,x2,y2,x3,y3,x4,y4,a_DireX,m_DireX,a_DireY,m_DireY,Rs,Rp,init_H)[3]
-
-	length_Arc_DireX0 = func_lengthArc(init_H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[0]
-	length_Arc_DireY0 = func_lengthArc(init_H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY)[1]
+	length_Arc_DireX0 = func_lengthArc(init_H,Rs,Rp,d1,m1,d2,m2)[0]
+	length_Arc_DireY0 = func_lengthArc(init_H,Rs,Rp,d1,m1,d2,m2)[1]
 
 	L_DireX0 = length_PQ_plusX0 + length_PQ_minusX0 + length_Arc_DireX0
 	L_DireY0 = length_PQ_plusY0 + length_PQ_minusY0 + length_Arc_DireY0
