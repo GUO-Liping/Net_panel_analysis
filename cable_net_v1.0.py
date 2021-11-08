@@ -99,10 +99,12 @@ def func_CN1_loaded_xPyP(m, d, alpha, Rp, H, ex, ey):
 	return xP_plus, yP_plus, zP_plus, xP_minu, yP_minu, zP_minu
 
 def func_CN1_solve_ABC(para_x1, para_y1, para_x2, para_y2):
-	if np.amin(abs(para_x2-para_x1))==0:
+	para_x1 = np.around(para_x1,8), 
+	para_x2 = np.around(para_x2,8)
+	if np.all(para_x2)==np.all(para_x1):
 		A1_arr = np.ones_like(para_x1)
 		B1_arr = np.zeros_like(para_x1)
-		C1_arr = -para_x1+np.zeros_like(para_x1)
+		C1_arr = np.zeros_like(para_x1)-para_x1
 	else:
 		A1_arr = (para_y2-para_y1)/(para_x2-para_x1)
 		B1_arr = -1+np.zeros_like(A1_arr)
@@ -111,7 +113,9 @@ def func_CN1_solve_ABC(para_x1, para_y1, para_x2, para_y2):
 
 
 def func_CN1_xy_intersection(A1, B1, C1, A2, B2, C2):
-	if np.amin(abs(A1*B2-A2*B1))==0:
+	A1B2 = np.around(A1*B2, 8)
+	A2B1 = np.around(A2*B1, 8)
+	if np.all(A1B2)==np.all(A2B1):
 		x_point = A1 + A2 + 10**100  # 采用大数淹没，避免除0报警
 		y_point = A1 + A2 + 10**100  # 采用大数淹没，避免除0报警
 	else:
@@ -122,18 +126,40 @@ def func_CN1_xy_intersection(A1, B1, C1, A2, B2, C2):
 
 # 本函数用于删除钢丝绳网与锚固点之间边界线延长线上的交点
 def func_CN1_pick_xQyQ(m, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34, yQ_line34, xQ_line41, yQ_line41, x1, y1, x2, y2, x3, y3, x4, y4):
+
+	x1 = round(x1,8)
+	x2 = round(x2,8)
+	x3 = round(x3,8)
+	x4 = round(x4,8)
+
+	y1 = round(y1,8)
+	y2 = round(y2,8)
+	y3 = round(y3,8)
+	y4 = round(y4,8)
+
+	xQ_line12 = np.around(np.asarray(xQ_line12.flatten(), dtype='float64'),8)
+	xQ_line23 = np.around(np.asarray(xQ_line23.flatten(), dtype='float64'),8)
+	xQ_line34 = np.around(np.asarray(xQ_line34.flatten(), dtype='float64'),8)
+	xQ_line41 = np.around(np.asarray(xQ_line41.flatten(), dtype='float64'),8)
+	
+	yQ_line12 = np.around(np.asarray(yQ_line12.flatten(), dtype='float64'),8)
+	yQ_line23 = np.around(np.asarray(yQ_line23.flatten(), dtype='float64'),8)
+	yQ_line34 = np.around(np.asarray(yQ_line34.flatten(), dtype='float64'),8)
+	yQ_line41 = np.around(np.asarray(yQ_line41.flatten(), dtype='float64'),8)
+
+
 	xQ = np.zeros(2*m)
 	yQ = np.zeros(2*m)
 	i1 = 0
 	for i12 in range(len(xQ_line12)):
-		if xQ_line12[i12]<x1 and xQ_line12[i12]<x2:
+		if xQ_line12[i12]<x1 and xQ_line12[i12]<x2:  # 通过x坐标判别是否位于边界线上
 			pass
-		elif xQ_line12[i12]>x1 and xQ_line12[i12]>x2:
+		elif xQ_line12[i12]>x1 and xQ_line12[i12]>x2:  # 通过x坐标判别是否位于边界线上
 			pass
 		else:
-			if yQ_line12[i12] < y1 and  yQ_line12[i12] < y2:
+			if yQ_line12[i12]<y1 and  yQ_line12[i12]<y2:  # 再通过y坐标判别是否位于边界线上
 				pass
-			elif yQ_line12[i12] > y1 and yQ_line12[i12] > y2:
+			elif yQ_line12[i12]>y1 and yQ_line12[i12]>y2:  # 再通过y坐标判别是否位于边界线上
 				pass
 			else:
 				xQ[i1] = xQ_line12[i12]
@@ -145,37 +171,39 @@ def func_CN1_pick_xQyQ(m, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34,
 		elif xQ_line23[i23]>x2 and xQ_line23[i23]>x3:
 			pass
 		else:
-			if yQ_line23[i23] < y2 and yQ_line23[i23] < y3:
+			if yQ_line23[i23]<y2 and yQ_line23[i23]<y3:
 				pass
-			elif yQ_line23[i23] > y2 and yQ_line23[i23] > y3:
+			elif yQ_line23[i23]>y2 and yQ_line23[i23]>y3:
 				pass
 			else:
 				xQ[i1] = xQ_line23[i23]
 				yQ[i1] = yQ_line23[i23]
 				i1 = i1 + 1
 	for i34 in range(len(xQ_line34)):
-		if xQ_line34[i34]<x3 and xQ_line34[i34]<x4:
+		if xQ_line34[i34]-x3<-1e-15 and xQ_line34[i34]-x4<-1e-15:
 			pass
-		elif xQ_line34[i34]>x3 and xQ_line34[i34]>x4:
+		elif xQ_line34[i34]-x3>1e-15 and xQ_line34[i34]-x4>1e-15:
 			pass
 		else:
-			if yQ_line34[i34] < y3 and yQ_line34[i34] < y4:
+			if yQ_line34[i34]-y3<-1e-15 and yQ_line34[i34]-y4<-1e-15:
 				pass
-			elif yQ_line34[i34] > y3 and yQ_line23[i34] > y4:
+			elif yQ_line34[i34]-y3>1e-15 and yQ_line23[i34]-y4>1e-15:
 				pass
 			else:
 				xQ[i1] = xQ_line34[i34]
 				yQ[i1] = yQ_line34[i34]
 				i1 = i1 + 1
 	for i41 in range(len(xQ_line41)):
-		if xQ_line41[i41]<x1 and xQ_line41[i41]<x4:
+		if xQ_line41[i41]-x4<-1e-15 and xQ_line41[i41]-x1<-1e-15:
 			pass
-		elif xQ_line41[i41]>x1 and xQ_line41[i41]>x4:
+		elif xQ_line41[i41]-x4>1e-15 and xQ_line41[i41]-x1>1e-15:
 			pass
 		else:
-			if yQ_line41[i41] < y4 and yQ_line41[i41] < y1:
+			if yQ_line41[i41]-y4<-1e-15 and yQ_line41[i41]-y1<-1e-15:
 				pass
-			elif yQ_line41[i41] > y4 and yQ_line41[i41] > y1:
+			elif yQ_line41[i41]-y4>1e-15 and yQ_line41[i41]-y1>1e-15:
+				print('yQ_line41[i41]', yQ_line41[i41])
+				print('y4=', y4)
 				pass
 			else:
 				xQ[i1] = xQ_line41[i41]
@@ -215,7 +243,7 @@ def func_CN1_sort_xQyQ(m, xQ, yQ, xP_plus, yP_plus, xP_minu, yP_minu):
 					elif (yQ[jQ] - yP_plus[i])<=-1e-15:  # python对于数值的绝对相等判别存在非常非常小1e-15但是不可忽略的误差
 						xQ_minu[i] = xQ[jQ]
 						yQ_minu[i] = yQ[jQ]
-					elif abs(yQ[jQ] - yP_plus[i]) <= 1e-15:
+					elif abs(yQ[jQ] - yP_plus[i])<=1e-15:
 						if xQ[jQ] > xP_plus[i]:
 							xQ_plus[i] = xQ[jQ]
 							yQ_plus[i] = yQ[jQ]
@@ -237,19 +265,20 @@ def func_CN1_sort_xQyQ(m, xQ, yQ, xP_plus, yP_plus, xP_minu, yP_minu):
 if __name__ == '__main__':
 
 	d1, d2 = 0.3, 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
-	alpha1, alpha2 = np.pi/4, np.pi/3  # 钢丝绳方向角，取值范围为半闭半开区间[0,pi)
+	alpha1, alpha2 = np.pi/3, np.pi/3  # 钢丝绳方向角，取值范围为半闭半开区间[0,pi)
 
 	ex, ey = 0.45, 0.45
 	Rs = 1.2  # 球罐形加载顶头半径
 	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
 
-	n_loop = 0 # 初始增量步数
+	n_loop = int(0) # 初始增量步数
 	epsilon_max = 0.0  # 钢丝绳初始应变
 	epsilon_f = 0.0235  # 钢丝绳失效应变
 	init_H = 0.55  # 钢丝绳网在重力作用下初始垂度（初始高度)
 
 	m1 = 2*func_round(Rp/d1)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
 	m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
+
 
 	#x1, y1 = 1.5*np.sqrt(2), 0
 	#x2, y2 = 0, 1.5*np.sqrt(2)
@@ -262,9 +291,9 @@ if __name__ == '__main__':
 	x4, y4 = -1.5, -1.5
 
 	E1, E2 = 91.304e9, 25.0e9
-	sigma_y = 1050e6
-	sigma_f = 1350e6
-	fail_force = 40700
+	sigma_y = float(1050e6)
+	sigma_f = float(1350e6)
+	fail_force = float(40700)
 	A_rope = fail_force/sigma_f
 
 
@@ -292,6 +321,7 @@ if __name__ == '__main__':
 	xQ2_line34, yQ2_line34 = func_CN1_xy_intersection(A2_arr, B2_arr, C2_arr, A_line34, B_line34, C_line34)  # 钢丝绳直线束与边界线（锚点3与锚点4连线）的交点，方向2
 	xQ2_line41, yQ2_line41 = func_CN1_xy_intersection(A2_arr, B2_arr, C2_arr, A_line41, B_line41, C_line41)  # 钢丝绳直线束与边界线（锚点4与锚点1连线）的交点，方向2
 
+
 	xQ1_pick, yQ1_pick = func_CN1_pick_xQyQ(m1, xQ1_line12, yQ1_line12, xQ1_line23, yQ1_line23, xQ1_line34, yQ1_line34, xQ1_line41, yQ1_line41, x1, y1, x2, y2, x3, y3, x4, y4)  # 挑选出边界线段范围内的交点，方向1
 	xQ2_pick, yQ2_pick = func_CN1_pick_xQyQ(m2, xQ2_line12, yQ2_line12, xQ2_line23, yQ2_line23, xQ2_line34, yQ2_line34, xQ2_line41, yQ2_line41, x1, y1, x2, y2, x3, y3, x4, y4)  # 挑选出边界线段范围内的交点，方向2
 
@@ -300,9 +330,8 @@ if __name__ == '__main__':
 	zQ1_plus, zQ1_minu = np.zeros_like(xQ1_plus), np.zeros_like(xQ1_plus)
 	zQ2_plus, zQ2_minu = np.zeros_like(xQ2_plus), np.zeros_like(xQ2_plus)
 
-！！！！！！！！！！！！！！！！！！！！！
-	print('xQ1_plus=',xQ2_pick)
-	print('yQ1_plus=',yQ2_pick)
+	print('xQ1_pick=',xQ1_pick)
+	print('yQ1_pick=',yQ1_pick)
 	print('xQ1_minu=',xQ1_minu)
 	print('yQ1_minu=',yQ1_minu)
 
@@ -318,7 +347,6 @@ if __name__ == '__main__':
 
 	length_PQ2_plus = np.sqrt((xP2_plus-xQ2_plus)**2+(yP2_plus-yQ2_plus)**2+(zP2_plus-zQ2_plus)**2)
 	length_PQ2_minu = np.sqrt((xP2_minu-xQ2_minu)**2+(yP2_minu-yQ2_minu)**2+(zP2_minu-zQ2_minu)**2)
-
 
 	length_Arc1 = func_CN1_lengthArc(init_H,Rs,Rp,d1,m1,d2,m2)[0]
 	length_Arc2 = func_CN1_lengthArc(init_H,Rs,Rp,d1,m1,d2,m2)[1]
