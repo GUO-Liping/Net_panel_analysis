@@ -239,7 +239,7 @@ if __name__ == '__main__':
 	d1, d2 = 0.3, 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
 	alpha1, alpha2 = np.pi/4, np.pi/3  # 钢丝绳方向角，取值范围为半闭半开区间[0,pi)
 
-	ex, ey = 0.0, 0.0
+	ex, ey = 0.45, 0.45
 	Rs = 1.2  # 球罐形加载顶头半径
 	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
 
@@ -300,9 +300,9 @@ if __name__ == '__main__':
 	zQ1_plus, zQ1_minu = np.zeros_like(xQ1_plus), np.zeros_like(xQ1_plus)
 	zQ2_plus, zQ2_minu = np.zeros_like(xQ2_plus), np.zeros_like(xQ2_plus)
 
-
-	print('xQ1_plus=',xQ1_plus)
-	print('yQ1_plus=',yQ1_plus)
+！！！！！！！！！！！！！！！！！！！！！
+	print('xQ1_plus=',xQ2_pick)
+	print('yQ1_plus=',yQ2_pick)
 	print('xQ1_minu=',xQ1_minu)
 	print('yQ1_minu=',yQ1_minu)
 
