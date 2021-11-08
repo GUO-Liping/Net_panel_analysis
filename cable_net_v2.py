@@ -19,60 +19,6 @@ import numpy as np
 from userfunc_NPA import *
 
 
-######################################################################################################################################################
-# 本部分代码用于校准另一种方法
-def func_CN1_cablenet_test_xyz(theta, H, w, Rp, Rs, a, m):
-	i_arr = np.arange(1,m+0.1,step=1)
-
-	xP_arr = a/2*(2*i_arr - m - 1)
-	yP_arr = np.sqrt(Rp**2 - xP_arr**2)
-	zP_arr = H*np.ones_like(xP_arr)
-
-	theta_1 = np.arcsin(xP_arr[-1]/(w/np.sqrt(2)))
-	theta_2 = np.arccos(xP_arr[-1]/(w/np.sqrt(2)))
-	if theta>=0 and theta<theta_1:
-		m1 = int(m/2 - 1/2*func_round(np.sqrt(2)*w*np.sin(theta)/a))
-
-		i1_arr = np.arange(1,m1+0.1,step=1)
-		i2_arr = np.arange(m1+1,m+0.1,step=1)
-		yQ1_arr = w/np.sqrt(2)*np.cos(theta) - abs(xP_arr[0] +w/np.sqrt(2)*np.sin(theta))*np.tan(np.pi/4+theta) + a*(i1_arr-1)*np.tan(np.pi/4+theta)
-		yQ2_arr = w/np.sqrt(2)*np.cos(theta) - abs(xP_arr[m1]+w/np.sqrt(2)*np.sin(theta))*np.tan(np.pi/4-theta) - a*(i2_arr-m1-1)*np.tan(np.pi/4-theta)
-	
-		xQ_arr = xP_arr
-		yQ_arr = np.concatenate((yQ1_arr,yQ2_arr))
-		zQ_arr = np.zeros_like(xP_arr)
-
-	elif theta>=theta_1 and theta<=theta_2:
-		xQ_arr = xP_arr
-		yQ_arr = w/np.sqrt(2)*np.cos(theta) - abs(xP_arr[0] +w/np.sqrt(2)*np.sin(theta))*np.tan(np.pi/4-theta) - a*(i_arr-1)*np.tan(np.pi/4-theta)
-		zQ_arr = np.zeros_like(xP_arr)
-
-	elif theta>theta_2 and theta<np.pi/2:
-		m1 = m/2 - 1/2*func_round(np.sqrt(2)*w*np.cos(theta)/a)
-
-		i1_arr = np.arange(1,m1+0.1,step=1)
-		i2_arr = np.arange(m1+1,m+0.1,step=1)
-		yQ1_arr = w/np.sqrt(2)*np.sin(theta) - abs(xP_arr[0] -w/np.sqrt(2)*np.cos(theta))*np.tan(theta-np.pi/4) + a*(i1_arr-1)*np.tan(theta-np.pi/4)
-		yQ2_arr = w/np.sqrt(2)*np.sin(theta) - abs(xP_arr[m1]-w/np.sqrt(2)*np.cos(theta))*np.tan(3*np.pi/4-theta) - a*(i2_arr-m1-1)*np.tan(3*np.pi/4-theta)
-			
-		xQ_arr = xP_arr
-		yQ_arr1 = np.concatenate((yQ1_arr,yQ2_arr))
-		zQ_arr = np.zeros_like(xP_arr)
-	else:
-		raise ValueError
-
-	Lu_PQ = np.sqrt((xQ_arr-xP_arr)**2 + (yQ_arr-yP_arr)**2 + (zQ_arr-zP_arr)**2)
-	Ld_PQ = Lu_PQ[::-1]
-
-	if H == 0:
-		Lc_PQ = 2*yP_arr
-	else:
-		Lc_PQ = 2*np.sqrt(Rs**2-xP_arr**2) * np.arctan(np.sqrt(Rp**2-xP_arr**2)/np.sqrt(Rs**2-Rp**2))		
-
-	return Lu_PQ, Lc_PQ, Ld_PQ
-######################################################################################################################################################
-
-
 def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 	i_DireX = np.arange(1,m_DireX+0.1,step=1)
 	i_DireY = np.arange(1,m_DireY+0.1,step=1)
@@ -128,26 +74,28 @@ def func_CN1_sigma(epsilon, sigma_y, E1, E2):
 			raise ValueError
 	return sigma_XY
 
-def func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, H, ex, ey):
-	i1_arr = np.arange(1,m1+0.1,step=1)  # 第一方向上与加载区域相交的钢丝绳序列（从1开始）
 
-	yP1_plus_origin = d1/2*(2*i1_arr - m1 - 1)
-	xP1_plus_origin = np.sqrt(Rp**2 - yP1_plus_origin**2)
-	zP1_plus_origin = H*np.ones_like(yP1_plus_origin)
+def func_CN1_loaded_xPyP(m, d, alpha, Rp, H, ex, ey):
+	i1_arr = np.arange(1,m+0.1,step=1)  # 第一方向上与加载区域相交的钢丝绳序列（从1开始）
 
-	yP1_minu_origin = yP1_plus_origin
-	xP1_minu_origin = -xP1_plus_origin
-	zP1_minu_origin = zP1_plus_origin
+	yP_plus_origin = d/2*(2*i1_arr - m - 1)
+	xP_plus_origin = np.sqrt(Rp**2 - yP_plus_origin**2)
+	zP_plus_origin = H*np.ones_like(yP_plus_origin)
 
-	xP1_plus = ex + xP1_plus_origin*np.cos(alpha1) - yP1_plus_origin*np.sin(alpha1)
-	yP1_plus = ey + xP1_plus_origin*np.sin(alpha1) + yP1_plus_origin*np.cos(alpha1)
-	zP1_plus = zP1_plus_origin
+	yP_minu_origin = yP_plus_origin
+	xP_minu_origin =-xP_plus_origin
+	zP_minu_origin = zP_plus_origin
 
-	xP1_minu = ex + xP1_minu_origin*np.cos(alpha1) - yP1_minu_origin*np.sin(alpha1)
-	yP1_minu = ey + xP1_minu_origin*np.sin(alpha1) + yP1_minu_origin*np.cos(alpha1)
-	zP1_minu = zP1_minu_origin
+	# 坐标旋转，全部基于与x轴平行的钢丝绳与加载区域的交点
+	xP_plus = ex + xP_plus_origin*np.cos(alpha) - yP_plus_origin*np.sin(alpha)
+	yP_plus = ey + xP_plus_origin*np.sin(alpha) + yP_plus_origin*np.cos(alpha)
+	zP_plus = zP_plus_origin
 
-	return xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu
+	xP_minu = ex + xP_minu_origin*np.cos(alpha) - yP_minu_origin*np.sin(alpha)
+	yP_minu = ey + xP_minu_origin*np.sin(alpha) + yP_minu_origin*np.cos(alpha)
+	zP_minu = zP_minu_origin
+
+	return xP_plus, yP_plus, zP_plus, xP_minu, yP_minu, zP_minu
 
 def func_CN1_solve_ABC(para_x1, para_y1, para_x2, para_y2):
 	if np.min(abs(para_x2-para_x1))==0:
@@ -197,7 +145,7 @@ def func_CN1_pick_xQyQ(m1, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34
 	for i34 in range(len(xQ_line34)):
 		if xQ_line34[i34]<x3 and xQ_line34[i34]<x4:
 			pass
-		elif  xQ_line34[i34]>x3 and xQ_line34[i34]>x4:
+		elif xQ_line34[i34]>x3 and xQ_line34[i34]>x4:
 			pass
 		else:
 			xQ1[i1] = xQ_line34[i34]				
@@ -206,7 +154,7 @@ def func_CN1_pick_xQyQ(m1, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34
 	for i41 in range(len(xQ_line41)):
 		if xQ_line41[i41]<x1 and xQ_line41[i41]<x4:
 			pass
-		elif  xQ_line41[i41]>x1 and xQ_line41[i41]>x4:
+		elif xQ_line41[i41]>x1 and xQ_line41[i41]>x4:
 			pass
 		else:
 			xQ1[i1] = xQ_line41[i41]
@@ -215,52 +163,54 @@ def func_CN1_pick_xQyQ(m1, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34
 	return xQ1, yQ1
 
 
-def func_CN1_sort_xQyQ(m1, xQ1, yQ1, xP1_plus, yP1_plus, xP1_minu, yP1_minu):
-	xQ1_plus = np.zeros(m1)
-	yQ1_plus = np.zeros(m1)
-	yQ1_minu = np.zeros(m1)
-	xQ1_minu = np.zeros(m1)
+def func_CN1_sort_xQyQ(m, xQ, yQ, xP_plus, yP_plus, xP_minu, yP_minu):
+	xQ_plus = np.zeros(m)
+	yQ_plus = np.zeros(m)
+	yQ_minu = np.zeros(m)
+	xQ_minu = np.zeros(m)
 
-	for i in range(len(xP1_plus)):
-		if abs(xP1_plus[i] - xP1_minu[i]) < 1e-16:
-			for j in range(len(xQ1)):
-				if abs(xQ1[j] - xP1_plus[i]) < 1e-16:
-					if (yQ1[j] - yP1_plus[i])>1e-16:
-						xQ1_plus[i] = xQ1[j]
-						yQ1_plus[i] = yQ1[j]
-					elif (yQ1[j] - yP1_plus[i])<-1e-16:  # python对于数值的绝对相等判别存在非常非常小1e-16但是不可忽略的误差
-						xQ1_minu[i] = xQ1[j]
-						yQ1_minu[i] = yQ1[j]
+	for i in range(len(xP_plus)):
+		if abs(xP_plus[i] - xP_minu[i]) <= 1e-15:
+			for jP in range(len(xQ)):
+				if abs(xQ[jP] - xP_plus[i]) <= 1e-15:
+					if (yQ[jP] - yP_plus[i])>=1e-15:
+						xQ_plus[i] = xQ[jP]
+						yQ_plus[i] = yQ[jP]
+					elif (yQ[jP] - yP_plus[i])<=-1e-15:  # python对于数值的绝对相等判别存在非常非常小1e-15但是不可忽略的误差
+						xQ_minu[i] = xQ[jP]
+						yQ_minu[i] = yQ[jP]
 					else:
 						raise ValueError
 				else:
 					pass
 		else:
-			for j in range(len(xQ1)):
-				k_search = (yQ1[j] - yP1_plus[i])/(xQ1[j] - xP1_plus[i])
-				k_target = (yP1_plus[i] - yP1_minu[i])/(xP1_plus[i] - xP1_minu[i])
-				if abs(k_search-k_target) < 1e-16:
-					if (yQ1[j] - yP1_plus[i])>1e-16:
-						xQ1_plus[i] = xQ1[j]
-						yQ1_plus[i] = yQ1[j]
-					elif (yQ1[j] - yP1_plus[i])<-1e-16:  # python对于数值的绝对相等判别存在非常非常小1e-16但是不可忽略的误差
-						xQ1_minu[i] = xQ1[j]
-						yQ1_minu[i] = yQ1[j]
-					elif abs(yQ1[j] - yP1_plus[i]) < 1e-16:
-						#print('i=',i, 'xQ1[j]=',xQ1[j],'yQ1[j]=',yQ1[j])
-						if xQ1[j] > xP1_plus[i]:
-							xQ1_plus[i] = xQ1[j]
-							yQ1_plus[i] = yQ1[j]
-						elif xQ1[j] < xP1_plus[i]:
-							xQ1_minu[i] = xQ1[j]
-							yQ1_minu[i] = yQ1[j]
+			k_target = (yP_plus[i] - yP_minu[i])/(xP_plus[i] - xP_minu[i])
+			for jQ in range(len(xQ)):
+				k_search = (yQ[jQ] - yP_plus[i])/(xQ[jQ] - xP_plus[i])
+				if abs(k_search-k_target) <= 1e-15:
+					if (yQ[jQ] - yP_plus[i])>=1e-15:
+						xQ_plus[i] = xQ[jQ]
+						yQ_plus[i] = yQ[jQ]
+					elif (yQ[jQ] - yP_plus[i])<=-1e-15:  # python对于数值的绝对相等判别存在非常非常小1e-15但是不可忽略的误差
+						xQ_minu[i] = xQ[jQ]
+						yQ_minu[i] = yQ[jQ]
+					elif abs(yQ[jQ] - yP_plus[i]) <= 1e-15:
+						if xQ[jQ] > xP_plus[i]:
+							xQ_plus[i] = xQ[jQ]
+							yQ_plus[i] = yQ[jQ]
+						elif xQ[jQ] < xP_plus[i]:
+							xQ_minu[i] = xQ[jQ]
+							yQ_minu[i] = yQ[jQ]
 						else:
 							raise ValueError
 					else:
 						raise ValueError	
 				else:
-					pass
-	return xQ1_plus, yQ1_plus, xQ1_minu, yQ1_minu
+					continue
+			print('i=',i, 'xQ_plus=',xQ_plus,'yQ_plus=',yQ_plus)
+
+	return xQ_plus, yQ_plus, xQ_minu, yQ_minu
+
 
 # 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
@@ -330,6 +280,11 @@ if __name__ == '__main__':
 	zQ2_plus, zQ2_minu = np.zeros_like(xQ2_plus), np.zeros_like(xQ2_plus)
 
 
+	print('xQ1_pick=',xQ1_pick)
+	print('yQ1_pick=',yQ1_pick)
+	print('xQ1_minu=',xQ1_minu)
+	print('yQ1_minu=',yQ1_minu)
+
 
 	print('xQ2_plus=',xQ2_plus)
 	print('yQ2_plus=',yQ2_plus)
@@ -337,19 +292,11 @@ if __name__ == '__main__':
 	print('yQ2_minu=',yQ2_minu)
 
 
-
-
-
-
-
 	length_PQ1_plus = np.sqrt((xP1_plus-xQ1_plus)**2+(yP1_plus-yQ1_plus)**2+(zP1_plus-zQ1_plus)**2)
 	length_PQ1_minu = np.sqrt((xP1_minu-xQ1_minu)**2+(yP1_minu-yQ1_minu)**2+(zP1_minu-zQ1_minu)**2)
 
 	length_PQ2_plus = np.sqrt((xP2_plus-xQ2_plus)**2+(yP2_plus-yQ2_plus)**2+(zP2_plus-zQ2_plus)**2)
 	length_PQ2_minu = np.sqrt((xP2_minu-xQ2_minu)**2+(yP2_minu-yQ2_minu)**2+(zP2_minu-zQ2_minu)**2)
-
-
-
 
 
 	length_Arc1 = func_CN1_lengthArc(init_H,Rs,Rp,d1,m1,d2,m2)[0]
@@ -360,8 +307,8 @@ if __name__ == '__main__':
 	print('L0_Dire1=',L0_Dire1)
 	print('L0_Dire2=',L0_Dire2)
 
-	Height = 0.0  # 网片加载位移
-	step_H = 1e-4  # 网片位移加载增量步长，单位：m
+	Height = 0.0  # 网片初始面外变形
+	step_H = 1e-2  # 位移加载增量步长，单位：m
 
 	while(n_loop<=1e4 and epsilon_max<=epsilon_f):
 
@@ -388,29 +335,16 @@ if __name__ == '__main__':
 		n_loop = n_loop+1
 		Height = Height+step_H
 
-		print('It the',n_loop, 'th loop,','epsilon_max=',epsilon_max,'Height=',Height)
+		#print('It the',n_loop, 'th loop,','epsilon_max=',epsilon_max,'Height=',Height)
 
 
-	sigma_XY = func_CN1_sigma(epsilon_XY, sigma_y, E1, E2)
-	force_XY = sigma_XY * A_rope
-	length_PQ = np.concatenate((length_PQ_plusX,length_PQ_minusX,length_PQ_plusY,length_PQ_minusY),axis=0)
-	max_height = Height
-	max_force = np.sum(force_XY*max_height/length_PQ)
+	#sigma_all = func_CN1_sigma(epsilon_all, sigma_y, E1, E2)
+	#force_all = sigma_all * A_rope
+	#length_PQ_all = np.concatenate((length_PQ1_plus,length_PQ1_minu,length_PQ2_plus,length_PQ2_minu),axis=0)
+	#max_height = Height
+	#max_force = np.sum(force_all*max_height/length_PQ_all)
 
-	########################################################################
-	# 本部分代码用于校准另一种方法
-	w =  np.sqrt((x1-x2)**2+(y1-y2)**2)
-	theta = np.arctan(y1/x1)
-	Lu_PQ0 = func_CN1_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[0]
-	Lc_PQ0 = func_CN1_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[1]
-	Ld_PQ0 = func_CN1_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[2]
-	L_PQ0 = Lu_PQ0 + Lc_PQ0 + Ld_PQ0
-	ED = np.linalg.norm((L_PQ0-L_DireY0),ord=2, axis=0, keepdims=False)
-	if ED<1e-3:
-		print('Test is passed')
-	else:
-		print('Test is failed')
-	########################################################################
 
-	print('max_height=',max_height)
-	print('max_force=',max_force)
+
+	print('Height=',Height)
+
