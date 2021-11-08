@@ -60,6 +60,7 @@ def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 		raise ValueError
 	return arc_length_DireX,arc_length_DireY
 
+
 def func_CN1_sigma(epsilon, sigma_y, E1, E2):
 	epsilon1 = sigma_y/E1
 	sigma_XY = np.zeros_like(epsilon)
@@ -98,7 +99,7 @@ def func_CN1_loaded_xPyP(m, d, alpha, Rp, H, ex, ey):
 	return xP_plus, yP_plus, zP_plus, xP_minu, yP_minu, zP_minu
 
 def func_CN1_solve_ABC(para_x1, para_y1, para_x2, para_y2):
-	if np.min(abs(para_x2-para_x1))==0:
+	if np.amin(abs(para_x2-para_x1))==0:
 		A1_arr = np.ones_like(para_x1)
 		B1_arr = np.zeros_like(para_x1)
 		C1_arr = -para_x1+np.zeros_like(para_x1)
@@ -110,7 +111,7 @@ def func_CN1_solve_ABC(para_x1, para_y1, para_x2, para_y2):
 
 
 def func_CN1_xy_intersection(A1, B1, C1, A2, B2, C2):
-	if np.min(abs(A1*B2-A2*B1))==0:
+	if np.amin(abs(A1*B2-A2*B1))==0:
 		x_point = A1 + A2 + 10**100  # 采用大数淹没，避免除0报警
 		y_point = A1 + A2 + 10**100  # 采用大数淹没，避免除0报警
 	else:
@@ -120,47 +121,67 @@ def func_CN1_xy_intersection(A1, B1, C1, A2, B2, C2):
 
 
 # 本函数用于删除钢丝绳网与锚固点之间边界线延长线上的交点
-def func_CN1_pick_xQyQ(m1, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34, yQ_line34, xQ_line41, yQ_line41, x1, y1, x2, y2, x3, y3, x4, y4):
-	xQ1 = np.zeros(2*m1)
-	yQ1 = np.zeros(2*m1)
+def func_CN1_pick_xQyQ(m, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34, yQ_line34, xQ_line41, yQ_line41, x1, y1, x2, y2, x3, y3, x4, y4):
+	xQ = np.zeros(2*m)
+	yQ = np.zeros(2*m)
 	i1 = 0
 	for i12 in range(len(xQ_line12)):
 		if xQ_line12[i12]<x1 and xQ_line12[i12]<x2:
 			pass
-		elif  xQ_line12[i12]>x1 and xQ_line12[i12]>x2:
+		elif xQ_line12[i12]>x1 and xQ_line12[i12]>x2:
 			pass
 		else:
-			xQ1[i1] = xQ_line12[i12]
-			yQ1[i1] = yQ_line12[i12]
-			i1 = i1 + 1
+			if yQ_line12[i12] < y1 and  yQ_line12[i12] < y2:
+				pass
+			elif yQ_line12[i12] > y1 and yQ_line12[i12] > y2:
+				pass
+			else:
+				xQ[i1] = xQ_line12[i12]
+				yQ[i1] = yQ_line12[i12]
+				i1 = i1 + 1
 	for i23 in range(len(xQ_line23)):
 		if xQ_line23[i23]<x2 and xQ_line23[i23]<x3:
 			pass
-		elif  xQ_line23[i23]>x2 and xQ_line23[i23]>x3:
+		elif xQ_line23[i23]>x2 and xQ_line23[i23]>x3:
 			pass
 		else:
-			xQ1[i1] = xQ_line23[i23]
-			yQ1[i1] = yQ_line23[i23]
-			i1 = i1 + 1
+			if yQ_line23[i23] < y2 and yQ_line23[i23] < y3:
+				pass
+			elif yQ_line23[i23] > y2 and yQ_line23[i23] > y3:
+				pass
+			else:
+				xQ[i1] = xQ_line23[i23]
+				yQ[i1] = yQ_line23[i23]
+				i1 = i1 + 1
 	for i34 in range(len(xQ_line34)):
 		if xQ_line34[i34]<x3 and xQ_line34[i34]<x4:
 			pass
 		elif xQ_line34[i34]>x3 and xQ_line34[i34]>x4:
 			pass
 		else:
-			xQ1[i1] = xQ_line34[i34]				
-			yQ1[i1] = yQ_line34[i34]	
-			i1 = i1 + 1
+			if yQ_line34[i34] < y3 and yQ_line34[i34] < y4:
+				pass
+			elif yQ_line34[i34] > y3 and yQ_line23[i34] > y4:
+				pass
+			else:
+				xQ[i1] = xQ_line34[i34]
+				yQ[i1] = yQ_line34[i34]
+				i1 = i1 + 1
 	for i41 in range(len(xQ_line41)):
 		if xQ_line41[i41]<x1 and xQ_line41[i41]<x4:
 			pass
 		elif xQ_line41[i41]>x1 and xQ_line41[i41]>x4:
 			pass
 		else:
-			xQ1[i1] = xQ_line41[i41]
-			yQ1[i1] = yQ_line41[i41]
-			i1 = i1 + 1
-	return xQ1, yQ1
+			if yQ_line41[i41] < y4 and yQ_line41[i41] < y1:
+				pass
+			elif yQ_line41[i41] > y4 and yQ_line41[i41] > y1:
+				pass
+			else:
+				xQ[i1] = xQ_line41[i41]
+				yQ[i1] = yQ_line41[i41]
+				i1 = i1 + 1
+	return xQ, yQ
 
 
 def func_CN1_sort_xQyQ(m, xQ, yQ, xP_plus, yP_plus, xP_minu, yP_minu):
@@ -207,7 +228,7 @@ def func_CN1_sort_xQyQ(m, xQ, yQ, xP_plus, yP_plus, xP_minu, yP_minu):
 						raise ValueError	
 				else:
 					continue
-			print('i=',i, 'xQ_plus=',xQ_plus,'yQ_plus=',yQ_plus)
+			#print('i=',i, 'xQ_plus=',xQ_plus,'yQ_plus=',yQ_plus)
 
 	return xQ_plus, yQ_plus, xQ_minu, yQ_minu
 
@@ -216,9 +237,9 @@ def func_CN1_sort_xQyQ(m, xQ, yQ, xP_plus, yP_plus, xP_minu, yP_minu):
 if __name__ == '__main__':
 
 	d1, d2 = 0.3, 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
-	alpha1, alpha2 = np.pi/6, np.pi/2  # 钢丝绳方向角，取值范围为半闭半开区间[0,pi)
+	alpha1, alpha2 = np.pi/2, np.pi/3  # 钢丝绳方向角，取值范围为半闭半开区间[0,pi)
 
-	ex, ey = 0, 0
+	ex, ey = 0.0, 0.0
 	Rs = 1.2  # 球罐形加载顶头半径
 	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
 
@@ -230,15 +251,15 @@ if __name__ == '__main__':
 	m1 = 2*func_round(Rp/d1)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
 	m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
 
-	#x1, y1 = 1.5*np.sqrt(2), 0
-	#x2, y2 = 0, 1.5*np.sqrt(2)
-	#x3, y3 = -1.5*np.sqrt(2), 0
-	#x4, y4 = 0, -1.5*np.sqrt(2)
+	x1, y1 = 1.5*np.sqrt(2), 0
+	x2, y2 = 0, 1.5*np.sqrt(2)
+	x3, y3 = -1.5*np.sqrt(2), 0
+	x4, y4 = 0, -1.5*np.sqrt(2)
 
-	x1, y1 = 1.5, -1.5
-	x2, y2 = 1.5, 1.5
-	x3, y3 = -1.5, 1.5
-	x4, y4 = -1.5, -1.5
+	#x1, y1 = 1.5, -1.5
+	#x2, y2 = 1.5, 1.5
+	#x3, y3 = -1.5, 1.5
+	#x4, y4 = -1.5, -1.5
 
 	E1, E2 = 91.304e9, 25.0e9
 	sigma_y = 1050e6
@@ -280,8 +301,8 @@ if __name__ == '__main__':
 	zQ2_plus, zQ2_minu = np.zeros_like(xQ2_plus), np.zeros_like(xQ2_plus)
 
 
-	print('xQ1_pick=',xQ1_pick)
-	print('yQ1_pick=',yQ1_pick)
+	print('xQ1_plus=',xQ1_plus)
+	print('yQ1_plus=',yQ1_plus)
 	print('xQ1_minu=',xQ1_minu)
 	print('yQ1_minu=',yQ1_minu)
 
@@ -308,7 +329,7 @@ if __name__ == '__main__':
 	print('L0_Dire2=',L0_Dire2)
 
 	Height = 0.0  # 网片初始面外变形
-	step_H = 1e-2  # 位移加载增量步长，单位：m
+	step_H = 1e-3  # 位移加载增量步长，单位：m
 
 	while(n_loop<=1e4 and epsilon_max<=epsilon_f):
 
@@ -335,7 +356,7 @@ if __name__ == '__main__':
 		n_loop = n_loop+1
 		Height = Height+step_H
 
-		#print('It the',n_loop, 'th loop,','epsilon_max=',epsilon_max,'Height=',Height)
+		print('It the',n_loop, 'th loop,','epsilon_max=',epsilon_max,'Height=',Height)
 
 
 	#sigma_all = func_CN1_sigma(epsilon_all, sigma_y, E1, E2)
