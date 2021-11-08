@@ -21,7 +21,7 @@ from userfunc_NPA import *
 
 ######################################################################################################################################################
 # 本部分代码用于校准另一种方法
-def func_cablenet_xyz(theta, H, w, Rp, Rs, a, m):
+def func_CN1_cablenet_test_xyz(theta, H, w, Rp, Rs, a, m):
 	i_arr = np.arange(1,m+0.1,step=1)
 
 	xP_arr = a/2*(2*i_arr - m - 1)
@@ -73,13 +73,7 @@ def func_cablenet_xyz(theta, H, w, Rp, Rs, a, m):
 ######################################################################################################################################################
 
 
-def func_cross_line_point(A1, B1, C1, A2, B2, C2):
-	x_cross = (B1*C2-B2*C1)/(A1*B2-A2*B1)
-	y_cross = (A2*C1-A1*C2)/(A1*B2-A2*B1)
-	return x_cross, y_cross
-
-
-def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
+def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 	i_DireX = np.arange(1,m_DireX+0.1,step=1)
 	i_DireY = np.arange(1,m_DireY+0.1,step=1)
 
@@ -120,7 +114,7 @@ def func_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 		raise ValueError
 	return arc_length_DireX,arc_length_DireY
 
-def func_sigma(epsilon, sigma_y, E1, E2):
+def func_CN1_sigma(epsilon, sigma_y, E1, E2):
 	epsilon1 = sigma_y/E1
 	sigma_XY = np.zeros_like(epsilon)
 	for i in range (int(len(epsilon))):
@@ -134,7 +128,7 @@ def func_sigma(epsilon, sigma_y, E1, E2):
 			raise ValueError
 	return sigma_XY
 
-def func_loaded_xPyP(m1, d1, alpha1, Rp, H, ex, ey):
+def func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, H, ex, ey):
 	i1_arr = np.arange(1,m1+0.1,step=1)  # 第一方向上与加载区域相交的钢丝绳序列（从1开始）
 
 	yP1_plus_origin = d1/2*(2*i1_arr - m1 - 1)
@@ -155,7 +149,7 @@ def func_loaded_xPyP(m1, d1, alpha1, Rp, H, ex, ey):
 
 	return xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu
 
-def func_solve_ABC(para_x1, para_y1, para_x2, para_y2):
+def func_CN1_solve_ABC(para_x1, para_y1, para_x2, para_y2):
 	if np.min(abs(para_x2-para_x1))==0:
 		A1_arr = np.ones_like(para_x1)
 		B1_arr = np.zeros_like(para_x1)
@@ -167,7 +161,7 @@ def func_solve_ABC(para_x1, para_y1, para_x2, para_y2):
 	return A1_arr, B1_arr, C1_arr
 
 
-def func_xy_intersection(A1, B1, C1, A2, B2, C2):
+def func_CN1_xy_intersection(A1, B1, C1, A2, B2, C2):
 	if np.min(abs(A1*B2-A2*B1))==0:
 		x_point = A1 + A2 + 10**100  # 采用大数淹没，避免除0报警
 		y_point = A1 + A2 + 10**100  # 采用大数淹没，避免除0报警
@@ -178,7 +172,7 @@ def func_xy_intersection(A1, B1, C1, A2, B2, C2):
 
 
 # 本函数用于删除钢丝绳网与锚固点之间边界线延长线上的交点
-def func_pick_xQyQ(m1, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34, yQ_line34, xQ_line41, yQ_line41, x1, y1, x2, y2, x3, y3, x4, y4):
+def func_CN1_pick_xQyQ(m1, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34, yQ_line34, xQ_line41, yQ_line41, x1, y1, x2, y2, x3, y3, x4, y4):
 	xQ1 = np.zeros(2*m1)
 	yQ1 = np.zeros(2*m1)
 	i1 = 0
@@ -221,7 +215,7 @@ def func_pick_xQyQ(m1, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34, yQ
 	return xQ1, yQ1
 
 
-def func_sort_xQyQ(m1, xQ1, yQ1, xP1_plus, yP1_plus, xP1_minu, yP1_minu):
+def func_CN1_sort_xQyQ(m1, xQ1, yQ1, xP1_plus, yP1_plus, xP1_minu, yP1_minu):
 	xQ1_plus = np.zeros(m1)
 	yQ1_plus = np.zeros(m1)
 	yQ1_minu = np.zeros(m1)
@@ -272,7 +266,7 @@ def func_sort_xQyQ(m1, xQ1, yQ1, xP1_plus, yP1_plus, xP1_minu, yP1_minu):
 if __name__ == '__main__':
 
 	d1, d2 = 0.3, 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
-	alpha1, alpha2 = 0, np.pi/2  # 钢丝绳方向角，取值范围为半闭半开区间[0,pi)
+	alpha1, alpha2 = np.pi/6, np.pi/2  # 钢丝绳方向角，取值范围为半闭半开区间[0,pi)
 
 	ex, ey = 0, 0
 	Rs = 1.2  # 球罐形加载顶头半径
@@ -304,34 +298,34 @@ if __name__ == '__main__':
 
 
 	# 初始时刻加载区域边缘力的作用点（P点）坐标，方向1与方向2，P点坐标随着加载位移的变换实时变化
-	xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_loaded_xPyP(m1, d1, alpha1, Rp, init_H, ex, ey)
-	xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_loaded_xPyP(m2, d2, alpha2, Rp, init_H, ex, ey)
+	xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, init_H, ex, ey)
+	xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_CN1_loaded_xPyP(m2, d2, alpha2, Rp, init_H, ex, ey)
 
 
 	# 求解计算过程中钢丝绳网片边界上力的作用点（Q点）坐标，方向1与方向2，Q点坐标不随加载位移的变换改变
-	A1_arr, B1_arr, C1_arr = func_solve_ABC(xP1_minu, yP1_minu, xP1_plus, yP1_plus)  # 与加载区域边缘相交的1方向的钢丝绳直线方程系数A1x+B1y+C1=0
-	A2_arr, B2_arr, C2_arr = func_solve_ABC(xP2_minu, yP2_minu, xP2_plus, yP2_plus)  # 与加载区域边缘相交的2方向的钢丝绳直线方程系数A2x+B2y+C2=0
+	A1_arr, B1_arr, C1_arr = func_CN1_solve_ABC(xP1_minu, yP1_minu, xP1_plus, yP1_plus)  # 与加载区域边缘相交的1方向的钢丝绳直线方程系数A1x+B1y+C1=0
+	A2_arr, B2_arr, C2_arr = func_CN1_solve_ABC(xP2_minu, yP2_minu, xP2_plus, yP2_plus)  # 与加载区域边缘相交的2方向的钢丝绳直线方程系数A2x+B2y+C2=0
 
-	A_line12, B_line12, C_line12 = func_solve_ABC(x1, y1, x2, y2)  # 边界线方程（锚点之间的连接线）A_linex+B_liney+C_line=0
-	A_line23, B_line23, C_line23 = func_solve_ABC(x2, y2, x3, y3)
-	A_line34, B_line34, C_line34 = func_solve_ABC(x3, y3, x4, y4)
-	A_line41, B_line41, C_line41 = func_solve_ABC(x4, y4, x1, y1)
+	A_line12, B_line12, C_line12 = func_CN1_solve_ABC(x1, y1, x2, y2)  # 边界线方程（锚点之间的连接线）A_linex+B_liney+C_line=0
+	A_line23, B_line23, C_line23 = func_CN1_solve_ABC(x2, y2, x3, y3)
+	A_line34, B_line34, C_line34 = func_CN1_solve_ABC(x3, y3, x4, y4)
+	A_line41, B_line41, C_line41 = func_CN1_solve_ABC(x4, y4, x1, y1)
 
-	xQ1_line12, yQ1_line12 = func_xy_intersection(A1_arr, B1_arr, C1_arr, A_line12, B_line12, C_line12)  # 钢丝绳直线束与边界线（锚点1与锚点2连线）的交点，方向1
-	xQ1_line23, yQ1_line23 = func_xy_intersection(A1_arr, B1_arr, C1_arr, A_line23, B_line23, C_line23)  # 钢丝绳直线束与边界线（锚点2与锚点3连线）的交点，方向1
-	xQ1_line34, yQ1_line34 = func_xy_intersection(A1_arr, B1_arr, C1_arr, A_line34, B_line34, C_line34)  # 钢丝绳直线束与边界线（锚点3与锚点4连线）的交点，方向1
-	xQ1_line41, yQ1_line41 = func_xy_intersection(A1_arr, B1_arr, C1_arr, A_line41, B_line41, C_line41)  # 钢丝绳直线束与边界线（锚点4与锚点1连线）的交点，方向1
+	xQ1_line12, yQ1_line12 = func_CN1_xy_intersection(A1_arr, B1_arr, C1_arr, A_line12, B_line12, C_line12)  # 钢丝绳直线束与边界线（锚点1与锚点2连线）的交点，方向1
+	xQ1_line23, yQ1_line23 = func_CN1_xy_intersection(A1_arr, B1_arr, C1_arr, A_line23, B_line23, C_line23)  # 钢丝绳直线束与边界线（锚点2与锚点3连线）的交点，方向1
+	xQ1_line34, yQ1_line34 = func_CN1_xy_intersection(A1_arr, B1_arr, C1_arr, A_line34, B_line34, C_line34)  # 钢丝绳直线束与边界线（锚点3与锚点4连线）的交点，方向1
+	xQ1_line41, yQ1_line41 = func_CN1_xy_intersection(A1_arr, B1_arr, C1_arr, A_line41, B_line41, C_line41)  # 钢丝绳直线束与边界线（锚点4与锚点1连线）的交点，方向1
 
-	xQ2_line12, yQ2_line12 = func_xy_intersection(A2_arr, B2_arr, C2_arr, A_line12, B_line12, C_line12)  # 钢丝绳直线束与边界线（锚点1与锚点2连线）的交点，方向2
-	xQ2_line23, yQ2_line23 = func_xy_intersection(A2_arr, B2_arr, C2_arr, A_line23, B_line23, C_line23)  # 钢丝绳直线束与边界线（锚点2与锚点3连线）的交点，方向2
-	xQ2_line34, yQ2_line34 = func_xy_intersection(A2_arr, B2_arr, C2_arr, A_line34, B_line34, C_line34)  # 钢丝绳直线束与边界线（锚点3与锚点4连线）的交点，方向2
-	xQ2_line41, yQ2_line41 = func_xy_intersection(A2_arr, B2_arr, C2_arr, A_line41, B_line41, C_line41)  # 钢丝绳直线束与边界线（锚点4与锚点1连线）的交点，方向2
+	xQ2_line12, yQ2_line12 = func_CN1_xy_intersection(A2_arr, B2_arr, C2_arr, A_line12, B_line12, C_line12)  # 钢丝绳直线束与边界线（锚点1与锚点2连线）的交点，方向2
+	xQ2_line23, yQ2_line23 = func_CN1_xy_intersection(A2_arr, B2_arr, C2_arr, A_line23, B_line23, C_line23)  # 钢丝绳直线束与边界线（锚点2与锚点3连线）的交点，方向2
+	xQ2_line34, yQ2_line34 = func_CN1_xy_intersection(A2_arr, B2_arr, C2_arr, A_line34, B_line34, C_line34)  # 钢丝绳直线束与边界线（锚点3与锚点4连线）的交点，方向2
+	xQ2_line41, yQ2_line41 = func_CN1_xy_intersection(A2_arr, B2_arr, C2_arr, A_line41, B_line41, C_line41)  # 钢丝绳直线束与边界线（锚点4与锚点1连线）的交点，方向2
 
-	xQ1_pick, yQ1_pick = func_pick_xQyQ(m1, xQ1_line12, yQ1_line12, xQ1_line23, yQ1_line23, xQ1_line34, yQ1_line34, xQ1_line41, yQ1_line41, x1, y1, x2, y2, x3, y3, x4, y4)  # 挑选出边界线段范围内的交点，方向1
-	xQ2_pick, yQ2_pick = func_pick_xQyQ(m2, xQ2_line12, yQ2_line12, xQ2_line23, yQ2_line23, xQ2_line34, yQ2_line34, xQ2_line41, yQ2_line41, x1, y1, x2, y2, x3, y3, x4, y4)  # 挑选出边界线段范围内的交点，方向2
+	xQ1_pick, yQ1_pick = func_CN1_pick_xQyQ(m1, xQ1_line12, yQ1_line12, xQ1_line23, yQ1_line23, xQ1_line34, yQ1_line34, xQ1_line41, yQ1_line41, x1, y1, x2, y2, x3, y3, x4, y4)  # 挑选出边界线段范围内的交点，方向1
+	xQ2_pick, yQ2_pick = func_CN1_pick_xQyQ(m2, xQ2_line12, yQ2_line12, xQ2_line23, yQ2_line23, xQ2_line34, yQ2_line34, xQ2_line41, yQ2_line41, x1, y1, x2, y2, x3, y3, x4, y4)  # 挑选出边界线段范围内的交点，方向2
 
-	xQ1_plus, yQ1_plus, xQ1_minu, yQ1_minu = func_sort_xQyQ(m1, xQ1_pick, yQ1_pick, xP1_plus, yP1_plus, xP1_minu, yP1_minu)  # 对挑选出来的交点进行重新排序，使得边界线上的交点与加载边缘上的交点一一对应，与实际钢丝绳网中匹配关系一致，方向1
-	xQ2_plus, yQ2_plus, xQ2_minu, yQ2_minu = func_sort_xQyQ(m2, xQ2_pick, yQ2_pick, xP2_plus, yP2_plus, xP2_minu, yP2_minu)  # 对挑选出来的交点进行重新排序，使得边界线上的交点与加载边缘上的交点一一对应，与实际钢丝绳网中匹配关系一致，方向2
+	xQ1_plus, yQ1_plus, xQ1_minu, yQ1_minu = func_CN1_sort_xQyQ(m1, xQ1_pick, yQ1_pick, xP1_plus, yP1_plus, xP1_minu, yP1_minu)  # 对挑选出来的交点进行重新排序，使得边界线上的交点与加载边缘上的交点一一对应，与实际钢丝绳网中匹配关系一致，方向1
+	xQ2_plus, yQ2_plus, xQ2_minu, yQ2_minu = func_CN1_sort_xQyQ(m2, xQ2_pick, yQ2_pick, xP2_plus, yP2_plus, xP2_minu, yP2_minu)  # 对挑选出来的交点进行重新排序，使得边界线上的交点与加载边缘上的交点一一对应，与实际钢丝绳网中匹配关系一致，方向2
 	zQ1_plus, zQ1_minu = np.zeros_like(xQ1_plus), np.zeros_like(xQ1_plus)
 	zQ2_plus, zQ2_minu = np.zeros_like(xQ2_plus), np.zeros_like(xQ2_plus)
 
@@ -358,23 +352,21 @@ if __name__ == '__main__':
 
 
 
-	length_Arc1 = func_lengthArc(init_H,Rs,Rp,d1,m1,d2,m2)[0]
-	length_Arc2 = func_lengthArc(init_H,Rs,Rp,d1,m1,d2,m2)[1]
+	length_Arc1 = func_CN1_lengthArc(init_H,Rs,Rp,d1,m1,d2,m2)[0]
+	length_Arc2 = func_CN1_lengthArc(init_H,Rs,Rp,d1,m1,d2,m2)[1]
 
 	L0_Dire1 = length_PQ1_plus + length_PQ1_minu + length_Arc1
 	L0_Dire2 = length_PQ2_plus + length_PQ2_minu + length_Arc2
 	print('L0_Dire1=',L0_Dire1)
 	print('L0_Dire2=',L0_Dire2)
-	
+
 	Height = 0.0  # 网片加载位移
-	step_H = 1e-2  # 网片位移加载增量步长，单位：m
+	step_H = 1e-4  # 网片位移加载增量步长，单位：m
 
 	while(n_loop<=1e4 and epsilon_max<=epsilon_f):
-		n_loop = n_loop+1
-		Height = Height+step_H
 
-		xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_loaded_xPyP(m1, d1, alpha1, Rp, Height, ex, ey)
-		xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_loaded_xPyP(m2, d2, alpha2, Rp, Height, ex, ey)
+		xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, Height, ex, ey)
+		xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_CN1_loaded_xPyP(m2, d2, alpha2, Rp, Height, ex, ey)
 
 		length_PQ1_plus = np.sqrt((xP1_plus-xQ1_plus)**2+(yP1_plus-yQ1_plus)**2+(zP1_plus-zQ1_plus)**2)
 		length_PQ1_minu = np.sqrt((xP1_minu-xQ1_minu)**2+(yP1_minu-yQ1_minu)**2+(zP1_minu-zQ1_minu)**2)
@@ -382,21 +374,24 @@ if __name__ == '__main__':
 		length_PQ2_plus = np.sqrt((xP2_plus-xQ2_plus)**2+(yP2_plus-yQ2_plus)**2+(zP2_plus-zQ2_plus)**2)
 		length_PQ2_minu = np.sqrt((xP2_minu-xQ2_minu)**2+(yP2_minu-yQ2_minu)**2+(zP2_minu-zQ2_minu)**2)
 
-		length_Arc1 = func_lengthArc(Height,Rs,Rp,d1,m1,d2,m2)[0]
-		length_Arc2 = func_lengthArc(Height,Rs,Rp,d1,m1,d2,m2)[1]
+		length_Arc1 = func_CN1_lengthArc(Height,Rs,Rp,d1,m1,d2,m2)[0]
+		length_Arc2 = func_CN1_lengthArc(Height,Rs,Rp,d1,m1,d2,m2)[1]
 
 		L_Dire1 = length_PQ1_plus + length_PQ1_minu + length_Arc1
 		L_Dire2 = length_PQ2_plus + length_PQ2_minu + length_Arc2
 
 		epsilon1 = (L_Dire1-L0_Dire1)/L0_Dire1
 		epsilon2 = (L_Dire2-L0_Dire2)/L0_Dire2
-
 		epsilon_all = np.concatenate((epsilon1,epsilon2),axis=0)
 		epsilon_max = np.amax(epsilon_all)
+
+		n_loop = n_loop+1
+		Height = Height+step_H
+
 		print('It the',n_loop, 'th loop,','epsilon_max=',epsilon_max,'Height=',Height)
 
 
-	sigma_XY = func_sigma(epsilon_XY, sigma_y, E1, E2)
+	sigma_XY = func_CN1_sigma(epsilon_XY, sigma_y, E1, E2)
 	force_XY = sigma_XY * A_rope
 	length_PQ = np.concatenate((length_PQ_plusX,length_PQ_minusX,length_PQ_plusY,length_PQ_minusY),axis=0)
 	max_height = Height
@@ -406,9 +401,9 @@ if __name__ == '__main__':
 	# 本部分代码用于校准另一种方法
 	w =  np.sqrt((x1-x2)**2+(y1-y2)**2)
 	theta = np.arctan(y1/x1)
-	Lu_PQ0 = func_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[0]
-	Lc_PQ0 = func_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[1]
-	Ld_PQ0 = func_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[2]
+	Lu_PQ0 = func_CN1_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[0]
+	Lc_PQ0 = func_CN1_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[1]
+	Ld_PQ0 = func_CN1_cablenet_xyz(theta, init_H, w, Rp, Rs, a_DireY, m_DireY)[2]
 	L_PQ0 = Lu_PQ0 + Lc_PQ0 + Ld_PQ0
 	ED = np.linalg.norm((L_PQ0-L_DireY0),ord=2, axis=0, keepdims=False)
 	if ED<1e-3:
