@@ -8,8 +8,8 @@ Function: 计算柔性防护系统中任意四边形钢丝绳网片顶破力、�
 Note: 国际单位制
 Version: 1.2.1
 Author: Liping GUO
-Date: from 2021/8/31 to 
-命名方式：以平行于x方向及y方向分别作为后缀
+Date: from 2021/8/31 to 2021/11/9
+命名规则：以平行于1方向及2方向分别作为后缀
 Remark: 尚未解决的问题：
 	(1)考虑矩形之外的网孔形状
 	(2)考虑柔性边界刚度
@@ -99,12 +99,10 @@ def func_CN1_loaded_xPyP(m, d, alpha, Rp, H, ex, ey):
 	return xP_plus, yP_plus, zP_plus, xP_minu, yP_minu, zP_minu
 
 def func_CN1_solve_ABC(para_x1, para_y1, para_x2, para_y2):
-	para_x1 = np.around(para_x1,8), 
-	para_x2 = np.around(para_x2,8)
-	if np.all(para_x2)==np.all(para_x1):
+	if np.amin(abs(para_x2-para_x1))==0:
 		A1_arr = np.ones_like(para_x1)
 		B1_arr = np.zeros_like(para_x1)
-		C1_arr = np.zeros_like(para_x1)-para_x1
+		C1_arr = -para_x1+np.zeros_like(para_x1)
 	else:
 		A1_arr = (para_y2-para_y1)/(para_x2-para_x1)
 		B1_arr = -1+np.zeros_like(A1_arr)
@@ -113,9 +111,7 @@ def func_CN1_solve_ABC(para_x1, para_y1, para_x2, para_y2):
 
 
 def func_CN1_xy_intersection(A1, B1, C1, A2, B2, C2):
-	A1B2 = np.around(A1*B2, 8)
-	A2B1 = np.around(A2*B1, 8)
-	if np.all(A1B2)==np.all(A2B1):
+	if np.amin(abs(A1*B2-A2*B1))==0:
 		x_point = A1 + A2 + 10**100  # 采用大数淹没，避免除0报警
 		y_point = A1 + A2 + 10**100  # 采用大数淹没，避免除0报警
 	else:
@@ -126,54 +122,32 @@ def func_CN1_xy_intersection(A1, B1, C1, A2, B2, C2):
 
 # 本函数用于删除钢丝绳网与锚固点之间边界线延长线上的交点
 def func_CN1_pick_xQyQ(m, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34, yQ_line34, xQ_line41, yQ_line41, x1, y1, x2, y2, x3, y3, x4, y4):
-
-	x1 = round(x1,8)
-	x2 = round(x2,8)
-	x3 = round(x3,8)
-	x4 = round(x4,8)
-
-	y1 = round(y1,8)
-	y2 = round(y2,8)
-	y3 = round(y3,8)
-	y4 = round(y4,8)
-
-	xQ_line12 = np.around(np.asarray(xQ_line12.flatten(), dtype='float64'),8)
-	xQ_line23 = np.around(np.asarray(xQ_line23.flatten(), dtype='float64'),8)
-	xQ_line34 = np.around(np.asarray(xQ_line34.flatten(), dtype='float64'),8)
-	xQ_line41 = np.around(np.asarray(xQ_line41.flatten(), dtype='float64'),8)
-	
-	yQ_line12 = np.around(np.asarray(yQ_line12.flatten(), dtype='float64'),8)
-	yQ_line23 = np.around(np.asarray(yQ_line23.flatten(), dtype='float64'),8)
-	yQ_line34 = np.around(np.asarray(yQ_line34.flatten(), dtype='float64'),8)
-	yQ_line41 = np.around(np.asarray(yQ_line41.flatten(), dtype='float64'),8)
-
-
 	xQ = np.zeros(2*m)
 	yQ = np.zeros(2*m)
 	i1 = 0
 	for i12 in range(len(xQ_line12)):
-		if xQ_line12[i12]<x1 and xQ_line12[i12]<x2:  # 通过x坐标判别是否位于边界线上
+		if xQ_line12[i12]-x1<-1e-15 and xQ_line12[i12]-x2<-1e-15:  # 通过x坐标判别是否位于边界线上
 			pass
-		elif xQ_line12[i12]>x1 and xQ_line12[i12]>x2:  # 通过x坐标判别是否位于边界线上
+		elif xQ_line12[i12]-x1>1e-15 and xQ_line12[i12]-x2>1e-15:  # 通过x坐标判别是否位于边界线上
 			pass
 		else:
-			if yQ_line12[i12]<y1 and  yQ_line12[i12]<y2:  # 再通过y坐标判别是否位于边界线上
+			if yQ_line12[i12]-y1<-1e-15 and  yQ_line12[i12]-y2<-1e-15:  # 再通过y坐标判别是否位于边界线上
 				pass
-			elif yQ_line12[i12]>y1 and yQ_line12[i12]>y2:  # 再通过y坐标判别是否位于边界线上
+			elif yQ_line12[i12]-y1>1e-15 and yQ_line12[i12]-y2>1e-15:  # 再通过y坐标判别是否位于边界线上
 				pass
 			else:
 				xQ[i1] = xQ_line12[i12]
 				yQ[i1] = yQ_line12[i12]
 				i1 = i1 + 1
 	for i23 in range(len(xQ_line23)):
-		if xQ_line23[i23]<x2 and xQ_line23[i23]<x3:
+		if xQ_line23[i23]-x2<-1e-15 and xQ_line23[i23]-x3<-1e-15:
 			pass
-		elif xQ_line23[i23]>x2 and xQ_line23[i23]>x3:
+		elif xQ_line23[i23]-x2>1e-15 and xQ_line23[i23]-x3>1e-15:
 			pass
 		else:
-			if yQ_line23[i23]<y2 and yQ_line23[i23]<y3:
+			if yQ_line23[i23]-y2<-1e-15 and yQ_line23[i23]-y3<-1e-15:
 				pass
-			elif yQ_line23[i23]>y2 and yQ_line23[i23]>y3:
+			elif yQ_line23[i23]-y2>1e-15 and yQ_line23[i23]-y3>1e-15:
 				pass
 			else:
 				xQ[i1] = xQ_line23[i23]
@@ -271,14 +245,13 @@ if __name__ == '__main__':
 	Rs = 1.2  # 球罐形加载顶头半径
 	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
 
-	n_loop = int(0) # 初始增量步数
+	n_loop = 0 # 初始增量步数
 	epsilon_max = 0.0  # 钢丝绳初始应变
 	epsilon_f = 0.0235  # 钢丝绳失效应变
 	init_H = 0.55  # 钢丝绳网在重力作用下初始垂度（初始高度)
 
 	m1 = 2*func_round(Rp/d1)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
 	m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
-
 
 	#x1, y1 = 1.5*np.sqrt(2), 0
 	#x2, y2 = 0, 1.5*np.sqrt(2)
@@ -291,9 +264,9 @@ if __name__ == '__main__':
 	x4, y4 = -1.5, -1.5
 
 	E1, E2 = 91.304e9, 25.0e9
-	sigma_y = float(1050e6)
-	sigma_f = float(1350e6)
-	fail_force = float(40700)
+	sigma_y = 1050e6
+	sigma_f = 1350e6
+	fail_force = 40700
 	A_rope = fail_force/sigma_f
 
 
@@ -321,7 +294,6 @@ if __name__ == '__main__':
 	xQ2_line34, yQ2_line34 = func_CN1_xy_intersection(A2_arr, B2_arr, C2_arr, A_line34, B_line34, C_line34)  # 钢丝绳直线束与边界线（锚点3与锚点4连线）的交点，方向2
 	xQ2_line41, yQ2_line41 = func_CN1_xy_intersection(A2_arr, B2_arr, C2_arr, A_line41, B_line41, C_line41)  # 钢丝绳直线束与边界线（锚点4与锚点1连线）的交点，方向2
 
-
 	xQ1_pick, yQ1_pick = func_CN1_pick_xQyQ(m1, xQ1_line12, yQ1_line12, xQ1_line23, yQ1_line23, xQ1_line34, yQ1_line34, xQ1_line41, yQ1_line41, x1, y1, x2, y2, x3, y3, x4, y4)  # 挑选出边界线段范围内的交点，方向1
 	xQ2_pick, yQ2_pick = func_CN1_pick_xQyQ(m2, xQ2_line12, yQ2_line12, xQ2_line23, yQ2_line23, xQ2_line34, yQ2_line34, xQ2_line41, yQ2_line41, x1, y1, x2, y2, x3, y3, x4, y4)  # 挑选出边界线段范围内的交点，方向2
 
@@ -348,6 +320,7 @@ if __name__ == '__main__':
 	length_PQ2_plus = np.sqrt((xP2_plus-xQ2_plus)**2+(yP2_plus-yQ2_plus)**2+(zP2_plus-zQ2_plus)**2)
 	length_PQ2_minu = np.sqrt((xP2_minu-xQ2_minu)**2+(yP2_minu-yQ2_minu)**2+(zP2_minu-zQ2_minu)**2)
 
+
 	length_Arc1 = func_CN1_lengthArc(init_H,Rs,Rp,d1,m1,d2,m2)[0]
 	length_Arc2 = func_CN1_lengthArc(init_H,Rs,Rp,d1,m1,d2,m2)[1]
 
@@ -359,7 +332,7 @@ if __name__ == '__main__':
 	Height = 0.0  # 网片初始面外变形
 	step_H = 1e-3  # 位移加载增量步长，单位：m
 
-	while(n_loop<=1e4 and epsilon_max<=epsilon_f):
+	while(n_loop<=1e3 and epsilon_max<=epsilon_f):
 
 		xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, Height, ex, ey)
 		xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_CN1_loaded_xPyP(m2, d2, alpha2, Rp, Height, ex, ey)
@@ -384,7 +357,7 @@ if __name__ == '__main__':
 		n_loop = n_loop+1
 		Height = Height+step_H
 
-		#print('It the',n_loop, 'th loop,','epsilon_max=',epsilon_max,'Height=',Height)
+		print('It the',n_loop, 'th loop,','epsilon_max=',epsilon_max,'Height=',Height)
 
 
 	#sigma_all = func_CN1_sigma(epsilon_all, sigma_y, E1, E2)
