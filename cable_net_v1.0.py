@@ -267,13 +267,13 @@ if __name__ == '__main__':
 	epsilon_u = 0.0235  # 钢丝绳失效应变
 
 	# 边界刚度输入，目前可考虑纤维两端连接不同刚度的钢丝绳
-	ksl_plus = 1e10  # 方向1边界弹簧刚度（单位：N/m），与方向1正方向纤维连接
-	ksl_minu = 1e10  # 方向1边界弹簧刚度（单位：N/m），与方向1负方向纤维连接
+	ks1_plus = 1e10  # 方向1边界弹簧刚度（单位：N/m），与方向1正方向纤维连接
+	ks1_minu = 1e10  # 方向1边界弹簧刚度（单位：N/m），与方向1负方向纤维连接
 	ks2_plus = 1e10  # 方向2边界弹簧刚度（单位：N/m），与方向2正方向纤维连接
 	ks2_minu = 1e10  # 方向2边界弹簧刚度（单位：N/m），与方向2负方向纤维连接
 
-	lsl_plus = 1e-1  # 方向1边界弹簧初始长度（单位：m），与方向1正方向纤维连接
-	lsl_minu = 1e-1  # 方向1边界弹簧初始长度（单位：m），与方向1负方向纤维连接
+	ls1_plus = 1e-1  # 方向1边界弹簧初始长度（单位：m），与方向1正方向纤维连接
+	ls1_minu = 1e-1  # 方向1边界弹簧初始长度（单位：m），与方向1负方向纤维连接
 	ls2_plus = 1e-1  # 方向2边界弹簧初始长度（单位：m），与方向2正方向纤维连接
 	ls2_minu = 1e-1  # 方向2边界弹簧初始长度（单位：m），与方向2负方向纤维连接
 	# 钢丝绳网几何参数输入
@@ -353,10 +353,28 @@ if __name__ == '__main__':
 	length_Arc1 = func_CN1_lengthArc(init_H,Rs,Rp,d1,m1,d2,m2)[0]
 	length_Arc2 = func_CN1_lengthArc(init_H,Rs,Rp,d1,m1,d2,m2)[1]
 
-	L0_Dire1 = length_PQ1_plus + length_PQ1_minu + length_Arc1
-	L0_Dire2 = length_PQ2_plus + length_PQ2_minu + length_Arc2
-	print('L0_Dire1=',L0_Dire1)
-	print('L0_Dire2=',L0_Dire2)
+	L0_dire1 = length_PQ1_plus + length_PQ1_minu + length_Arc1
+	L0_dire2 = length_PQ2_plus + length_PQ2_minu + length_Arc2
+	print('L0_dire1=',L0_dire1)
+	print('L0_dire2=',L0_dire2)
+	
+	l_f0_dire1 = L0_dire1 - ls1_minu - ls1_plus  # 纤维弹簧单元中1方向纤维初始长度
+	l_f0_dire2 = L0_dire2 - ls2_minu - ls2_plus  # 纤维弹簧单元中2方向纤维初始长度
+
+	k_s_dire1 = 1/(1/ks1_minu + 1/ks1_plus)  # 纤维弹簧单元中1方向边界串联弹簧刚度
+	k_s_dire2 = 1/(1/ks2_minu + 1/ks2_plus)  # 纤维弹簧单元中2方向边界串联弹簧刚度
+
+	K_dire1 = 1/(l_f0_dire1/(E_young*A_fibre) + 1/k_s_dire1)  # 纤维弹簧单元1方向拉伸刚度，线弹性阶段
+	K_dire2 = 1/(l_f0_dire2/(E_young*A_fibre) + 1/k_s_dire2)  # 纤维弹簧单元2方向拉伸刚度，线弹性阶段
+	
+	K_T_dire1 = 1/(l_f0_dire1/(E_tangent*A_fibre) + 1/k_s_dire1)  # 纤维弹簧单元1方向拉伸刚度，进入屈服后阶段
+	K_T_dire2 = 1/(l_f0_dire2/(E_tangent*A_fibre) + 1/k_s_dire2)  # 纤维弹簧单元2方向拉伸刚度，进入屈服后阶段
+
+	Ly_dire1 = L0_dire1 + sigma_y*A_fibre/K_dire1  # 纤维单元发生屈服时，1方向纤维弹簧单元总长度
+	Ly_dire2 = L0_dire2 + sigma_y*A_fibre/K_dire2  # 纤维单元发生失效时，2方向纤维弹簧单元总长度
+
+	Lu_dire1 = L0_dire1 + sigma_y*A_fibre/K_dire1 + (sigma_u-sigma_y)*A_fibre/K_T_dire1  # 纤维单元发生失效时，1方向纤维弹簧单元总长度
+	Lu_dire2 = L0_dire2 + sigma_y*A_fibre/K_dire2 + (sigma_u-sigma_y)*A_fibre/K_T_dire2  # 纤维单元发生失效时，2方向纤维弹簧单元总长度
 
 	n_loop = 0 # 初始增量步数
 	Height = 0.0  # 网片初始面外变形
@@ -376,11 +394,11 @@ if __name__ == '__main__':
 		length_Arc1 = func_CN1_lengthArc(Height,Rs,Rp,d1,m1,d2,m2)[0]
 		length_Arc2 = func_CN1_lengthArc(Height,Rs,Rp,d1,m1,d2,m2)[1]
 
-		L_Dire1 = length_PQ1_plus + length_PQ1_minu + length_Arc1
-		L_Dire2 = length_PQ2_plus + length_PQ2_minu + length_Arc2
+		L_dire1 = length_PQ1_plus + length_PQ1_minu + length_Arc1
+		L_dire2 = length_PQ2_plus + length_PQ2_minu + length_Arc2
 
-		delta_L1 = L_Dire1-L0_Dire1
-		delta_L2 = L_Dire2-L0_Dire2
+		delta_L1 = L_dire1-L0_dire1
+		delta_L2 = L_dire2-L0_dire2
 
 		delta_L_all = np.concatenate((delta_L1,delta_L2),axis=0)
 
