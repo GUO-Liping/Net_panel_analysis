@@ -18,44 +18,64 @@ Remark: 尚未解决的问题：
 import numpy as np
 from userfunc_NPA import *
 
+# 本函数用于考虑更细致的情形：加载高度处于顶头自身高度之内，目前尚不完善
+#def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
+#	i_DireX = np.arange(1,m_DireX+0.1,step=1)
+#	i_DireY = np.arange(1,m_DireY+0.1,step=1)
+#
+#	d_DireX = abs(a_DireX/2*(2*i_DireX - m_DireX - 1))
+#	d_DireY = abs(a_DireY/2*(2*i_DireY - m_DireY - 1))
+#
+#	minH = Rs-np.sqrt(Rs**2-Rp**2)
+#	if H>0.0 and H < minH:
+#		Rp_H = np.sqrt(Rs**2-(Rs-H)**2)
+#		beta_DireX = np.zeros_like(d_DireX)
+#		beta_DireY = np.zeros_like(d_DireY)
+#		arc_length_DireX = np.zeros_like(d_DireX)
+#		arc_length_DireY = np.zeros_like(d_DireY)
+#
+#		for iDX in range(len(d_DireX)):
+#			if abs(d_DireX[iDX])<Rp_H:
+#				beta_DireX[iDX] = 2*np.arccos((Rs-H)/np.sqrt(Rs**2-d_DireX[iDX]**2))
+#				arc_length_DireX[iDX] = beta_DireX[iDX]*np.sqrt(Rs**2-d_DireX[iDX]**2)
+#			else:
+#				arc_length_DireX[iDX] = 2*np.sqrt(Rp**2 - d_DireX[iDX]**2)
+#		
+#		for iDY in range(len(d_DireY)):
+#			if abs(d_DireY[iDY])<Rp_H:
+#				beta_DireY[iDY] = 2*np.arccos((Rs-H)/np.sqrt(Rs**2-d_DireY[iDY]**2))
+#				arc_length_DireY[iDY] = beta_DireY[iDY]*np.sqrt(Rs**2-d_DireY[iDY]**2)
+#			else:
+#				arc_length_DireY[iDY] = 2*np.sqrt(Rp**2 - d_DireY[iDY]**2)
+#
+#	elif H >= minH:
+#		alpha_DireX = 2*np.arctan(np.sqrt((Rp**2-d_DireX**2)/(Rs**2-Rp**2)))
+#		alpha_DireY = 2*np.arctan(np.sqrt((Rp**2-d_DireY**2)/(Rs**2-Rp**2)))
+#		arc_length_DireX = alpha_DireX*np.sqrt(Rs**2-d_DireX**2)
+#		arc_length_DireY = alpha_DireY*np.sqrt(Rs**2-d_DireY**2)
+#	elif H <= 0.0:
+#		arc_length_DireX = 2*np.sqrt(Rp**2 - d_DireX**2)
+#		arc_length_DireY = 2*np.sqrt(Rp**2 - d_DireY**2)
+#	else:
+#		raise ValueError
+#	return arc_length_DireX,arc_length_DireY
 
+
+# 本函数用于考虑粗略情形下的弧长计算：加载高度处于顶头自身高度之内，则认为面外变形量为0
 def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 	i_DireX = np.arange(1,m_DireX+0.1,step=1)
 	i_DireY = np.arange(1,m_DireY+0.1,step=1)
-
 	d_DireX = abs(a_DireX/2*(2*i_DireX - m_DireX - 1))
 	d_DireY = abs(a_DireY/2*(2*i_DireY - m_DireY - 1))
-
 	minH = Rs-np.sqrt(Rs**2-Rp**2)
-	if H>0.0 and H < minH:
-		Rp_H = np.sqrt(Rs**2-(Rs-H)**2)
-		beta_DireX = np.zeros_like(d_DireX)
-		beta_DireY = np.zeros_like(d_DireY)
-		arc_length_DireX = np.zeros_like(d_DireX)
-		arc_length_DireY = np.zeros_like(d_DireY)
-
-		for iDX in range(len(d_DireX)):
-			if abs(d_DireX[iDX])<Rp_H:
-				beta_DireX[iDX] = 2*np.arccos((Rs-H)/np.sqrt(Rs**2-d_DireX[iDX]**2))
-				arc_length_DireX[iDX] = beta_DireX[iDX]*np.sqrt(Rs**2-d_DireX[iDX]**2)
-			else:
-				arc_length_DireX[iDX] = 2*np.sqrt(Rp**2 - d_DireX[iDX]**2)
-		
-		for iDY in range(len(d_DireY)):
-			if abs(d_DireY[iDY])<Rp_H:
-				beta_DireY[iDY] = 2*np.arccos((Rs-H)/np.sqrt(Rs**2-d_DireY[iDY]**2))
-				arc_length_DireY[iDY] = beta_DireY[iDY]*np.sqrt(Rs**2-d_DireY[iDY]**2)
-			else:
-				arc_length_DireY[iDY] = 2*np.sqrt(Rp**2 - d_DireY[iDY]**2)
-
+	if H < minH:
+		arc_length_DireX = 2*np.sqrt(Rp**2 - d_DireX**2)
+		arc_length_DireY = 2*np.sqrt(Rp**2 - d_DireY**2)
 	elif H >= minH:
 		alpha_DireX = 2*np.arctan(np.sqrt((Rp**2-d_DireX**2)/(Rs**2-Rp**2)))
 		alpha_DireY = 2*np.arctan(np.sqrt((Rp**2-d_DireY**2)/(Rs**2-Rp**2)))
 		arc_length_DireX = alpha_DireX*np.sqrt(Rs**2-d_DireX**2)
 		arc_length_DireY = alpha_DireY*np.sqrt(Rs**2-d_DireY**2)
-	elif H <= 0.0:
-		arc_length_DireX = 2*np.sqrt(Rp**2 - d_DireX**2)
-		arc_length_DireY = 2*np.sqrt(Rp**2 - d_DireY**2)
 	else:
 		raise ValueError
 	return arc_length_DireX,arc_length_DireY
@@ -235,40 +255,49 @@ def func_CN1_sort_xQyQ(m, xQ, yQ, xP_plus, yP_plus, xP_minu, yP_minu):
 	return xQ_plus, yQ_plus, xQ_minu, yQ_minu
 
 
-# 参数输入----------------------------------------------------------------------------------- #
 if __name__ == '__main__':
+	# 参数输入----------------------------------------------------------------------------------- #
+	# 钢丝绳网材料参数输入
+	E_young = 91.304e9  # 钢丝绳网中的钢丝绳弹性模量（单位：Pa）
+	E_tangent = 25.0e9  # 钢丝绳网中的钢丝绳硬化段切线模量（单位：Pa）
+	sigma_y = 1050e6  # 钢丝绳网中的钢丝绳屈服强度（单位：Pa）
+	sigma_u = 1350e6  # 钢丝绳网中的钢丝绳极限强度（单位：Pa）
+	fail_force = 40700  # 钢丝绳网中的钢丝绳破断力（单位：N）
+	epsilon_fibre = 0.0  # 钢丝绳初始应变
+	epsilon_u = 0.0235  # 钢丝绳失效应变
 
-	d1, d2 = 0.3, 0.3  # 本程序可以用于计算两侧不同的a值（网孔间距）
-	alpha1, alpha2 = np.pi/3, np.pi/3  # 钢丝绳方向角，取值范围为半闭半开区间[0,pi)
+	# 边界刚度输入，目前可考虑纤维两端连接不同刚度的钢丝绳
+	ksl_plus = 1e10  # 方向1边界弹簧刚度（单位：N/m），与方向1正方向纤维连接
+	ksl_minu = 1e10  # 方向1边界弹簧刚度（单位：N/m），与方向1负方向纤维连接
+	ks2_plus = 1e10  # 方向2边界弹簧刚度（单位：N/m），与方向2正方向纤维连接
+	ks2_minu = 1e10  # 方向2边界弹簧刚度（单位：N/m），与方向2负方向纤维连接
 
-	ex, ey = 0.45, 0.45
-	Rs = 1.2  # 球罐形加载顶头半径
-	Rp = 0.5  # 加载顶头水平投影半径，若加载形状为多边形时考虑为半径为Rp圆内切
-
-	n_loop = 0 # 初始增量步数
-	epsilon_max = 0.0  # 钢丝绳初始应变
-	epsilon_f = 0.0235  # 钢丝绳失效应变
+	lsl_plus = 1e-1  # 方向1边界弹簧初始长度（单位：m），与方向1正方向纤维连接
+	lsl_minu = 1e-1  # 方向1边界弹簧初始长度（单位：m），与方向1负方向纤维连接
+	ls2_plus = 1e-1  # 方向2边界弹簧初始长度（单位：m），与方向2正方向纤维连接
+	ls2_minu = 1e-1  # 方向2边界弹簧初始长度（单位：m），与方向2负方向纤维连接
+	# 钢丝绳网几何参数输入
+	d1 = 0.3  # 1方向钢丝绳间距-网孔间距
+	d2 = 0.3  # 2方向钢丝绳间距-网孔间距
+	alpha1, alpha2 = 0, np.pi/2  # 钢丝绳方向角，取值范围为半闭半开区间[0,pi)
+	A_fibre = fail_force/sigma_u
 	init_H = 0.55  # 钢丝绳网在重力作用下初始垂度（初始高度)
 
+	# 加载区域几何参数输入
+	ex = 0  # 加载区域中心沿x方向偏心距（单位：m）
+	ey = 0  # 加载区域中心沿y方向偏心距（单位：m）
+	Rs = 1.2  # 球罐形加载顶头半径（单位：m）
+	Rp = 0.5  # 加载顶头水平投影半径（单位：m），若加载形状为多边形时考虑为等面积圆的半径
+
+	# 锚点坐标输入，可考虑任意四边形钢丝绳网片
+	x1, y1 = 1.5, -1.5  # 四个锚点中锚点1的坐标
+	x2, y2 = 1.5, 1.5  # 四个锚点中锚点2的坐标
+	x3, y3 = -1.5, 1.5  # 四个锚点中锚点3的坐标
+	x4, y4 = -1.5, -1.5  # 四个锚点中锚点4的坐标
+
+	# 求解过程----------------------------------------------------------------------------------- #
 	m1 = 2*func_round(Rp/d1)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
 	m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
-
-	#x1, y1 = 1.5*np.sqrt(2), 0
-	#x2, y2 = 0, 1.5*np.sqrt(2)
-	#x3, y3 = -1.5*np.sqrt(2), 0
-	#x4, y4 = 0, -1.5*np.sqrt(2)
-
-	x1, y1 = 1.5, -1.5
-	x2, y2 = 1.5, 1.5
-	x3, y3 = -1.5, 1.5
-	x4, y4 = -1.5, -1.5
-
-	E1, E2 = 91.304e9, 25.0e9
-	sigma_y = 1050e6
-	sigma_f = 1350e6
-	fail_force = 40700
-	A_rope = fail_force/sigma_f
-
 
 	# 初始时刻加载区域边缘力的作用点（P点）坐标，方向1与方向2，P点坐标随着加载位移的变换实时变化
 	xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, init_H, ex, ey)
@@ -329,10 +358,11 @@ if __name__ == '__main__':
 	print('L0_Dire1=',L0_Dire1)
 	print('L0_Dire2=',L0_Dire2)
 
+	n_loop = 0 # 初始增量步数
 	Height = 0.0  # 网片初始面外变形
 	step_H = 1e-3  # 位移加载增量步长，单位：m
 
-	while(n_loop<=1e3 and epsilon_max<=epsilon_f):
+	while(n_loop<=1e3 and epsilon_fibre<=epsilon_u):
 
 		xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, Height, ex, ey)
 		xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_CN1_loaded_xPyP(m2, d2, alpha2, Rp, Height, ex, ey)
@@ -349,15 +379,15 @@ if __name__ == '__main__':
 		L_Dire1 = length_PQ1_plus + length_PQ1_minu + length_Arc1
 		L_Dire2 = length_PQ2_plus + length_PQ2_minu + length_Arc2
 
-		epsilon1 = (L_Dire1-L0_Dire1)/L0_Dire1
-		epsilon2 = (L_Dire2-L0_Dire2)/L0_Dire2
-		epsilon_all = np.concatenate((epsilon1,epsilon2),axis=0)
-		epsilon_max = np.amax(epsilon_all)
+		delta_L1 = L_Dire1-L0_Dire1
+		delta_L2 = L_Dire2-L0_Dire2
+
+		delta_L_all = np.concatenate((delta_L1,delta_L2),axis=0)
 
 		n_loop = n_loop+1
 		Height = Height+step_H
 
-		print('It the',n_loop, 'th loop,','epsilon_max=',epsilon_max,'Height=',Height)
+		print('It the',n_loop, 'th loop,','delta_L_all=',delta_L_all,'Height=',Height)
 
 
 	#sigma_all = func_CN1_sigma(epsilon_all, sigma_y, E1, E2)
