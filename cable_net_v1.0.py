@@ -281,7 +281,7 @@ if __name__ == '__main__':
 	alpha1 = 0*np.pi/2  # 钢丝绳方向角1，取值范围为半闭半开区间[0,pi)
 	alpha2 = np.pi/2 # 钢丝绳方向角2，取值范围为半闭半开区间[0,pi)
 	A_fibre = fail_force/sigma_u
-	H_init = 0.18  # 钢丝绳网在重力作用下初始垂度（初始高度)
+	initial_sag = 0.2  # 钢丝绳网在重力作用下初始垂度（初始高度)
 
 	# 加载区域几何参数输入
 	ex = 0  # 加载区域中心沿x方向偏心距（单位：m）
@@ -302,8 +302,8 @@ if __name__ == '__main__':
 	m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
 
 	# 初始时刻加载区域边缘力的作用点（P点）坐标，方向1与方向2，P点坐标随着加载位移的变换实时变化
-	xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, H_init, ex, ey)
-	xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_CN1_loaded_xPyP(m2, d2, alpha2, Rp, H_init, ex, ey)
+	xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, initial_sag, ex, ey)
+	xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_CN1_loaded_xPyP(m2, d2, alpha2, Rp, initial_sag, ex, ey)
 
 
 	# 求解计算过程中钢丝绳网片边界上力的作用点（Q点）坐标，方向1与方向2，Q点坐标不随加载位移的变换改变
@@ -351,8 +351,8 @@ if __name__ == '__main__':
 	length_PQ2_plus = np.sqrt((xP2_plus-xQ2_plus)**2+(yP2_plus-yQ2_plus)**2+(zP2_plus-zQ2_plus)**2)
 	length_PQ2_minu = np.sqrt((xP2_minu-xQ2_minu)**2+(yP2_minu-yQ2_minu)**2+(zP2_minu-zQ2_minu)**2)
 
-	length_Arc1 = func_CN1_lengthArc(H_init,Rs,Rp,d1,m1,d2,m2)[0]
-	length_Arc2 = func_CN1_lengthArc(H_init,Rs,Rp,d1,m1,d2,m2)[1]
+	length_Arc1 = func_CN1_lengthArc(initial_sag,Rs,Rp,d1,m1,d2,m2)[0]
+	length_Arc2 = func_CN1_lengthArc(initial_sag,Rs,Rp,d1,m1,d2,m2)[1]
 
 	L0_dire1 = length_PQ1_plus + length_PQ1_minu + length_Arc1
 	L0_dire2 = length_PQ2_plus + length_PQ2_minu + length_Arc2
@@ -380,7 +380,7 @@ if __name__ == '__main__':
 	Lu_all = np.concatenate((Lu_dire1,Lu_dire2),axis=0)
 
 	n_loop = 0 # 初始增量步数
-	Height = H_init  # 网片初始面外变形
+	Height = initial_sag  # 网片初始面外变形
 	step_H = 1e-3  # 位移加载增量步长，单位：m
 
 	target_delta_Lu = np.amin(abs(Lu_all-L0_all))
