@@ -270,7 +270,7 @@ def func_CN1_sort_ks_ls0(origin_k, origin_x, origin_y, target_x, target_y):
 	            index_k[j] = i
 	        else:
 	            pass
-	print('index_k=',index_k.astype('int'))
+	#print('index_k=',index_k.astype('int'))
 	return ko[index_k.astype('int64')]
 
 
@@ -511,7 +511,7 @@ if __name__ == '__main__':
 		n_loop = n_loop+1
 		Height = Height+step_H
 
-		print('It the',n_loop, 'th loop,','L_all=',np.around(L_all,3),'Height=',np.around(Height,3))
+		#print('It the',n_loop, 'th loop,','L_all=',np.around(L_all,3),'Height=',np.around(Height,3))
 
 
 	print('epsilon_u=',np.around(epsilon_u,3),'Height=',np.around(Height,3),'Force=',np.around(force_ultimate,3),'Energy=',np.around(energy_ultimate,3))
