@@ -304,10 +304,10 @@ if __name__ == '__main__':
 	x4, y4 = -1.5, -1.5  # 四个锚点中锚点4的坐标
 
 	# 边界刚度输入，目前可考虑纤维两端连接不同刚度的钢丝绳
-	ks12 = 1e20  # 锚点12之间的边界弹簧刚度（单位：N/m），与方向1正方向纤维连接
-	ks23 = 1e20  # 锚点23之间的边界弹簧刚度（单位：N/m），与方向1负方向纤维连接
-	ks34 = 1e20  # 锚点34之间的边界弹簧刚度（单位：N/m），与方向2正方向纤维连接
-	ks41 = 1e20  # 锚点41之间的边界弹簧刚度（单位：N/m），与方向2负方向纤维连接
+	ks12 = 1e15  # 锚点12之间的边界弹簧刚度（单位：N/m），与方向1正方向纤维连接，刚性边界取值为1e15N/m
+	ks23 = 1e15  # 锚点23之间的边界弹簧刚度（单位：N/m），与方向1负方向纤维连接
+	ks34 = 1e15  # 锚点34之间的边界弹簧刚度（单位：N/m），与方向2正方向纤维连接
+	ks41 = 1e15  # 锚点41之间的边界弹簧刚度（单位：N/m），与方向2负方向纤维连接
 
 	l0_s12 = 1e-1  # 方向1边界弹簧初始长度（单位：m），与方向1正方向纤维连接
 	l0_s23 = 1e-1  # 方向1边界弹簧初始长度（单位：m），与方向1负方向纤维连接
@@ -434,11 +434,11 @@ if __name__ == '__main__':
 
 	n_loop = 0 # 初始增量步数
 	Height = initial_sag  # 网片初始面外变形
-	step_H = 1e-4  # 位移加载增量步长，单位：m
+	step_H = 1e-3  # 位移加载增量步长，单位：m
 
 	target_delta_Lu = np.amin(abs(Lu_all-L0_all))
 
-	while(n_loop<=3e3 and np.amin(target_delta_Lu>=step_H)):  # 判别条件是由一个不等式来确定的（该不等式证明：直角三角形的一个直角边恒定，则另一个直角边的增大程度始终大于斜边长度的增大程度）
+	while(n_loop<=100000 and np.amin(target_delta_Lu>=step_H)):  # 判别条件是由一个不等式来确定的（该不等式证明：直角三角形的一个直角边恒定，则另一个直角边的增大程度始终大于斜边长度的增大程度）
 
 		xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, Height, ex, ey)
 		xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_CN1_loaded_xPyP(m2, d2, alpha2, Rp, Height, ex, ey)
@@ -502,8 +502,8 @@ if __name__ == '__main__':
 			force_ultimate_proj1_minu = force_ultimate_dire1*Height/length_PQ1_minu  # 极限破坏状态1方向负侧端点各个纤维弹簧单元内力沿着加载方向的投影
 			force_ultimate_proj2_plus = force_ultimate_dire2*Height/length_PQ2_plus  # 极限破坏状态2方向正侧端点各个纤维弹簧单元内力沿着加载方向的投影
 			force_ultimate_proj2_minu = force_ultimate_dire2*Height/length_PQ2_minu  # 极限破坏状态2方向负侧端点各个纤维弹簧单元内力沿着加载方向的投影
-			force_ultimate = np.sum(force_ultimate_proj1_plus) + np.sum(force_ultimate_proj1_minu) + np.sum(force_ultimate_proj2_plus) + np.sum(force_ultimate_proj2_minu)  # 极限破坏状态各个纤维弹簧单元内力之和，矢量和运算
 
+			force_ultimate = np.sum(force_ultimate_proj1_plus) + np.sum(force_ultimate_proj1_minu) + np.sum(force_ultimate_proj2_plus) + np.sum(force_ultimate_proj2_minu)  # 极限破坏状态各个纤维弹簧单元内力之和，矢量和运算
 			energy_ultimate = np.sum(energy_ultimate_dire1) + np.sum(force_ultimate_dire2)  # 极限破坏状态各个纤维弹簧单元吸收总能量，标量直接相加
 		else:
 			pass
