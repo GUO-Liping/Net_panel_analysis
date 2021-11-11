@@ -255,6 +255,25 @@ def func_CN1_sort_xQyQ(m, xQ, yQ, xP_plus, yP_plus, xP_minu, yP_minu):
 	return xQ_plus, yQ_plus, xQ_minu, yQ_minu
 
 
+def func_CN1_sort_ks_ls0(origin_k, origin_x, origin_y, target_x, target_y):
+
+	x1 = np.around(origin_x.astype('float'),3)
+	y1 = np.around(origin_y.astype('float'),3)
+	x2 = np.around(target_x.astype('float'),3)
+	y2 = np.around(target_y.astype('float'),3)
+	ko = np.around(origin_k.astype('float'),3)
+	
+	index_k = np.empty_like(x2)
+	for i in range(len(x1)):
+	    for j in range(len(x2)):
+	        if x1[i] == x2[j] and y1[i]==y2[j]:
+	            index_k[j] = i
+	        else:
+	            pass
+	print('index_k=',index_k.astype('int'))
+	return ko[index_k.astype('int64')]
+
+
 if __name__ == '__main__':
 	# 参数输入----------------------------------------------------------------------------------- #
 	# 钢丝绳网材料参数输入
@@ -263,17 +282,6 @@ if __name__ == '__main__':
 	sigma_y = 1050e6  # 钢丝绳网中的钢丝绳屈服强度（单位：Pa）
 	sigma_u = 1350e6  # 钢丝绳网中的钢丝绳极限强度（单位：Pa）
 	fail_force = 40700  # 钢丝绳网中的钢丝绳破断力（单位：N）
-
-	# 边界刚度输入，目前可考虑纤维两端连接不同刚度的钢丝绳
-	ks1_plus = 1e20  # 方向1边界弹簧刚度（单位：N/m），与方向1正方向纤维连接
-	ks1_minu = 1e20  # 方向1边界弹簧刚度（单位：N/m），与方向1负方向纤维连接
-	ks2_plus = 1e20  # 方向2边界弹簧刚度（单位：N/m），与方向2正方向纤维连接
-	ks2_minu = 1e20  # 方向2边界弹簧刚度（单位：N/m），与方向2负方向纤维连接
-
-	ls1_plus = 1e-1  # 方向1边界弹簧初始长度（单位：m），与方向1正方向纤维连接
-	ls1_minu = 1e-1  # 方向1边界弹簧初始长度（单位：m），与方向1负方向纤维连接
-	ls2_plus = 1e-1  # 方向2边界弹簧初始长度（单位：m），与方向2正方向纤维连接
-	ls2_minu = 1e-1  # 方向2边界弹簧初始长度（单位：m），与方向2负方向纤维连接
 
 	# 钢丝绳网几何参数输入
 	d1 = 0.3  # 1方向钢丝绳间距-网孔间距
@@ -295,6 +303,28 @@ if __name__ == '__main__':
 	x3, y3 = -1.5, 1.5  # 四个锚点中锚点3的坐标
 	x4, y4 = -1.5, -1.5  # 四个锚点中锚点4的坐标
 
+	# 边界刚度输入，目前可考虑纤维两端连接不同刚度的钢丝绳
+	ks12 = 1e20  # 锚点12之间的边界弹簧刚度（单位：N/m），与方向1正方向纤维连接
+	ks23 = 1e20  # 锚点23之间的边界弹簧刚度（单位：N/m），与方向1负方向纤维连接
+	ks34 = 1e20  # 锚点34之间的边界弹簧刚度（单位：N/m），与方向2正方向纤维连接
+	ks41 = 1e20  # 锚点41之间的边界弹簧刚度（单位：N/m），与方向2负方向纤维连接
+
+	l0_s12 = 1e-1  # 方向1边界弹簧初始长度（单位：m），与方向1正方向纤维连接
+	l0_s23 = 1e-1  # 方向1边界弹簧初始长度（单位：m），与方向1负方向纤维连接
+	l0_s34 = 1e-1  # 方向2边界弹簧初始长度（单位：m），与方向2正方向纤维连接
+	l0_s41 = 1e-1  # 方向2边界弹簧初始长度（单位：m），与方向2负方向纤维连接
+
+	# 边界刚度输入，目前可考虑纤维两端连接不同刚度的钢丝绳
+	#ks1_plus = 1e20  # 方向1边界弹簧刚度（单位：N/m），与方向1正方向纤维连接
+	#ks1_minu = 1e20  # 方向1边界弹簧刚度（单位：N/m），与方向1负方向纤维连接
+	#ks2_plus = 1e20  # 方向2边界弹簧刚度（单位：N/m），与方向2正方向纤维连接
+	#ks2_minu = 1e20  # 方向2边界弹簧刚度（单位：N/m），与方向2负方向纤维连接
+#
+	#ls1_plus = 1e-1  # 方向1边界弹簧初始长度（单位：m），与方向1正方向纤维连接
+	#ls1_minu = 1e-1  # 方向1边界弹簧初始长度（单位：m），与方向1负方向纤维连接
+	#ls2_plus = 1e-1  # 方向2边界弹簧初始长度（单位：m），与方向2正方向纤维连接
+	#ls2_minu = 1e-1  # 方向2边界弹簧初始长度（单位：m），与方向2负方向纤维连接
+
 	# 求解过程----------------------------------------------------------------------------------- #
 	epsilon_u = sigma_y/E_young + (sigma_u-sigma_y)/E_tangent  # 钢丝绳失效应变
 
@@ -302,8 +332,8 @@ if __name__ == '__main__':
 	m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
 
 	# 初始时刻加载区域边缘力的作用点（P点）坐标，方向1与方向2，P点坐标随着加载位移的变换实时变化
-	xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, initial_sag, ex, ey)
-	xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_CN1_loaded_xPyP(m2, d2, alpha2, Rp, initial_sag, ex, ey)
+	xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, initial_sag, ex, ey)  # 1方向钢丝绳与加载区域边缘交点坐标
+	xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_CN1_loaded_xPyP(m2, d2, alpha2, Rp, initial_sag, ex, ey)  # 2方向钢丝绳与加载区域边缘交点坐标
 
 
 	# 求解计算过程中钢丝绳网片边界上力的作用点（Q点）坐标，方向1与方向2，Q点坐标不随加载位移的变换改变
@@ -330,19 +360,42 @@ if __name__ == '__main__':
 
 	xQ1_plus, yQ1_plus, xQ1_minu, yQ1_minu = func_CN1_sort_xQyQ(m1, xQ1_pick, yQ1_pick, xP1_plus, yP1_plus, xP1_minu, yP1_minu)  # 对挑选出来的交点进行重新排序，使得边界线上的交点与加载边缘上的交点一一对应，与实际钢丝绳网中匹配关系一致，方向1
 	xQ2_plus, yQ2_plus, xQ2_minu, yQ2_minu = func_CN1_sort_xQyQ(m2, xQ2_pick, yQ2_pick, xP2_plus, yP2_plus, xP2_minu, yP2_minu)  # 对挑选出来的交点进行重新排序，使得边界线上的交点与加载边缘上的交点一一对应，与实际钢丝绳网中匹配关系一致，方向2
+	
 	zQ1_plus, zQ1_minu = np.zeros_like(xQ1_plus), np.zeros_like(xQ1_plus)
 	zQ2_plus, zQ2_minu = np.zeros_like(xQ2_plus), np.zeros_like(xQ2_plus)
 
-	print('xQ1_pick=',xQ1_pick)
-	print('yQ1_pick=',yQ1_pick)
-	print('xQ1_minu=',xQ1_minu)
-	print('yQ1_minu=',yQ1_minu)
+	# 用于对ks和ls0进行排序，即满足每个弹簧刚度等于连接边界的刚度
+	xQ1_m1 = np.concatenate((xQ1_line12, xQ1_line23, xQ1_line34, xQ1_line41))
+	yQ1_m1 = np.concatenate((yQ1_line12, yQ1_line23, yQ1_line34, yQ1_line41))
+	xQ2_m2 = np.concatenate((xQ2_line12, xQ2_line23, xQ2_line34, xQ2_line41))
+	yQ2_m2 = np.concatenate((yQ2_line12, yQ2_line23, yQ2_line34, yQ2_line41))
 
+	k_spring_m1 = np.concatenate((ks12*np.ones(m1), ks23*np.ones(m1), ks34*np.ones(m1), ks41*np.ones(m1)))
+	k_spring_m2 = np.concatenate((ks12*np.ones(m2), ks23*np.ones(m2), ks34*np.ones(m2), ks41*np.ones(m2)))
 
-	print('xQ2_plus=',xQ2_plus)
-	print('yQ2_plus=',yQ2_plus)
-	print('xQ2_minu=',xQ2_minu)
-	print('yQ2_minu=',yQ2_minu)
+	l0_spring_m1 = np.concatenate((l0_s12*np.ones(m1), l0_s23*np.ones(m1), l0_s34*np.ones(m1), l0_s41*np.ones(m1)))
+	l0_spring_m2 = np.concatenate((l0_s12*np.ones(m2), l0_s23*np.ones(m2), l0_s34*np.ones(m2), l0_s41*np.ones(m2)))
+
+	k_spring1_plus = func_CN1_sort_ks_ls0(k_spring_m1, xQ1_m1, yQ1_m1, xQ1_plus, yQ1_plus)
+	k_spring1_minu = func_CN1_sort_ks_ls0(k_spring_m1, xQ1_m1, yQ1_m1, xQ1_minu, yQ1_minu)
+	k_spring2_plus = func_CN1_sort_ks_ls0(k_spring_m2, xQ2_m2, yQ2_m2, xQ2_plus, yQ2_plus)
+	k_spring2_minu = func_CN1_sort_ks_ls0(k_spring_m2, xQ2_m2, yQ2_m2, xQ2_minu, yQ2_minu)
+
+	l0_spring1_plus = func_CN1_sort_ks_ls0(l0_spring_m1, xQ1_m1, yQ1_m1, xQ1_plus, yQ1_plus)
+	l0_spring1_minu = func_CN1_sort_ks_ls0(l0_spring_m1, xQ1_m1, yQ1_m1, xQ1_minu, yQ1_minu)
+	l0_spring2_plus = func_CN1_sort_ks_ls0(l0_spring_m2, xQ2_m2, yQ2_m2, xQ2_plus, yQ2_plus)
+	l0_spring2_minu = func_CN1_sort_ks_ls0(l0_spring_m2, xQ2_m2, yQ2_m2, xQ2_minu, yQ2_minu)
+
+	#print('xQ1_pick=',xQ1_pick)
+	#print('yQ1_pick=',yQ1_pick)
+	#print('xQ1_minu=',xQ1_minu)
+	#print('yQ1_minu=',yQ1_minu)
+	#
+#
+	#print('xQ2_plus=',xQ2_plus)
+	#print('yQ2_plus=',yQ2_plus)
+	#print('xQ2_minu=',xQ2_minu)
+	#print('yQ2_minu=',yQ2_minu)
 
 
 	length_PQ1_plus = np.sqrt((xP1_plus-xQ1_plus)**2+(yP1_plus-yQ1_plus)**2+(zP1_plus-zQ1_plus)**2)
@@ -357,11 +410,11 @@ if __name__ == '__main__':
 	L0_dire1 = length_PQ1_plus + length_PQ1_minu + length_Arc1
 	L0_dire2 = length_PQ2_plus + length_PQ2_minu + length_Arc2
 
-	l_f0_dire1 = L0_dire1 - ls1_minu - ls1_plus  # 纤维弹簧单元中1方向纤维初始长度
-	l_f0_dire2 = L0_dire2 - ls2_minu - ls2_plus  # 纤维弹簧单元中2方向纤维初始长度
+	l_f0_dire1 = L0_dire1 - l0_spring1_minu - l0_spring1_plus  # 纤维弹簧单元中1方向纤维初始长度
+	l_f0_dire2 = L0_dire2 - l0_spring2_minu - l0_spring2_plus  # 纤维弹簧单元中2方向纤维初始长度
 
-	k_s_dire1 = 1/(1/ks1_minu + 1/ks1_plus)  # 纤维弹簧单元中1方向边界串联弹簧刚度
-	k_s_dire2 = 1/(1/ks2_minu + 1/ks2_plus)  # 纤维弹簧单元中2方向边界串联弹簧刚度
+	k_s_dire1 = 1/(1/k_spring1_minu + 1/k_spring1_plus)  # 纤维弹簧单元中1方向边界串联弹簧刚度
+	k_s_dire2 = 1/(1/k_spring2_minu + 1/k_spring2_plus)  # 纤维弹簧单元中2方向边界串联弹簧刚度
 
 	K_dire1 = 1/(l_f0_dire1/(E_young*A_fibre) + 1/k_s_dire1)  # 纤维弹簧单元1方向拉伸刚度，线弹性阶段
 	K_dire2 = 1/(l_f0_dire2/(E_young*A_fibre) + 1/k_s_dire2)  # 纤维弹簧单元2方向拉伸刚度，线弹性阶段
@@ -381,7 +434,7 @@ if __name__ == '__main__':
 
 	n_loop = 0 # 初始增量步数
 	Height = initial_sag  # 网片初始面外变形
-	step_H = 1e-3  # 位移加载增量步长，单位：m
+	step_H = 1e-4  # 位移加载增量步长，单位：m
 
 	target_delta_Lu = np.amin(abs(Lu_all-L0_all))
 
