@@ -4,7 +4,7 @@
 
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from part_Logic import *
+from test_Logic import *
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

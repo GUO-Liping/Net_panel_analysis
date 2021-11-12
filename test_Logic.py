@@ -15,7 +15,7 @@ log: 计算部分，未完全实现界面与逻辑的分离。
 '''
 from PyQt5.QtWidgets import QMainWindow
 import numpy as np
-from part_UI import *
+from test_UI import *
 
 
 class MyWindow(QMainWindow, Ui_MainWindow):
@@ -44,23 +44,23 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         value = self.value_input_height.text()
         try:
             float(value)
-            self.area.setHeightValue(abs(float(value)))
+            self.areaRN.setHeightValue(abs(float(value)))
 
         except ValueError:
-            self.area.setHeightValue(1)
+            self.areaRN.setHeightValue(1)
 
     def slot_width_change(self):
         value = self.value_input_width.text()
         try:
             float(value)
-            self.area.setWidthValue(abs(float(value)))
+            self.areaRN.setWidthValue(abs(float(value)))
 
         except ValueError:
-            self.area.setWidthValue(1)
+            self.areaRN.setWidthValue(1)
 
     def slot_nw_change(self):
         value = self.value_input_nw.value()
-        self.area.setPenWidth(value)
+        self.areaRN.setPenWidth(value)
 
     def slot_compute(self):
         self.nw = self.value_input_nw.value()
