@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import QMainWindow
 import numpy as np
 from test_UI import *
 
-
+#dd = np.asarray(a.split(','),dtype='float')  # 将坐标转换为数组
 class MyWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(MyWindow, self).__init__(parent)
