@@ -23,11 +23,11 @@ class Ui_MainWindow(object):
 		sizePolicy20.setVerticalStretch(0)
 
 		font_menuBar = QtGui.QFont()
-		font_menuBar.setFamily("等线")
+		font_menuBar.setFamily("Arial")
 		font_menuBar.setPointSize(10)
 
 		font_toolBar = QtGui.QFont()
-		font_toolBar.setFamily("等线")
+		font_toolBar.setFamily("Arial")
 		font_toolBar.setPointSize(8)
  
 		font_tab = QtGui.QFont()
@@ -572,7 +572,7 @@ class Ui_MainWindow(object):
 		self.horizontalLayoutCN.addWidget(self.stackedWidget_drawingCN)
 		self.gridLayoutCN.addWidget(self.splitter_horizontalCN, 0, 0, 1, 1)
 		self.tabWidget_all.addTab(self.tab_CableNet, "")
- 
+
 		self.tab_OtherNet = QtWidgets.QWidget()
 		self.tab_OtherNet.setObjectName("tab_OtherNet")
 		self.tabWidget_all.addTab(self.tab_OtherNet, "")
@@ -798,9 +798,78 @@ class PaintAreaCN(QtWidgets.QWidget):
 	def paintEvent(self,QPaintEvent):
 		qp = QtGui.QPainter()
 		qp.begin(self)
+		self.draw_boundary(qp)
 		self.draw_lines(qp)
 		self.draw_ellipse(qp)
 		qp.end()
+
+	def draw_boundary(self, qp):
+		pen_boundary = QtGui.QPen()
+		pen_boundary.setStyle(QtCore.Qt.SolidLine)
+		pen_boundary.setWidth(3)
+		pen_boundary.setBrush(QtGui.QColor(255,0,0, 255))  # 最后一个数字为0-255之间，表示透明度
+		pen_boundary.setCapStyle(QtCore.Qt.RoundCap)
+		pen_boundary.setJoinStyle(QtCore.Qt.RoundJoin)
+
+		x1_origin = 1.5
+		y1_origin = -1.5
+
+		x2_origin = 1.5
+		y2_origin = 1.5
+
+		x3_origin = -1.5
+		y3_origin = 1.5
+
+		x4_origin = -1.5
+		y4_origin = -1.5
+
+		x_max = max(x1_origin, x2_origin, x3_origin, x4_origin)
+		x_min = min(x1_origin, x2_origin, x3_origin, x4_origin)
+
+		y_max = max(y1_origin, y2_origin, y3_origin, y4_origin)
+		y_min = min(y1_origin, y2_origin, y3_origin, y4_origin)
+
+		max_abs_xy = max(abs(x_max),abs(x_min),abs(y_max),abs(y_min))
+		min_width_height = min(self.width(), self.height())
+		scale_xy = 0.45*min_width_height/max_abs_xy
+
+		x1_scale = scale_xy*x1_origin
+		y1_scale = scale_xy*y1_origin
+		x2_scale = scale_xy*x2_origin
+		y2_scale = scale_xy*y2_origin
+		x3_scale = scale_xy*x3_origin
+		y3_scale = scale_xy*y3_origin
+		x4_scale = scale_xy*x4_origin
+		y4_scale = scale_xy*y4_origin	
+
+		x1_translate = x1_scale+self.width()/2
+		y1_translate = self.height()/2 - y1_scale
+
+		x2_translate = x2_scale+self.width()/2
+		y2_translate = self.height()/2 - y2_scale
+
+		x3_translate = x3_scale+self.width()/2
+		y3_translate = self.height()/2 - y3_scale
+
+		x4_translate = x4_scale+self.width()/2
+		y4_translate = self.height()/2 - y4_scale
+
+
+
+
+
+
+
+
+	
+
+		qp.setPen(pen_boundary)
+
+		qp.drawLine(x1_translate, y1_translate, x2_translate, y2_translate)
+		qp.drawLine(x2_translate, y2_translate, x3_translate, y3_translate)
+		qp.drawLine(x3_translate, y3_translate, x4_translate, y4_translate)
+		qp.drawLine(x4_translate, y4_translate, x1_translate, y1_translate)
+
 
 	def draw_lines(self, qp):
 		pen_line = QtGui.QPen()
