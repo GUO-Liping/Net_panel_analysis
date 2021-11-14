@@ -241,14 +241,44 @@ class MyWindow(QMainWindow, Ui_MainWindow):
 
 
     def slot_computeCN(self):
-        input_kargs1_CN = {'E_young':, 'E_tangent':, 'sigma_y':, 'sigma_u':, 'A_fibre':, 'Rp':, 'ex':, 'ey':}
-        input_kargs2_CN = {'d1':, 'd2':, 'alpha1':, 'alpha2':, 'x1':, 'y1':, 'x2':, 'y2':, 'x3':, 'y3':, 'x4':, 'y4':}
-        input_kargs3_CN = {'ks12':, 'ks23':, 'ks34':, 'ks41':, 'initial_sag':}
+        self.E_young = float(self.value_input_E_CN.text())
+        self.E_tangent = float(self.value_input_ET_CN.text())
+        self.sigma_u = float(self.value_input_sigmau_CN.text())
+        self.epsilon_u = float(self.value_input_epsilonu_CN.text())
+        self.A_fibre = float(self.value_input_Acable_CN.text())
+        self.Rp = float(self.value_input_Rp_CN.text())
+        self.ex = float(self.value_input_ex_CN.text())
+        self.ey = float(self.value_input_ey_CN.text())
+
+        self.d1 = float(self.value_input_d1_CN.text())
+        self.d2 = float(self.value_input_d2_CN.text())
+        self.alpha1 = float(self.value_input_alpha1_CN.text())
+        self.alpha2 = float(self.value_input_alpha2_CN.text())
+
+        self.x1 = np.asarray(self.value_input_x1y1_CN.split(','),dtype='float')[0]
+        self.y1 = np.asarray(self.value_input_x1y1_CN.split(','),dtype='float')[1]
+        self.x2 = np.asarray(self.value_input_x2y2_CN.split(','),dtype='float')[0]
+        self.y2 = np.asarray(self.value_input_x2y2_CN.split(','),dtype='float')[1]
+        self.x3 = np.asarray(self.value_input_x3y3_CN.split(','),dtype='float')[0]
+        self.y3 = np.asarray(self.value_input_x3y3_CN.split(','),dtype='float')[1]
+        self.x4 = np.asarray(self.value_input_x4y4_CN.split(','),dtype='float')[0]
+        self.y4 = np.asarray(self.value_input_x4y4_CN.split(','),dtype='float')[1]
+
+        self.ks12 = float(self.value_input_ks12_CN.text())
+        self.ks23 = float(self.value_input_ks23_CN.text())
+        self.ks34 = float(self.value_input_ks34_CN.text())
+        self.ks41 = float(self.value_input_ks41_CN.text())
+        self.initial_sag = float(self.value_input_initial_sag_CN.text())
+
+        input_kargs1_CN = {'E_young':self.E_young, 'E_tangent':self.E_tangent, 'sigma_u':self.sigma_u, 'epsilon_u':self.epsilon_u, 'A_fibre':self.A_fibre, 'Rp':self.Rp, 'ex':self.ex, 'ey':self.ey}
+        input_kargs2_CN = {'d1':self.d1, 'd2':self.d2, 'alpha1':self.alpha1, 'alpha2':self.alpha2, 'x1':self.x1, 'y1':self.y1, 'x2':self.x2, 'y2':self.y2, 'x3':self.x3, 'y3':self.y3, 'x4':self.x4, 'y4':self.y4}
+        input_kargs3_CN = {'ks12':self.ks12, 'ks23':self.ks23, 'ks34':self.ks34, 'ks41':self.ks41, 'initial_sag':self.initial_sag}
         input_kargs_CN = {**input_kargs1_CN,**input_kargs2_CN,**input_kargs3_CN}  # 合并字典
 
         self.Height_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[0]
         self.Force_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[1]
         self.Energy_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[2]
+        self.func_outputCN()
 
     def func_outputCN(self):
 
