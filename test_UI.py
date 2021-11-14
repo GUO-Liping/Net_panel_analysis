@@ -859,10 +859,10 @@ class PaintAreaCN(QtWidgets.QWidget):
 		self.x2_minu_draw = np.array([0.45,0.15,-0.15,-0.45])  
 		self.y2_minu_draw = np.array([-1.5,-1.5,-1.5,-1.5])
 
-		self.alpha1_CN_draw = 0
-		self.alpha2_CN_draw = 90
+		self.alpha1_CN_draw = 0*np.pi/180
+		self.alpha2_CN_draw = 90*np.pi/180
 		self.d1_CN_draw = 0.3
-		self.d1_CN_draw = 0.3 
+		self.d2_CN_draw = 0.3 
 
 		self.penCN = QtGui.QPen()
 
@@ -911,11 +911,11 @@ class PaintAreaCN(QtWidgets.QWidget):
 		self.update()
 	
 	def set_alpha1_CN_draw(self, value):
-		self.alpha1_CN_draw = value
+		self.alpha1_CN_draw = value*np.pi/180
 		self.update()
 	
 	def set_alpha2_CN_draw(self, value):
-		self.alpha2_CN_draw = value
+		self.alpha2_CN_draw = value*np.pi/180
 		self.update()
 	
 	def set_d1_CN_draw(self, value):
@@ -1074,19 +1074,44 @@ class PaintAreaCN(QtWidgets.QWidget):
 			qp.drawLine(50*j, 10, 50*j, self.height()-10)
 
 	def draw_load_lines(self, qp):
-		pen_load_line = QtGui.QPen()
-		pen_load_line.setStyle(QtCore.Qt.SolidLine)
-		pen_load_line.setWidth(5)
-		pen_load_line.setBrush(QtGui.QColor(106,90,205, 255))  # 最后一个数字为0-255之间，表示透明度
-		pen_load_line.setCapStyle(QtCore.Qt.RoundCap)
-		pen_load_line.setJoinStyle(QtCore.Qt.RoundJoin)
-		qp.setPen(pen_load_line)
+		m1_draw = 2*cable_net_v1_POP.func_round(self.Rp_CN_draw/self.d1_CN_draw)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
+		m2_draw = 2*cable_net_v1_POP.func_round(self.Rp_CN_draw/self.d2_CN_draw)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
+		xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = cable_net_v1_POP.func_CN1_loaded_xPyP(m1_draw, self.d1_CN_draw, self.alpha1_CN_draw, self.Rp_CN_draw, 0, self.ex_CN_draw, self.ey_CN_draw)  # 1方向钢丝绳与加载区域边缘交点坐标
+		xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = cable_net_v1_POP.func_CN1_loaded_xPyP(m2_draw, self.d2_CN_draw, self.alpha2_CN_draw, self.Rp_CN_draw, 0, self.ex_CN_draw, self.ey_CN_draw)  # 2方向钢丝绳与加载区域边缘交点坐标
 
-
-		m1 = 2*func_round(self.Rp_CN_draw/self.d1_CN_draw)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
-		m2 = 2*func_round(self.Rp_CN_draw/self.d2_CN_draw)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
-		xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, initial_sag, ex, ey)  # 1方向钢丝绳与加载区域边缘交点坐标
-		xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_CN1_loaded_xPyP(m2, d2, alpha2, Rp, initial_sag, ex, ey)  # 2方向钢丝绳与加载区域边缘交点坐标
+		# 求解计算过程中钢丝绳网片边界上力的作用点（Q点）坐标，方向1与方向2，Q点坐标不随加载位移的变换改变
+		A1_arr, B1_arr, C1_arr = cable_net_v1_POP.func_CN1_solve_ABC(xP1_minu, yP1_minu, xP1_plus, yP1_plus)  # 与加载区域边缘相交的1方向的钢丝绳直线方程系数A1x+B1y+C1=0
+		A2_arr, B2_arr, C2_arr = cable_net_v1_POP.func_CN1_solve_ABC(xP2_minu, yP2_minu, xP2_plus, yP2_plus)  # 与加载区域边缘相交的2方向的钢丝绳直线方程系数A2x+B2y+C2=0
+	
+		A_line12, B_line12, C_line12 = cable_net_v1_POP.func_CN1_solve_ABC(self.boundary_x1, self.boundary_y1, self.boundary_x2, self.boundary_y2)  # 边界线方程（锚点之间的连接线）A_linex+B_liney+C_line=0
+		A_line23, B_line23, C_line23 = cable_net_v1_POP.func_CN1_solve_ABC(self.boundary_x2, self.boundary_y2, self.boundary_x3, self.boundary_y3)
+		A_line34, B_line34, C_line34 = cable_net_v1_POP.func_CN1_solve_ABC(self.boundary_x3, self.boundary_y3, self.boundary_x4, self.boundary_y4)
+		A_line41, B_line41, C_line41 = cable_net_v1_POP.func_CN1_solve_ABC(self.boundary_x4, self.boundary_y4, self.boundary_x1, self.boundary_y1)
+	
+		xQ1_line12, yQ1_line12 = cable_net_v1_POP.func_CN1_xy_intersection(A1_arr, B1_arr, C1_arr, A_line12, B_line12, C_line12)  # 钢丝绳直线束与边界线（锚点1与锚点2连线）的交点，方向1
+		xQ1_line23, yQ1_line23 = cable_net_v1_POP.func_CN1_xy_intersection(A1_arr, B1_arr, C1_arr, A_line23, B_line23, C_line23)  # 钢丝绳直线束与边界线（锚点2与锚点3连线）的交点，方向1
+		xQ1_line34, yQ1_line34 = cable_net_v1_POP.func_CN1_xy_intersection(A1_arr, B1_arr, C1_arr, A_line34, B_line34, C_line34)  # 钢丝绳直线束与边界线（锚点3与锚点4连线）的交点，方向1
+		xQ1_line41, yQ1_line41 = cable_net_v1_POP.func_CN1_xy_intersection(A1_arr, B1_arr, C1_arr, A_line41, B_line41, C_line41)  # 钢丝绳直线束与边界线（锚点4与锚点1连线）的交点，方向1
+	
+		xQ2_line12, yQ2_line12 = cable_net_v1_POP.func_CN1_xy_intersection(A2_arr, B2_arr, C2_arr, A_line12, B_line12, C_line12)  # 钢丝绳直线束与边界线（锚点1与锚点2连线）的交点，方向2
+		xQ2_line23, yQ2_line23 = cable_net_v1_POP.func_CN1_xy_intersection(A2_arr, B2_arr, C2_arr, A_line23, B_line23, C_line23)  # 钢丝绳直线束与边界线（锚点2与锚点3连线）的交点，方向2
+		xQ2_line34, yQ2_line34 = cable_net_v1_POP.func_CN1_xy_intersection(A2_arr, B2_arr, C2_arr, A_line34, B_line34, C_line34)  # 钢丝绳直线束与边界线（锚点3与锚点4连线）的交点，方向2
+		xQ2_line41, yQ2_line41 = cable_net_v1_POP.func_CN1_xy_intersection(A2_arr, B2_arr, C2_arr, A_line41, B_line41, C_line41)  # 钢丝绳直线束与边界线（锚点4与锚点1连线）的交点，方向2
+	
+		xQ1_pick, yQ1_pick = cable_net_v1_POP.func_CN1_pick_xQyQ(m1_draw, xQ1_line12, yQ1_line12, xQ1_line23, yQ1_line23, xQ1_line34, yQ1_line34, xQ1_line41, yQ1_line41, self.boundary_x1, self.boundary_y1, self.boundary_x2, self.boundary_y2, self.boundary_x3, self.boundary_y3, self.boundary_x4, self.boundary_y4)  # 挑选出边界线段范围内的交点，方向1
+		xQ2_pick, yQ2_pick = cable_net_v1_POP.func_CN1_pick_xQyQ(m2_draw, xQ2_line12, yQ2_line12, xQ2_line23, yQ2_line23, xQ2_line34, yQ2_line34, xQ2_line41, yQ2_line41, self.boundary_x1, self.boundary_y1, self.boundary_x2, self.boundary_y2, self.boundary_x3, self.boundary_y3, self.boundary_x4, self.boundary_y4)  # 挑选出边界线段范围内的交点，方向2
+	
+		xQ1_plus, yQ1_plus, xQ1_minu, yQ1_minu = cable_net_v1_POP.func_CN1_sort_xQyQ(m1_draw, xQ1_pick, yQ1_pick, xP1_plus, yP1_plus, xP1_minu, yP1_minu)  # 对挑选出来的交点进行重新排序，使得边界线上的交点与加载边缘上的交点一一对应，与实际钢丝绳网中匹配关系一致，方向1
+		xQ2_plus, yQ2_plus, xQ2_minu, yQ2_minu = cable_net_v1_POP.func_CN1_sort_xQyQ(m2_draw, xQ2_pick, yQ2_pick, xP2_plus, yP2_plus, xP2_minu, yP2_minu)  # 对挑选出来的交点进行重新排序，使得边界线上的交点与加载边缘上的交点一一对应，与实际钢丝绳网中匹配关系一致，方向2
+	
+		self.x1_plus_draw = np.asarray(xQ1_plus,dtype='float')
+		self.y1_plus_draw = np.asarray(yQ1_plus,dtype='float')
+		self.x1_minu_draw = np.asarray(xQ1_minu,dtype='float')
+		self.y1_minu_draw = np.asarray(yQ1_minu,dtype='float')
+		self.x2_plus_draw = np.asarray(xQ2_plus,dtype='float')
+		self.y2_plus_draw = np.asarray(yQ2_plus,dtype='float')
+		self.x2_minu_draw = np.asarray(xQ2_minu,dtype='float')
+		self.y2_minu_draw = np.asarray(yQ2_minu,dtype='float')
 
 		x1_plus_draw_scale = self.scale_xy*self.x1_plus_draw
 		y1_plus_draw_scale = self.scale_xy*self.y1_plus_draw
@@ -1106,7 +1131,24 @@ class PaintAreaCN(QtWidgets.QWidget):
 		x2_minu_draw_translate = x2_minu_draw_scale + self.width()/2
 		y2_minu_draw_translate = self.height()/2 - y2_minu_draw_scale
 
+		pen_load_line1 = QtGui.QPen()
+		pen_load_line1.setStyle(QtCore.Qt.SolidLine)
+		pen_load_line1.setWidth(3)
+		pen_load_line1.setBrush(QtGui.QColor(106,90,205, 255))  # 最后一个数字为0-255之间，表示透明度
+		pen_load_line1.setCapStyle(QtCore.Qt.RoundCap)
+		pen_load_line1.setJoinStyle(QtCore.Qt.RoundJoin)
+		qp.setPen(pen_load_line1)
+
 		for i in range(len(x1_plus_draw_translate)):
 			qp.drawLine(x1_plus_draw_translate[i], y1_plus_draw_translate[i], x1_minu_draw_translate[i], y1_minu_draw_translate[i])
+		
+		pen_load_line2 = QtGui.QPen()
+		pen_load_line2.setStyle(QtCore.Qt.SolidLine)
+		pen_load_line2.setWidth(3)
+		pen_load_line2.setBrush(QtGui.QColor(90,10,15, 255))  # 最后一个数字为0-255之间，表示透明度
+		pen_load_line2.setCapStyle(QtCore.Qt.RoundCap)
+		pen_load_line2.setJoinStyle(QtCore.Qt.RoundJoin)
+		qp.setPen(pen_load_line2)
+
 		for j in range(len(x2_plus_draw_translate)):
 			qp.drawLine(x2_plus_draw_translate[j], y2_plus_draw_translate[j], x2_minu_draw_translate[j], y2_minu_draw_translate[j])

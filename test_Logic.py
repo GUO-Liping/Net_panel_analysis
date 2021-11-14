@@ -338,17 +338,23 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         value = self.value_input_d1_CN.text()
         try:
             float(value)
-            self.areaCN.set_d1_CN_draw(float(value))
+            if float(value)==0:
+                self.areaCN.set_d1_CN_draw(0.3)
+            else:
+                self.areaCN.set_d1_CN_draw(float(value))
         except ValueError:
-            self.areaCN.set_d1_CN_draw(0.0)
+            self.areaCN.set_d1_CN_draw(0.3)
 
     def slot_input_d2_CN_change(self):
         value = self.value_input_d2_CN.text()
         try:
             float(value)
-            self.areaCN.set_d2_CN_draw(float(value))
+            if float(value)==0:
+                self.areaCN.set_d2_CN_draw(0.3)
+            else:
+                 self.areaCN.set_d2_CN_draw(float(value))
         except ValueError:
-            self.areaCN.set_d2_CN_draw(0.0)
+            self.areaCN.set_d2_CN_draw(0.3)
 
 
     def slot_computeCN(self):

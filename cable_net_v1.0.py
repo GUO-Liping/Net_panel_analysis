@@ -60,6 +60,13 @@ import numpy as np
 #		raise ValueError
 #	return arc_length_DireX,arc_length_DireY
 
+def func_round(number):
+    if number % 1 == 0.5:
+        number = number + 0.5
+    else:
+        number = round(number)
+    return int(number)
+
 
 # 本函数用于考虑粗略情形下的弧长计算：加载高度处于顶头自身高度之内，则认为面外变形量为0
 def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):

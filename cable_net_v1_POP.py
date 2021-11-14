@@ -16,7 +16,7 @@ Remark: 尚未解决的问题：
 '''
 
 import numpy as np
-from userfunc_NPA import *
+#from userfunc_NPA import *
 
 # 本函数用于考虑更细致的情形：加载高度处于顶头自身高度之内，目前尚不完善
 #def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
@@ -60,6 +60,13 @@ from userfunc_NPA import *
 #		raise ValueError
 #	return arc_length_DireX,arc_length_DireY
 
+
+def func_round(number):
+    if number % 1 == 0.5:
+        number = number + 0.5
+    else:
+        number = round(number)
+    return int(number)
 
 # 本函数用于考虑粗略情形下的弧长计算：加载高度处于顶头自身高度之内，则认为面外变形量为0
 def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
