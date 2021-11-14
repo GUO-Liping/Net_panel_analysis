@@ -536,15 +536,35 @@ class Ui_MainWindow(object):
 		self.formLayout_outputCN.setVerticalSpacing(10)
 		self.formLayout_outputCN.setObjectName("formLayout_outputCN")
 
-		self.label_outputCN = QtWidgets.QLabel(self.groupBox_outputCN)  
-		self.label_outputCN.setFont(font_label)
-		self.label_outputCN.setObjectName("label_outputCN")
-		self.formLayout_outputCN.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.label_outputCN)
+		self.label_output1CN = QtWidgets.QLabel(self.groupBox_outputCN)  
+		self.label_output1CN.setFont(font_label)
+		self.label_output1CN.setObjectName("label_output1CN")
+		self.formLayout_outputCN.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.label_output1CN)
 
-		self.value_outputCN = QtWidgets.QLineEdit(self.groupBox_outputCN)  
-		self.value_outputCN.setFont(font_value)
-		self.value_outputCN.setObjectName("value_output1")
-		self.formLayout_outputCN.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.value_outputCN)
+		self.value_output1CN = QtWidgets.QLineEdit(self.groupBox_outputCN)  
+		self.value_output1CN.setFont(font_value)
+		self.value_output1CN.setObjectName("value_output1CN")
+		self.formLayout_outputCN.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.value_output1CN)
+
+		self.label_output2CN = QtWidgets.QLabel(self.groupBox_outputCN)  
+		self.label_output2CN.setFont(font_label)
+		self.label_output2CN.setObjectName("label_output2CN")
+		self.formLayout_outputCN.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_output2CN)
+
+		self.value_output2CN = QtWidgets.QLineEdit(self.groupBox_outputCN)  
+		self.value_output2CN.setFont(font_value)
+		self.value_output2CN.setObjectName("value_output2CN")
+		self.formLayout_outputCN.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.value_output2CN)
+
+		self.label_output3CN = QtWidgets.QLabel(self.groupBox_outputCN)  
+		self.label_output3CN.setFont(font_label)
+		self.label_output3CN.setObjectName("label_output3CN")
+		self.formLayout_outputCN.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.label_output3CN)
+
+		self.value_output3CN = QtWidgets.QLineEdit(self.groupBox_outputCN)  
+		self.value_output3CN.setFont(font_value)
+		self.value_output3CN.setObjectName("value_output3CN")
+		self.formLayout_outputCN.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.value_output3CN)
 
 		self.horizontalLayout_4CN.addLayout(self.formLayout_outputCN)
 		self.verticalLayout_input_outputCN.addWidget(self.groupBox_outputCN)
@@ -673,10 +693,13 @@ class Ui_MainWindow(object):
 
 		self.groupBox_output.setTitle(_translate("MainWindow", "Output"))
 		self.groupBox_outputCN.setTitle(_translate("MainWindow", "Output"))
-		self.label_output1.setText(_translate("MainWindow", "Displacement"))
-		self.value_output1.setText(_translate("MainWindow", "output1"))
-		self.label_outputCN.setText(_translate("MainWindow", "Displacement"))
-		self.value_outputCN.setText(_translate("MainWindow", "output1"))
+		self.label_output1CN.setText(_translate("MainWindow", "Displacement"))
+		self.value_output1CN.setText(_translate("MainWindow", "output1"))
+		self.label_output2CN.setText(_translate("MainWindow", "Force"))
+		self.value_output2CN.setText(_translate("MainWindow", "output2"))
+		self.label_output3CN.setText(_translate("MainWindow", "Energy"))
+		self.value_output3CN.setText(_translate("MainWindow", "output3"))
+
 		self.label_output2.setText(_translate("MainWindow", "Force"))
 		self.value_output2.setText(_translate("MainWindow", "output2"))
 		self.label_output3.setText(_translate("MainWindow", "Energy"))
@@ -780,8 +803,7 @@ class PaintAreaCN(QtWidgets.QWidget):
 
 		self.NetHeightValue = 3
 		self.NetWidthValue = 3
-
-		self.mypen = QtGui.QPen()
+		self.penCN = QtGui.QPen()
 
 	def setHeightValue(self, value):
 		self.NetHeightValue = value
@@ -792,7 +814,7 @@ class PaintAreaCN(QtWidgets.QWidget):
 		self.update()
 
 	def setPenWidth(self, value):
-		self.mypen.setWidth(round(value / 2))
+		self.penCN.setWidth(round(value / 2))
 		self.update()
 
 	def paintEvent(self,QPaintEvent):
@@ -825,22 +847,21 @@ class PaintAreaCN(QtWidgets.QWidget):
 
 		x_max = max(x1_origin, x2_origin, x3_origin, x4_origin)
 		x_min = min(x1_origin, x2_origin, x3_origin, x4_origin)
-
 		y_max = max(y1_origin, y2_origin, y3_origin, y4_origin)
 		y_min = min(y1_origin, y2_origin, y3_origin, y4_origin)
 
 		max_abs_xy = max(abs(x_max),abs(x_min),abs(y_max),abs(y_min))
 		min_width_height = min(self.width(), self.height())
-		scale_xy = 0.45*min_width_height/max_abs_xy
+		self.scale_xy = 0.45*min_width_height/max_abs_xy
 
-		x1_scale = scale_xy*x1_origin
-		y1_scale = scale_xy*y1_origin
-		x2_scale = scale_xy*x2_origin
-		y2_scale = scale_xy*y2_origin
-		x3_scale = scale_xy*x3_origin
-		y3_scale = scale_xy*y3_origin
-		x4_scale = scale_xy*x4_origin
-		y4_scale = scale_xy*y4_origin	
+		x1_scale = self.scale_xy*x1_origin
+		y1_scale = self.scale_xy*y1_origin
+		x2_scale = self.scale_xy*x2_origin
+		y2_scale = self.scale_xy*y2_origin
+		x3_scale = self.scale_xy*x3_origin
+		y3_scale = self.scale_xy*y3_origin
+		x4_scale = self.scale_xy*x4_origin
+		y4_scale = self.scale_xy*y4_origin	
 
 		x1_translate = x1_scale+self.width()/2
 		y1_translate = self.height()/2 - y1_scale
@@ -854,21 +875,21 @@ class PaintAreaCN(QtWidgets.QWidget):
 		x4_translate = x4_scale+self.width()/2
 		y4_translate = self.height()/2 - y4_scale
 
-
-
-
-
-
-
-
-	
-
 		qp.setPen(pen_boundary)
-
 		qp.drawLine(x1_translate, y1_translate, x2_translate, y2_translate)
 		qp.drawLine(x2_translate, y2_translate, x3_translate, y3_translate)
 		qp.drawLine(x3_translate, y3_translate, x4_translate, y4_translate)
 		qp.drawLine(x4_translate, y4_translate, x1_translate, y1_translate)
+
+		pen_point = QtGui.QPen()
+		pen_point.setWidth(18)
+		pen_point.setBrush(QtGui.QColor(139,137,137, 255))  # 最后一个数字为0-255之间，表示透明度
+
+		qp.setPen(pen_point)
+		qp.drawPoint(x1_translate, y1_translate)
+		qp.drawPoint(x2_translate, y2_translate)
+		qp.drawPoint(x3_translate, y3_translate)
+		qp.drawPoint(x4_translate, y4_translate)
 
 
 	def draw_lines(self, qp):

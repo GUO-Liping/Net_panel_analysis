@@ -22,12 +22,15 @@ class MyWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(MyWindow, self).__init__(parent)
         self.setupUi(self)
-
-        self.pushButton.clicked.connect(self.slot_compute)
+        # 用于开始计算ring net
+        self.pushButton.clicked.connect(self.slot_computeRN)
+        # 用于绘图参数改变 ring net
         self.value_input_height.textChanged.connect(self.slot_height_change)
         self.value_input_width.textChanged.connect(self.slot_width_change)
         self.value_input_nw.valueChanged.connect(self.slot_nw_change)
         
+        # 用于开始计算cable net
+        self.pushButtonCN.cliked.connect(self.slot_computeCN)
     # 窗口关闭时的二次确认消息窗体
     def closeEvent(self, event):
 
@@ -62,7 +65,7 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         value = self.value_input_nw.value()
         self.areaRN.setPenWidth(value)
 
-    def slot_compute(self):
+    def slot_computeRN(self):
         self.nw = self.value_input_nw.value()
         self.wx_origin = float(self.value_input_width.text())
         self.wy_origin = float(self.value_input_height.text())
@@ -235,3 +238,21 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.value_output4.setText(str(format(self.gama_N2, '0.2f')))
         self.value_output5.setText(str(format(self.ls2_min, '0.2f'))+' m')
         self.value_output6.setText(str(format(self.lf2_min, '0.2f'))+' m')
+
+
+    def slot_computeCN(self):
+        input_kargs1_CN = {'E_young':, 'E_tangent':, 'sigma_y':, 'sigma_u':, 'A_fibre':, 'Rp':, 'ex':, 'ey':}
+        input_kargs2_CN = {'d1':, 'd2':, 'alpha1':, 'alpha2':, 'x1':, 'y1':, 'x2':, 'y2':, 'x3':, 'y3':, 'x4':, 'y4':}
+        input_kargs3_CN = {'ks12':, 'ks23':, 'ks34':, 'ks41':, 'initial_sag':}
+        input_kargs_CN = {**input_kargs1_CN,**input_kargs2_CN,**input_kargs3_CN}  # 合并字典
+
+        self.Height_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[0]
+        self.Force_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[1]
+        self.Energy_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[2]
+
+    def func_outputCN(self):
+
+        self.value_output1CN.setText(str(format(self.Height_CN, '0.2f'))+' m')
+        self.value_output2CN.setText(str(format(self.Force_CN/1000, '0.2f'))+' kN')
+        self.value_output3CN.setText(str(format(self.Energy_CN/1000, '0.2f'))+' kJ')
+
