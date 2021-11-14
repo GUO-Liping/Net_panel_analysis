@@ -16,7 +16,7 @@ Remark: 尚未解决的问题：
 '''
 
 import numpy as np
-from userfunc_NPA import *
+#from userfunc_NPA import *
 
 # 本函数用于考虑更细致的情形：加载高度处于顶头自身高度之内，目前尚不完善
 #def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
@@ -286,9 +286,10 @@ if __name__ == '__main__':
 	# 钢丝绳网几何参数输入
 	d1 = 0.3  # 1方向钢丝绳间距-网孔间距
 	d2 = 0.3  # 2方向钢丝绳间距-网孔间距
-	alpha1 = 0*np.pi/2  # 钢丝绳方向角1，取值范围为半闭半开区间[0,pi)
+	alpha1 = 0  # 钢丝绳方向角1，取值范围为半闭半开区间[0,pi)
 	alpha2 = np.pi/2 # 钢丝绳方向角2，取值范围为半闭半开区间[0,pi)
 	A_fibre = fail_force/sigma_u
+	print('A_fibre=',A_fibre)
 	initial_sag = 0.2  # 钢丝绳网在重力作用下初始垂度（初始高度)
 
 	# 加载区域几何参数输入
@@ -326,7 +327,6 @@ if __name__ == '__main__':
 	#ls2_minu = 1e-1  # 方向2边界弹簧初始长度（单位：m），与方向2负方向纤维连接
 
 	# 求解过程----------------------------------------------------------------------------------- #
-	epsilon_u = sigma_y/E_young + (sigma_u-sigma_y)/E_tangent  # 钢丝绳失效应变
 
 	m1 = 2*func_round(Rp/d1)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
 	m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
@@ -513,6 +513,6 @@ if __name__ == '__main__':
 
 		#print('It the',n_loop, 'th loop,','L_all=',np.around(L_all,3),'Height=',np.around(Height,3))
 
-
+	epsilon_u = sigma_y/E_young + (sigma_u-sigma_y)/E_tangent  # 钢丝绳失效应变
 	print('epsilon_u=',np.around(epsilon_u,3),'Height=',np.around(Height,3),'Force=',np.around(force_ultimate,3),'Energy=',np.around(energy_ultimate,3))
 

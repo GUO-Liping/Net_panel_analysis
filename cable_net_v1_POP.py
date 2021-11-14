@@ -275,8 +275,43 @@ def func_CN1_sort_ks_ls0(origin_k, origin_x, origin_y, target_x, target_y):
 
 
 # if __name__ == '__main__':
-def func_main_cable_net(E_young,E_tangent,sigma_y,sigma_u,A_fibre,Rp,ex,ey,d1,d2,alpha1,alpha2,x1,y1,x2,y2,x3,y3,x4,y4,ks12,ks23,ks34,ks41,initial_sag):
+def func_main_cable_net(input_kargs):
 	# 参数输入----------------------------------------------------------------------------------- #
+	E_young = 10**9*input_kargs['E_young']  # 钢丝绳网中的钢丝绳弹性模量（单位：Pa）
+	E_tangent = 10**9*input_kargs['E_tangent']  # 钢丝绳网中的钢丝绳硬化段切线模量（单位：Pa）
+	sigma_y = 10**6*input_kargs['sigma_y']  # 钢丝绳网中的钢丝绳极限强度（单位：Pa）
+	sigma_u = 10**6*input_kargs['sigma_u']
+	A_fibre =  10**(-6)*input_kargs['A_fibre']
+
+	# 钢丝绳网几何参数输入
+	d1 = input_kargs['d1']  # 1方向钢丝绳间距-网孔间距
+	d2 = input_kargs['d2']  # 2方向钢丝绳间距-网孔间距
+	alpha1 = np.pi/180*input_kargs['alpha1']  # 钢丝绳方向角1，取值范围为半闭半开区间[0,pi)
+	alpha2 = np.pi/180*input_kargs['alpha2'] # 钢丝绳方向角2，取值范围为半闭半开区间[0,pi)
+
+	# 加载区域几何参数输入
+	Rp = input_kargs['Rp']  # 加载顶头水平投影半径（单位：m），若加载形状为多边形时考虑为等面积圆的半径
+	ex = input_kargs['ex']  # 加载区域中心沿x方向偏心距（单位：m）
+	ey = input_kargs['ey']  # 加载区域中心沿y方向偏心距（单位：m）
+
+	# 锚点坐标输入，可考虑任意四边形钢丝绳网片
+	x1 = input_kargs['x1']
+	x2 = input_kargs['x2']
+	x3 = input_kargs['x3']
+	x4 = input_kargs['x4']
+	y1 = input_kargs['y1']
+	y2 = input_kargs['y2']
+	y3 = input_kargs['y3']
+	y4 = input_kargs['y4']
+
+	# 边界刚度输入，目前可考虑纤维两端连接不同刚度的钢丝绳
+	ks12 = input_kargs['ks12']  # 锚点12之间的边界弹簧刚度（单位：N/m），与方向1正方向纤维连接，刚性边界取值为1e15N/m
+	ks23 = input_kargs['ks23']  # 锚点23之间的边界弹簧刚度（单位：N/m），与方向1负方向纤维连接
+	ks34 = input_kargs['ks34']  # 锚点34之间的边界弹簧刚度（单位：N/m），与方向2正方向纤维连接
+	ks41 = input_kargs['ks41']  # 锚点41之间的边界弹簧刚度（单位：N/m），与方向2负方向纤维连接
+
+	initial_sag = input_kargs['initial_sag']  # 钢丝绳网在重力作用下初始垂度（初始高度)
+
 	# 钢丝绳网材料参数输入
 	'''
 	E_young = 91.304e9  # 钢丝绳网中的钢丝绳弹性模量（单位：Pa）
@@ -317,7 +352,6 @@ def func_main_cable_net(E_young,E_tangent,sigma_y,sigma_u,A_fibre,Rp,ex,ey,d1,d2
 
 	# 求解过程----------------------------------------------------------------------------------- #
 	Rs = Rp/(np.arcsin(5/12))  # 球罐形加载顶头半径（单位：m）
-	epsilon_u = sigma_y/E_young + (sigma_u-sigma_y)/E_tangent  # 钢丝绳失效应变
 
 	m1 = 2*func_round(Rp/d1)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
 	m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
@@ -501,11 +535,14 @@ def func_main_cable_net(E_young,E_tangent,sigma_y,sigma_u,A_fibre,Rp,ex,ey,d1,d2
 
 		n_loop = n_loop+1
 		Height = Height+step_H
-
+	
+	#sigma_y = E_young*(sigma_u-E_tangent*epsilon_u)/(E_young-E_tangent)
+	breaking_force = sigma_u*A_fibre
+	epsilon_u = sigma_y/E_young + (sigma_u-sigma_y)/E_tangent
 	Height = np.around(Height,3)
 	Force = np.around(force_ultimate,3)
 	Energy = np.around(energy_ultimate,3)
 
 	print('epsilon_u=',np.around(epsilon_u,3),'Height=',np.around(Height,3),'Force=',np.around(force_ultimate,3),'Energy=',np.around(energy_ultimate,3))
 
-	return Height,Force,Energy
+	return breaking_force,epsilon_u,Height,Force,Energy,xQ1_plus, yQ1_plus, xQ1_minu, yQ1_minu,xQ2_plus, yQ2_plus, xQ2_minu, yQ2_minu

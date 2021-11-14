@@ -16,6 +16,7 @@ log: 计算部分，未完全实现界面与逻辑的分离。
 from PyQt5.QtWidgets import QMainWindow
 import numpy as np
 from test_UI import *
+import cable_net_v1_POP
 
 #dd = np.asarray(a.split(','),dtype='float')  # 将坐标转换为数组
 class MyWindow(QMainWindow, Ui_MainWindow):
@@ -30,18 +31,22 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.value_input_nw.valueChanged.connect(self.slot_nw_change)
         
         # 用于开始计算cable net
-        self.pushButtonCN.cliked.connect(self.slot_computeCN)
-    # 窗口关闭时的二次确认消息窗体
-    def closeEvent(self, event):
+        self.pushButtonCN.clicked.connect(self.slot_computeCN)
+        # 用于绘图参数改变 ring net
+        self.value_input_x1y1_CN.textChanged.connect(self.slot_boundary_x1y1_change)
+        self.value_input_x2y2_CN.textChanged.connect(self.slot_boundary_x2y2_change)
+        self.value_input_x3y3_CN.textChanged.connect(self.slot_boundary_x3y3_change)
+        self.value_input_x4y4_CN.textChanged.connect(self.slot_boundary_x4y4_change)
 
-        reply = QtWidgets.QMessageBox.question(self,'Message',"Are you sure to quit?",
-                                               QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                                               QtWidgets.QMessageBox.No)
+        self.value_input_Rp_CN.textChanged.connect(self.slot_input_Rp_CN_change)
+        self.value_input_ex_CN.textChanged.connect(self.slot_input_ex_CN_change)
+        self.value_input_ey_CN.textChanged.connect(self.slot_input_ey_CN_change)
 
-        if reply == QtWidgets.QMessageBox.Yes:
-            event.accept()
-        else:
-            event.ignore()
+        self.value_input_alpha1_CN.textChanged.connect(self.slot_input_alpha1_CN_change)
+        self.value_input_alpha2_CN.textChanged.connect(self.slot_input_alpha2_CN_change)
+
+        self.value_input_d1_CN.textChanged.connect(self.slot_input_d1_CN_change)
+        self.value_input_d2_CN.textChanged.connect(self.slot_input_d2_CN_change)
 
     def slot_height_change(self):
         value = self.value_input_height.text()
@@ -239,12 +244,118 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.value_output5.setText(str(format(self.ls2_min, '0.2f'))+' m')
         self.value_output6.setText(str(format(self.lf2_min, '0.2f'))+' m')
 
+# ------------------------------------------------------------------------------------------#
+# 将更改后的输入值在图像中更新
+    def slot_boundary_x1y1_change(self):
+        value0 = np.asarray(self.value_input_x1y1_CN.text().split(','),dtype='float')[0]
+        value1 = np.asarray(self.value_input_x1y1_CN.text().split(','),dtype='float')[1]
+        try:
+            float(value0)
+            float(value1)
+            self.areaCN.set_boundary_x1(float(value0))
+            self.areaCN.set_boundary_y1(float(value1))
+        except ValueError:
+            self.areaCN.set_boundary_x1(1.5)
+            self.areaCN.set_boundary_y1(-1.5)
+
+    def slot_boundary_x2y2_change(self):
+        value0 = np.asarray(self.value_input_x2y2_CN.text().split(','),dtype='float')[0]
+        value1 = np.asarray(self.value_input_x2y2_CN.text().split(','),dtype='float')[1]
+        try:
+            float(value0)
+            float(value1)
+            self.areaCN.set_boundary_x2(float(value0))
+            self.areaCN.set_boundary_y2(float(value1))
+        except ValueError:
+            self.areaCN.set_boundary_x2(1.5)
+            self.areaCN.set_boundary_y2(1.5)
+
+    def slot_boundary_x3y3_change(self):
+        value0 = np.asarray(self.value_input_x3y3_CN.text().split(','),dtype='float')[0]
+        value1 = np.asarray(self.value_input_x3y3_CN.text().split(','),dtype='float')[1]
+        try:
+            float(value0)
+            float(value1)
+            self.areaCN.set_boundary_x3(float(value0))
+            self.areaCN.set_boundary_y3(float(value1))
+        except ValueError:
+            self.areaCN.set_boundary_x3(-1.5)
+            self.areaCN.set_boundary_y3(1.5)
+
+    def slot_boundary_x4y4_change(self):
+        value0 = np.asarray(self.value_input_x4y4_CN.text().split(','),dtype='float')[0]
+        value1 = np.asarray(self.value_input_x4y4_CN.text().split(','),dtype='float')[1]
+        try:
+            float(value0)
+            float(value1)
+            self.areaCN.set_boundary_x4(float(value0))
+            self.areaCN.set_boundary_y4(float(value1))
+        except ValueError:
+            self.areaCN.set_boundary_x4(-1.5)
+            self.areaCN.set_boundary_y4(-1.5)
+
+    def slot_input_Rp_CN_change(self):
+        value = self.value_input_Rp_CN.text()
+        try:
+            float(value)
+            self.areaCN.set_Rp_CN_draw(float(value))
+        except ValueError:
+            self.areaCN.set_Rp_CN_draw(0.5)
+
+    def slot_input_ex_CN_change(self):
+        value = self.value_input_ex_CN.text()
+        try:
+            float(value)
+            self.areaCN.set_ex_CN_draw(float(value))
+        except ValueError:
+            self.areaCN.set_ex_CN_draw(0.0)
+
+    def slot_input_ey_CN_change(self):
+        value = self.value_input_ey_CN.text()
+        try:
+            float(value)
+            self.areaCN.set_ey_CN_draw(float(value))
+        except ValueError:
+            self.areaCN.set_ey_CN_draw(0.0)
+
+    def slot_input_alpha1_CN_change(self):
+        value = self.value_input_alpha1_CN.text()
+        try:
+            float(value)
+            self.areaCN.set_alpha1_CN_draw(float(value))
+        except ValueError:
+            self.areaCN.set_alpha1_CN_draw(0.0)
+
+    def slot_input_alpha2_CN_change(self):
+        value = self.value_input_alpha2_CN.text()
+        try:
+            float(value)
+            self.areaCN.set_alpha2_CN_draw(float(value))
+        except ValueError:
+            self.areaCN.set_alpha2_CN_draw(0.0)
+
+    def slot_input_d1_CN_change(self):
+        value = self.value_input_d1_CN.text()
+        try:
+            float(value)
+            self.areaCN.set_d1_CN_draw(float(value))
+        except ValueError:
+            self.areaCN.set_d1_CN_draw(0.0)
+
+    def slot_input_d2_CN_change(self):
+        value = self.value_input_d2_CN.text()
+        try:
+            float(value)
+            self.areaCN.set_d2_CN_draw(float(value))
+        except ValueError:
+            self.areaCN.set_d2_CN_draw(0.0)
+
 
     def slot_computeCN(self):
         self.E_young = float(self.value_input_E_CN.text())
         self.E_tangent = float(self.value_input_ET_CN.text())
         self.sigma_u = float(self.value_input_sigmau_CN.text())
-        self.epsilon_u = float(self.value_input_epsilonu_CN.text())
+        self.sigma_y = float(self.value_input_sigmay_CN.text())
         self.A_fibre = float(self.value_input_Acable_CN.text())
         self.Rp = float(self.value_input_Rp_CN.text())
         self.ex = float(self.value_input_ex_CN.text())
@@ -255,14 +366,14 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.alpha1 = float(self.value_input_alpha1_CN.text())
         self.alpha2 = float(self.value_input_alpha2_CN.text())
 
-        self.x1 = np.asarray(self.value_input_x1y1_CN.split(','),dtype='float')[0]
-        self.y1 = np.asarray(self.value_input_x1y1_CN.split(','),dtype='float')[1]
-        self.x2 = np.asarray(self.value_input_x2y2_CN.split(','),dtype='float')[0]
-        self.y2 = np.asarray(self.value_input_x2y2_CN.split(','),dtype='float')[1]
-        self.x3 = np.asarray(self.value_input_x3y3_CN.split(','),dtype='float')[0]
-        self.y3 = np.asarray(self.value_input_x3y3_CN.split(','),dtype='float')[1]
-        self.x4 = np.asarray(self.value_input_x4y4_CN.split(','),dtype='float')[0]
-        self.y4 = np.asarray(self.value_input_x4y4_CN.split(','),dtype='float')[1]
+        self.x1 = np.asarray(self.value_input_x1y1_CN.text().split(','),dtype='float')[0]
+        self.y1 = np.asarray(self.value_input_x1y1_CN.text().split(','),dtype='float')[1]
+        self.x2 = np.asarray(self.value_input_x2y2_CN.text().split(','),dtype='float')[0]
+        self.y2 = np.asarray(self.value_input_x2y2_CN.text().split(','),dtype='float')[1]
+        self.x3 = np.asarray(self.value_input_x3y3_CN.text().split(','),dtype='float')[0]
+        self.y3 = np.asarray(self.value_input_x3y3_CN.text().split(','),dtype='float')[1]
+        self.x4 = np.asarray(self.value_input_x4y4_CN.text().split(','),dtype='float')[0]
+        self.y4 = np.asarray(self.value_input_x4y4_CN.text().split(','),dtype='float')[1]
 
         self.ks12 = float(self.value_input_ks12_CN.text())
         self.ks23 = float(self.value_input_ks23_CN.text())
@@ -270,19 +381,35 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.ks41 = float(self.value_input_ks41_CN.text())
         self.initial_sag = float(self.value_input_initial_sag_CN.text())
 
-        input_kargs1_CN = {'E_young':self.E_young, 'E_tangent':self.E_tangent, 'sigma_u':self.sigma_u, 'epsilon_u':self.epsilon_u, 'A_fibre':self.A_fibre, 'Rp':self.Rp, 'ex':self.ex, 'ey':self.ey}
+        input_kargs1_CN = {'E_young':self.E_young, 'E_tangent':self.E_tangent, 'sigma_y':self.sigma_y, 'sigma_u':self.sigma_u, 'A_fibre':self.A_fibre, 'Rp':self.Rp, 'ex':self.ex, 'ey':self.ey}
         input_kargs2_CN = {'d1':self.d1, 'd2':self.d2, 'alpha1':self.alpha1, 'alpha2':self.alpha2, 'x1':self.x1, 'y1':self.y1, 'x2':self.x2, 'y2':self.y2, 'x3':self.x3, 'y3':self.y3, 'x4':self.x4, 'y4':self.y4}
         input_kargs3_CN = {'ks12':self.ks12, 'ks23':self.ks23, 'ks34':self.ks34, 'ks41':self.ks41, 'initial_sag':self.initial_sag}
         input_kargs_CN = {**input_kargs1_CN,**input_kargs2_CN,**input_kargs3_CN}  # 合并字典
 
-        self.Height_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[0]
-        self.Force_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[1]
-        self.Energy_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[2]
+        self.Breaking_force_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[0]
+        self.Failure_strain_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[1]
+        self.Height_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[2]
+        self.Force_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[3]
+        self.Energy_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[4]
         self.func_outputCN()
 
     def func_outputCN(self):
 
-        self.value_output1CN.setText(str(format(self.Height_CN, '0.2f'))+' m')
-        self.value_output2CN.setText(str(format(self.Force_CN/1000, '0.2f'))+' kN')
-        self.value_output3CN.setText(str(format(self.Energy_CN/1000, '0.2f'))+' kJ')
+        self.value_output1CN.setText(str(format(self.Breaking_force_CN/1000, '0.3f'))+' kN')
+        self.value_output2CN.setText(str(format(self.Failure_strain_CN, '0.3f'))+' ')
+        self.value_output3CN.setText(str(format(self.Height_CN, '0.3f'))+' m')
+        self.value_output4CN.setText(str(format(self.Force_CN/1000, '0.3f'))+' kN')
+        self.value_output5CN.setText(str(format(self.Energy_CN/1000, '0.3f'))+' kJ')
 
+
+    # 窗口关闭时的二次确认消息窗体
+    def closeEvent(self, event):
+
+        reply = QtWidgets.QMessageBox.question(self,'Message',"Are you sure to quit?",
+                                               QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                               QtWidgets.QMessageBox.No)
+
+        if reply == QtWidgets.QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()

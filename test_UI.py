@@ -3,8 +3,9 @@
 # NetPanelAnalysis_V1_0_2界面
 
 import numpy as np
-from PyQt5.QtCore import pyqtSignal
+#from PyQt5.QtCore import pyqtSignal
 from PyQt5 import QtCore, QtGui, QtWidgets
+import cable_net_v1_POP
 
 class Ui_MainWindow(object):
 
@@ -301,45 +302,46 @@ class Ui_MainWindow(object):
 		self.gridLayout_inputCN.setHorizontalSpacing(10)
 		self.gridLayout_inputCN.setVerticalSpacing(10)
 		self.gridLayout_inputCN.setColumnMinimumWidth(3, 20)
+
 		self.label_input_E_CN = QtWidgets.QLabel(self.groupBox_inputCN)
 		self.label_input_E_CN.setFont(font_label)
 		self.gridLayout_inputCN.addWidget(self.label_input_E_CN, 0, 0)
-		self.label_input_E_CN.setText('E (Pa)')
+		self.label_input_E_CN.setText('E (GPa)')
 
 		self.value_input_E_CN = QtWidgets.QLineEdit(self.groupBox_inputCN)
 		self.value_input_E_CN.setFont(font_value)
 		self.gridLayout_inputCN.addWidget(self.value_input_E_CN, 0, 1)
-		self.value_input_E_CN.setText('100e9')
+		self.value_input_E_CN.setText('91.304')
 
 		self.label_input_ET_CN = QtWidgets.QLabel(self.groupBox_inputCN)
 		self.label_input_ET_CN.setFont(font_label)
 		self.gridLayout_inputCN.addWidget(self.label_input_ET_CN, 0, 2)
-		self.label_input_ET_CN.setText('E<sub>T</sub> (Pa)')
+		self.label_input_ET_CN.setText('E<sub>T</sub> (GPa)')
 
 		self.value_input_ET_CN = QtWidgets.QLineEdit(self.groupBox_inputCN)
 		self.value_input_ET_CN.setFont(font_value)
 		self.gridLayout_inputCN.addWidget(self.value_input_ET_CN, 0, 3)
-		self.value_input_ET_CN.setText('10e9')
+		self.value_input_ET_CN.setText('25.0')
+
+		self.label_input_sigmay_CN = QtWidgets.QLabel(self.groupBox_inputCN)
+		self.label_input_sigmay_CN.setFont(font_label)
+		self.gridLayout_inputCN.addWidget(self.label_input_sigmay_CN, 1, 0)
+		self.label_input_sigmay_CN.setText('σ<sub>y</sub> (MPa)')
+
+		self.value_input_sigmay_CN = QtWidgets.QLineEdit(self.groupBox_inputCN)
+		self.value_input_sigmay_CN.setFont(font_value)
+		self.gridLayout_inputCN.addWidget(self.value_input_sigmay_CN, 1, 1)
+		self.value_input_sigmay_CN.setText('1050')
 
 		self.label_input_sigmau_CN = QtWidgets.QLabel(self.groupBox_inputCN)
 		self.label_input_sigmau_CN.setFont(font_label)
-		self.gridLayout_inputCN.addWidget(self.label_input_sigmau_CN, 1, 0)
-		self.label_input_sigmau_CN.setText('σ<sub>u</sub> (Pa)')
+		self.gridLayout_inputCN.addWidget(self.label_input_sigmau_CN, 1, 2)
+		self.label_input_sigmau_CN.setText('σ<sub>u</sub> (MPa)')
 
 		self.value_input_sigmau_CN = QtWidgets.QLineEdit(self.groupBox_inputCN)
 		self.value_input_sigmau_CN.setFont(font_value)
-		self.gridLayout_inputCN.addWidget(self.value_input_sigmau_CN, 1, 1)
-		self.value_input_sigmau_CN.setText('1570e6')
-
-		self.label_input_epsilonu_CN = QtWidgets.QLabel(self.groupBox_inputCN)
-		self.label_input_epsilonu_CN.setFont(font_label)
-		self.gridLayout_inputCN.addWidget(self.label_input_epsilonu_CN, 1, 2)
-		self.label_input_epsilonu_CN.setText('ε<sub>u</sub> (1)')
-
-		self.value_input_epsilonu_CN = QtWidgets.QLineEdit(self.groupBox_inputCN)
-		self.value_input_epsilonu_CN.setFont(font_value)
-		self.gridLayout_inputCN.addWidget(self.value_input_epsilonu_CN, 1, 3)
-		self.value_input_epsilonu_CN.setText('0.05')
+		self.gridLayout_inputCN.addWidget(self.value_input_sigmau_CN, 1, 3)
+		self.value_input_sigmau_CN.setText('1350')
 
 		self.label_input_Acable_CN = QtWidgets.QLabel(self.groupBox_inputCN)
 		self.label_input_Acable_CN.setFont(font_label)
@@ -349,7 +351,7 @@ class Ui_MainWindow(object):
 		self.value_input_Acable_CN = QtWidgets.QLineEdit(self.groupBox_inputCN)
 		self.value_input_Acable_CN.setFont(font_value)
 		self.gridLayout_inputCN.addWidget(self.value_input_Acable_CN, 2, 1)
-		self.value_input_Acable_CN.setText('314')
+		self.value_input_Acable_CN.setText('30.148')
 
 		self.label_input_Rp_CN = QtWidgets.QLabel(self.groupBox_inputCN)
 		self.label_input_Rp_CN.setFont(font_label)
@@ -429,7 +431,7 @@ class Ui_MainWindow(object):
 		self.value_input_x1y1_CN = QtWidgets.QLineEdit(self.groupBox_inputCN)
 		self.value_input_x1y1_CN.setFont(font_value)
 		self.gridLayout_inputCN.addWidget(self.value_input_x1y1_CN, 6, 1)
-		self.value_input_x1y1_CN.setText('1.5, 1.5')
+		self.value_input_x1y1_CN.setText('1.5, -1.5')
 
 		self.label_input_x2y2_CN = QtWidgets.QLabel(self.groupBox_inputCN)
 		self.label_input_x2y2_CN.setFont(font_label)
@@ -439,7 +441,7 @@ class Ui_MainWindow(object):
 		self.value_input_x2y2_CN = QtWidgets.QLineEdit(self.groupBox_inputCN)
 		self.value_input_x2y2_CN.setFont(font_value)
 		self.gridLayout_inputCN.addWidget(self.value_input_x2y2_CN, 6, 3)
-		self.value_input_x2y2_CN.setText('-1.5, 1.5')
+		self.value_input_x2y2_CN.setText('1.5, 1.5')
 
 		self.label_input_x3y3_CN = QtWidgets.QLabel(self.groupBox_inputCN)
 		self.label_input_x3y3_CN.setFont(font_label)
@@ -459,7 +461,7 @@ class Ui_MainWindow(object):
 		self.value_input_x4y4_CN = QtWidgets.QLineEdit(self.groupBox_inputCN)
 		self.value_input_x4y4_CN.setFont(font_value)
 		self.gridLayout_inputCN.addWidget(self.value_input_x4y4_CN, 7, 3)
-		self.value_input_x4y4_CN.setText('-1.5, 1.5')
+		self.value_input_x4y4_CN.setText('-1.5, -1.5')
 
 		self.label_input_ks12_CN = QtWidgets.QLabel(self.groupBox_inputCN)
 		self.label_input_ks12_CN.setFont(font_label)
@@ -509,7 +511,7 @@ class Ui_MainWindow(object):
 		self.value_input_initial_sag_CN = QtWidgets.QLineEdit(self.groupBox_inputCN)
 		self.value_input_initial_sag_CN.setFont(font_value)
 		self.gridLayout_inputCN.addWidget(self.value_input_initial_sag_CN, 10, 2, 1, 2)
-		self.value_input_initial_sag_CN.setText('0.55')
+		self.value_input_initial_sag_CN.setText('0.20')
 
 		self.horizontalLayout_3CN.addLayout(self.gridLayout_inputCN)
 		self.verticalLayout_input_outputCN.addWidget(self.groupBox_inputCN)
@@ -565,6 +567,26 @@ class Ui_MainWindow(object):
 		self.value_output3CN.setFont(font_value)
 		self.value_output3CN.setObjectName("value_output3CN")
 		self.formLayout_outputCN.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.value_output3CN)
+
+		self.label_output4CN = QtWidgets.QLabel(self.groupBox_outputCN)  
+		self.label_output4CN.setFont(font_label)
+		self.label_output4CN.setObjectName("label_output4CN")
+		self.formLayout_outputCN.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.label_output4CN)
+
+		self.value_output4CN = QtWidgets.QLineEdit(self.groupBox_outputCN)  
+		self.value_output4CN.setFont(font_value)
+		self.value_output4CN.setObjectName("value_output4CN")
+		self.formLayout_outputCN.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.value_output4CN)
+
+		self.label_output5CN = QtWidgets.QLabel(self.groupBox_outputCN)  
+		self.label_output5CN.setFont(font_label)
+		self.label_output5CN.setObjectName("label_output5CN")
+		self.formLayout_outputCN.setWidget(4, QtWidgets.QFormLayout.LabelRole, self.label_output5CN)
+
+		self.value_output5CN = QtWidgets.QLineEdit(self.groupBox_outputCN)  
+		self.value_output5CN.setFont(font_value)
+		self.value_output5CN.setObjectName("value_output5CN")
+		self.formLayout_outputCN.setWidget(4, QtWidgets.QFormLayout.FieldRole, self.value_output5CN)
 
 		self.horizontalLayout_4CN.addLayout(self.formLayout_outputCN)
 		self.verticalLayout_input_outputCN.addWidget(self.groupBox_outputCN)
@@ -693,12 +715,17 @@ class Ui_MainWindow(object):
 
 		self.groupBox_output.setTitle(_translate("MainWindow", "Output"))
 		self.groupBox_outputCN.setTitle(_translate("MainWindow", "Output"))
-		self.label_output1CN.setText(_translate("MainWindow", "Displacement"))
+
+		self.label_output1CN.setText(_translate("MainWindow", "Breaking force of cable"))
 		self.value_output1CN.setText(_translate("MainWindow", "output1"))
-		self.label_output2CN.setText(_translate("MainWindow", "Force"))
+		self.label_output2CN.setText(_translate("MainWindow", "Failure strain of cable"))
 		self.value_output2CN.setText(_translate("MainWindow", "output2"))
-		self.label_output3CN.setText(_translate("MainWindow", "Energy"))
+		self.label_output3CN.setText(_translate("MainWindow", "Displacement"))
 		self.value_output3CN.setText(_translate("MainWindow", "output3"))
+		self.label_output4CN.setText(_translate("MainWindow", "Force"))
+		self.value_output4CN.setText(_translate("MainWindow", "output4"))
+		self.label_output5CN.setText(_translate("MainWindow", "Energy"))
+		self.value_output5CN.setText(_translate("MainWindow", "output5"))
 
 		self.label_output2.setText(_translate("MainWindow", "Force"))
 		self.value_output2.setText(_translate("MainWindow", "output2"))
@@ -801,28 +828,144 @@ class PaintAreaCN(QtWidgets.QWidget):
 	def __init__(self):
 		super(PaintAreaCN, self).__init__()
 
-		self.NetHeightValue = 3
-		self.NetWidthValue = 3
+		self.boundary_x1 = 1.5
+		self.boundary_y1 = -1.5
+		self.boundary_x2 = 1.5
+		self.boundary_y2 = 1.5
+		self.boundary_x3 = -1.5
+		self.boundary_y3 = 1.5
+		self.boundary_x4 = -1.5
+		self.boundary_y4 = -1.5
+
+		self.Rp_CN_draw = 0.5
+		self.ex_CN_draw = 0
+		self.ey_CN_draw = 0
+
+		#self.x1_plus_draw = np.asarray(cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[5], dtype='float')
+		#self.y1_plus_draw = np.asarray(cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[6], dtype='float')
+		#self.x1_minu_draw = np.asarray(cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[7], dtype='float')
+		#self.y1_minu_draw = np.asarray(cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[8], dtype='float')
+		#self.x2_plus_draw = np.asarray(cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[9], dtype='float')
+		#self.y2_plus_draw = np.asarray(cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[10], dtype='float')
+		#self.x2_minu_draw = np.asarray(cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[11], dtype='float')
+		#self.y2_minu_draw = np.asarray(cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[12], dtype='float')
+		
+		self.x1_plus_draw = np.array([1.5,1.5,1.5,1.5])
+		self.y1_plus_draw = np.array([-0.45,-0.15,0.15,0.45])
+		self.x1_minu_draw = np.array([-1.5,-1.5,-1.5,-1.5]) 
+		self.y1_minu_draw = np.array([-0.45,-0.15,0.15,0.45]) 
+		self.x2_plus_draw = np.array([0.45,0.15,-0.15,-0.45]) 
+		self.y2_plus_draw = np.array([1.5,1.5,1.5,1.5]) 
+		self.x2_minu_draw = np.array([0.45,0.15,-0.15,-0.45])  
+		self.y2_minu_draw = np.array([-1.5,-1.5,-1.5,-1.5])
+
+		self.alpha1_CN_draw = 0
+		self.alpha2_CN_draw = 90
+		self.d1_CN_draw = 0.3
+		self.d1_CN_draw = 0.3 
+
 		self.penCN = QtGui.QPen()
 
-	def setHeightValue(self, value):
-		self.NetHeightValue = value
+	def set_boundary_x1(self, value):
+		self.boundary_x1 = value
 		self.update()
 
-	def setWidthValue(self, value):
-		self.NetWidthValue = value
+	def set_boundary_y1(self, value):
+		self.boundary_y1 = value
 		self.update()
 
-	def setPenWidth(self, value):
-		self.penCN.setWidth(round(value / 2))
+	def set_boundary_x2(self, value):
+		self.boundary_x2 = value
 		self.update()
 
+	def set_boundary_y2(self, value):
+		self.boundary_y2 = value
+		self.update()
+
+	def set_boundary_x3(self, value):
+		self.boundary_x3 = value
+		self.update()
+
+	def set_boundary_y3(self, value):
+		self.boundary_y3 = value
+		self.update()
+
+	def set_boundary_x4(self, value):
+		self.boundary_x4 = value
+		self.update()
+
+	def set_boundary_y4(self, value):
+		self.boundary_y4 = value
+		self.update()
+
+	def set_Rp_CN_draw(self, value):
+		self.Rp_CN_draw = value
+		self.update()
+
+	def set_ex_CN_draw(self, value):
+		self.ex_CN_draw = value
+		self.update()
+
+	def set_ey_CN_draw(self, value):
+		self.ey_CN_draw = value
+		self.update()
+	
+	def set_alpha1_CN_draw(self, value):
+		self.alpha1_CN_draw = value
+		self.update()
+	
+	def set_alpha2_CN_draw(self, value):
+		self.alpha2_CN_draw = value
+		self.update()
+	
+	def set_d1_CN_draw(self, value):
+		self.d1_CN_draw = value
+		self.update()
+	
+	def set_d2_CN_draw(self, value):
+		self.d2_CN_draw = value
+		self.update()
+
+	'''
+	def set_xQ1_plus_CN_draw(self, value):
+		self.xQ1_plus_CN_draw = value
+		self.update()
+
+	def set_yQ1_plus_CN_draw(self, value):
+		self.yQ1_plus_CN_draw = value
+		self.update()
+
+	def set_xQ1_minu_CN_draw(self, value):
+		self.xQ1_minu_CN_draw = value
+		self.update()
+
+	def set_yQ1_minu_CN_draw(self, value):
+		self.yQ1_minu_CN_draw = value
+		self.update()
+
+	def set_xQ2_plus_CN_draw(self, value):
+		self.xQ2_plus_CN_draw = value
+		self.update()
+
+	def set_yQ2_plus_CN_draw(self, value):
+		self.yQ2_plus_CN_draw = value
+		self.update()
+
+	def set_xQ2_minu_CN_draw(self, value):
+		self.xQ2_minu_CN_draw = value
+		self.update()
+
+	def set_yQ2_minu_CN_draw(self, value):
+		self.yQ2_minu_CN_draw = value
+		self.update()
+	'''
 	def paintEvent(self,QPaintEvent):
 		qp = QtGui.QPainter()
 		qp.begin(self)
 		self.draw_boundary(qp)
 		self.draw_lines(qp)
 		self.draw_ellipse(qp)
+		self.draw_load_lines(qp)
 		qp.end()
 
 	def draw_boundary(self, qp):
@@ -833,17 +976,14 @@ class PaintAreaCN(QtWidgets.QWidget):
 		pen_boundary.setCapStyle(QtCore.Qt.RoundCap)
 		pen_boundary.setJoinStyle(QtCore.Qt.RoundJoin)
 
-		x1_origin = 1.5
-		y1_origin = -1.5
-
-		x2_origin = 1.5
-		y2_origin = 1.5
-
-		x3_origin = -1.5
-		y3_origin = 1.5
-
-		x4_origin = -1.5
-		y4_origin = -1.5
+		x1_origin = self.boundary_x1
+		y1_origin = self.boundary_y1
+		x2_origin = self.boundary_x2
+		y2_origin = self.boundary_y2
+		x3_origin = self.boundary_x3
+		y3_origin = self.boundary_y3
+		x4_origin = self.boundary_x4
+		y4_origin = self.boundary_y4
 
 		x_max = max(x1_origin, x2_origin, x3_origin, x4_origin)
 		x_min = min(x1_origin, x2_origin, x3_origin, x4_origin)
@@ -852,7 +992,7 @@ class PaintAreaCN(QtWidgets.QWidget):
 
 		max_abs_xy = max(abs(x_max),abs(x_min),abs(y_max),abs(y_min))
 		min_width_height = min(self.width(), self.height())
-		self.scale_xy = 0.45*min_width_height/max_abs_xy
+		self.scale_xy = 0.48*min_width_height/max_abs_xy
 
 		x1_scale = self.scale_xy*x1_origin
 		y1_scale = self.scale_xy*y1_origin
@@ -892,6 +1032,32 @@ class PaintAreaCN(QtWidgets.QWidget):
 		qp.drawPoint(x4_translate, y4_translate)
 
 
+	def draw_ellipse(self, qp):
+		pen_ellipse = QtGui.QPen()
+		pen_ellipse.setStyle(QtCore.Qt.SolidLine)
+		pen_ellipse.setWidth(3)
+		pen_ellipse.setBrush(QtGui.QColor(0,0,0,255))  # 最后一个数字为0-255之间，表示透明度
+		pen_ellipse.setCapStyle(QtCore.Qt.RoundCap)
+		pen_ellipse.setJoinStyle(QtCore.Qt.RoundJoin)
+
+		Rp_ellipse = self.scale_xy*self.Rp_CN_draw
+		ex_ellipse = self.scale_xy*self.ex_CN_draw
+		ey_ellipse = self.scale_xy*self.ey_CN_draw
+
+		xc_ellipse = ex_ellipse + self.width()/2
+		yc_ellipse = self.height()/2 - ey_ellipse
+
+		h_ellipse = 2*Rp_ellipse
+		w_ellipse = 2*Rp_ellipse
+
+		x0_ellipse = xc_ellipse - Rp_ellipse
+		y0_ellipse = yc_ellipse - Rp_ellipse
+
+		qp.setPen(pen_ellipse)
+		qp.setBrush(QtGui.QColor(255,222,173,125))
+		qp.drawEllipse(x0_ellipse, y0_ellipse, w_ellipse,h_ellipse)
+
+
 	def draw_lines(self, qp):
 		pen_line = QtGui.QPen()
 		pen_line.setStyle(QtCore.Qt.DashDotLine)
@@ -907,20 +1073,40 @@ class PaintAreaCN(QtWidgets.QWidget):
 		for j in range(m2_lines):
 			qp.drawLine(50*j, 10, 50*j, self.height()-10)
 
+	def draw_load_lines(self, qp):
+		pen_load_line = QtGui.QPen()
+		pen_load_line.setStyle(QtCore.Qt.SolidLine)
+		pen_load_line.setWidth(5)
+		pen_load_line.setBrush(QtGui.QColor(106,90,205, 255))  # 最后一个数字为0-255之间，表示透明度
+		pen_load_line.setCapStyle(QtCore.Qt.RoundCap)
+		pen_load_line.setJoinStyle(QtCore.Qt.RoundJoin)
+		qp.setPen(pen_load_line)
 
-	def draw_ellipse(self, qp):
-		pen_ellipse = QtGui.QPen()
-		pen_ellipse.setStyle(QtCore.Qt.SolidLine)
-		pen_ellipse.setWidth(3)
-		pen_ellipse.setBrush(QtGui.QColor(0,0,0,255))  # 最后一个数字为0-255之间，表示透明度
-		pen_ellipse.setCapStyle(QtCore.Qt.RoundCap)
-		pen_ellipse.setJoinStyle(QtCore.Qt.RoundJoin)
-		xc_eliipse = self.width()/2
-		yc_eliipse = self.height()/2
-		h_ellipse = 500
-		w_ellipse = 500
-		x_eliipse = xc_eliipse - w_ellipse/2
-		y_eliipse = yc_eliipse - h_ellipse/2
-		qp.setPen(pen_ellipse)
-		qp.setBrush(QtGui.QColor(255,222,173,125))
-		qp.drawEllipse(x_eliipse, y_eliipse, w_ellipse,h_ellipse)
+
+		m1 = 2*func_round(self.Rp_CN_draw/self.d1_CN_draw)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
+		m2 = 2*func_round(self.Rp_CN_draw/self.d2_CN_draw)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
+		xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, initial_sag, ex, ey)  # 1方向钢丝绳与加载区域边缘交点坐标
+		xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_CN1_loaded_xPyP(m2, d2, alpha2, Rp, initial_sag, ex, ey)  # 2方向钢丝绳与加载区域边缘交点坐标
+
+		x1_plus_draw_scale = self.scale_xy*self.x1_plus_draw
+		y1_plus_draw_scale = self.scale_xy*self.y1_plus_draw
+		x1_minu_draw_scale = self.scale_xy*self.x1_minu_draw
+		y1_minu_draw_scale = self.scale_xy*self.y1_minu_draw
+		x2_plus_draw_scale = self.scale_xy*self.x2_plus_draw
+		y2_plus_draw_scale = self.scale_xy*self.y2_plus_draw
+		x2_minu_draw_scale = self.scale_xy*self.x2_minu_draw
+		y2_minu_draw_scale = self.scale_xy*self.y2_minu_draw
+
+		x1_plus_draw_translate = x1_plus_draw_scale + self.width()/2
+		y1_plus_draw_translate = self.height()/2 - y1_plus_draw_scale
+		x1_minu_draw_translate = x1_minu_draw_scale + self.width()/2
+		y1_minu_draw_translate = self.height()/2 - y1_minu_draw_scale
+		x2_plus_draw_translate = x2_plus_draw_scale + self.width()/2
+		y2_plus_draw_translate = self.height()/2 - y2_plus_draw_scale
+		x2_minu_draw_translate = x2_minu_draw_scale + self.width()/2
+		y2_minu_draw_translate = self.height()/2 - y2_minu_draw_scale
+
+		for i in range(len(x1_plus_draw_translate)):
+			qp.drawLine(x1_plus_draw_translate[i], y1_plus_draw_translate[i], x1_minu_draw_translate[i], y1_minu_draw_translate[i])
+		for j in range(len(x2_plus_draw_translate)):
+			qp.drawLine(x2_plus_draw_translate[j], y2_plus_draw_translate[j], x2_minu_draw_translate[j], y2_minu_draw_translate[j])
