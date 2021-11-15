@@ -15,8 +15,8 @@ log: 计算部分，未完全实现界面与逻辑的分离。
 '''
 from PyQt5.QtWidgets import QMainWindow
 import numpy as np
-from test_UI import *
-import cable_net_v1_POP
+from NPA_UI import *
+import NPA_cable_net_v1_POP
 
 #dd = np.asarray(a.split(','),dtype='float')  # 将坐标转换为数组
 class MyWindow(QMainWindow, Ui_MainWindow):
@@ -395,17 +395,17 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         input_kargs3_CN = {'ks12':self.ks12, 'ks23':self.ks23, 'ks34':self.ks34, 'ks41':self.ks41, 'initial_sag':self.initial_sag}
         input_kargs_CN = {**input_kargs1_CN,**input_kargs2_CN,**input_kargs3_CN}  # 合并字典
 
-        self.Breaking_force_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[0]
-        self.Failure_strain_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[1]
-        self.Height_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[2]
-        self.Force_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[3]
-        self.Energy_CN = cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[4]
+        self.Breaking_force_CN = NPA_cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[0]
+        self.Failure_strain_CN = NPA_cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[1]
+        self.Height_CN = NPA_cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[2]
+        self.Force_CN = NPA_cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[3]
+        self.Energy_CN = NPA_cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[4]
         self.func_outputCN()
 
     def func_outputCN(self):
 
-        self.value_output1CN.setText(str(format(self.Breaking_force_CN/1000, '0.3f'))+' kN'+' \t'+' \t'+'Please Check!')
-        self.value_output2CN.setText(str(format(self.Failure_strain_CN, '0.3f'))+' \t'+' \t'+ 'Please Check!')
+        self.value_output1CN.setText(str(format(self.Breaking_force_CN/1000, '0.3f'))+'kN'+ '\t \t'+'Please Check!')
+        self.value_output2CN.setText(str(format(self.Failure_strain_CN, '0.3f'))+'\t \t'+ 'Please Check!')
         self.value_output3CN.setText(str(format(self.Height_CN, '0.3f'))+' m')
         self.value_output4CN.setText(str(format(self.Force_CN/1000, '0.3f'))+' kN')
         self.value_output5CN.setText(str(format(self.Energy_CN/1000, '0.3f'))+' kJ')
