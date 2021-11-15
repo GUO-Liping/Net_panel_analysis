@@ -142,8 +142,8 @@ def func_CN1_xy_intersection(A1, B1, C1, A2, B2, C2):
 		x_point = A1 + A2 + 10**100  # 采用大数淹没，避免除0报警
 		y_point = A1 + A2 + 10**100  # 采用大数淹没，避免除0报警
 	else:
-		x_point =  (B1*C2-B2*C1)/(A1*B2-A2*B1)
-		y_point =  (A2*C1-A1*C2)/(A1*B2-A2*B1)
+		x_point = (B1*C2-B2*C1)/(A1*B2-A2*B1)
+		y_point = (A2*C1-A1*C2)/(A1*B2-A2*B1)
 	return x_point, y_point
 
 
@@ -237,7 +237,7 @@ def func_CN1_sort_xQyQ(m, xQ, yQ, xP_plus, yP_plus, xP_minu, yP_minu):
 			k_target = (yP_plus[i] - yP_minu[i])/(xP_plus[i] - xP_minu[i])
 			for jQ in range(len(xQ)):
 				k_search = (yQ[jQ] - yP_plus[i])/(xQ[jQ] - xP_plus[i])
-				if abs(k_search-k_target) <= 1e-15:
+				if abs(k_search-k_target) <= 1e-8:  # 1e-8是通过求解tan(0.000001°)-tan(0°)获得的：当角度增长0.000001°时满足的精度要求
 					if (yQ[jQ] - yP_plus[i])>=1e-15:
 						xQ_plus[i] = xQ[jQ]
 						yQ_plus[i] = yQ[jQ]
@@ -294,7 +294,7 @@ if __name__ == '__main__':
 	d1 = 0.3  # 1方向钢丝绳间距-网孔间距
 	d2 = 0.3  # 2方向钢丝绳间距-网孔间距
 	alpha1 = 0  # 钢丝绳方向角1，取值范围为半闭半开区间[0,pi)
-	alpha2 = np.pi/2 # 钢丝绳方向角2，取值范围为半闭半开区间[0,pi)
+	alpha2 = 89*np.pi/180 # 钢丝绳方向角2，取值范围为半闭半开区间[0,pi)
 	A_fibre = fail_force/sigma_u
 	print('A_fibre=',A_fibre)
 	initial_sag = 0.2  # 钢丝绳网在重力作用下初始垂度（初始高度)
@@ -393,16 +393,16 @@ if __name__ == '__main__':
 	l0_spring2_plus = func_CN1_sort_ks_ls0(l0_spring_m2, xQ2_m2, yQ2_m2, xQ2_plus, yQ2_plus)
 	l0_spring2_minu = func_CN1_sort_ks_ls0(l0_spring_m2, xQ2_m2, yQ2_m2, xQ2_minu, yQ2_minu)
 
-	#print('xQ1_pick=',xQ1_pick)
-	#print('yQ1_pick=',yQ1_pick)
-	#print('xQ1_minu=',xQ1_minu)
-	#print('yQ1_minu=',yQ1_minu)
-	#
+	print('xQ1_plus=',xQ1_plus)
+	print('yQ1_plus=',yQ1_plus)
+	print('xQ1_minu=',xQ1_minu)
+	print('yQ1_minu=',yQ1_minu)
+	
 #
-	#print('xQ2_plus=',xQ2_plus)
-	#print('yQ2_plus=',yQ2_plus)
-	#print('xQ2_minu=',xQ2_minu)
-	#print('yQ2_minu=',yQ2_minu)
+	print('xQ2_plus=',xQ2_plus)
+	print('yQ2_plus=',yQ2_plus)
+	print('xQ2_minu=',xQ2_minu)
+	print('yQ2_minu=',yQ2_minu)
 
 
 	length_PQ1_plus = np.sqrt((xP1_plus-xQ1_plus)**2+(yP1_plus-yQ1_plus)**2+(zP1_plus-zQ1_plus)**2)

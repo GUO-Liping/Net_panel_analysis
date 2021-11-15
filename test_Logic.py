@@ -298,7 +298,10 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         value = self.value_input_Rp_CN.text()
         try:
             float(value)
-            self.areaCN.set_Rp_CN_draw(float(value))
+            if float(value) == 0:
+                self.areaCN.set_Rp_CN_draw(0.5)
+            else:
+                self.areaCN.set_Rp_CN_draw(float(value))
         except ValueError:
             self.areaCN.set_Rp_CN_draw(0.5)
 
@@ -401,8 +404,8 @@ class MyWindow(QMainWindow, Ui_MainWindow):
 
     def func_outputCN(self):
 
-        self.value_output1CN.setText(str(format(self.Breaking_force_CN/1000, '0.3f'))+' kN')
-        self.value_output2CN.setText(str(format(self.Failure_strain_CN, '0.3f'))+' ')
+        self.value_output1CN.setText(str(format(self.Breaking_force_CN/1000, '0.3f'))+' kN'+' \t'+' \t'+'Please Check!')
+        self.value_output2CN.setText(str(format(self.Failure_strain_CN, '0.3f'))+' \t'+' \t'+ 'Please Check!')
         self.value_output3CN.setText(str(format(self.Height_CN, '0.3f'))+' m')
         self.value_output4CN.setText(str(format(self.Force_CN/1000, '0.3f'))+' kN')
         self.value_output5CN.setText(str(format(self.Energy_CN/1000, '0.3f'))+' kJ')

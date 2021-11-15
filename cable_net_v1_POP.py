@@ -237,7 +237,7 @@ def func_CN1_sort_xQyQ(m, xQ, yQ, xP_plus, yP_plus, xP_minu, yP_minu):
 			k_target = (yP_plus[i] - yP_minu[i])/(xP_plus[i] - xP_minu[i])
 			for jQ in range(len(xQ)):
 				k_search = (yQ[jQ] - yP_plus[i])/(xQ[jQ] - xP_plus[i])
-				if abs(k_search-k_target) <= 1e-15:
+				if abs(k_search-k_target) <= 1e-8:  # 1e-8是通过求解tan(0.000001°)-tan(0°)获得的：当角度增长0.000001°时满足的精度要求
 					if (yQ[jQ] - yP_plus[i])>=1e-15:
 						xQ_plus[i] = xQ[jQ]
 						yQ_plus[i] = yQ[jQ]
