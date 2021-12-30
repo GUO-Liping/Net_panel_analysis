@@ -311,7 +311,7 @@ def func_main_cable_net(input_kargs):
 	y3 = input_kargs['y3']
 	y4 = input_kargs['y4']
 
-	# 边界刚度输入，目前可考虑纤维两端连接不同刚度的钢丝绳
+	# 边界刚度输入，目前可考虑边界四周连接不同刚度的钢丝绳
 	ks12 = input_kargs['ks12']  # 锚点12之间的边界弹簧刚度（单位：N/m），与方向1正方向纤维连接，刚性边界取值为1e15N/m
 	ks23 = input_kargs['ks23']  # 锚点23之间的边界弹簧刚度（单位：N/m），与方向1负方向纤维连接
 	ks34 = input_kargs['ks34']  # 锚点34之间的边界弹簧刚度（单位：N/m），与方向2正方向纤维连接
@@ -491,7 +491,6 @@ def func_main_cable_net(input_kargs):
 		target_delta_Lu = np.amin(abs(L_all-Lu_all))
 
 		if np.amin(abs(L_all-Ly_all))<step_H:
-			print('The', np.where(abs(L_all-Ly_all)<step_H), 'th', 'fibre yielded when','Height=',Height)
 			force_yield_dire1 = K_dire1*(L_dire1-L0_dire1)  # 1方向各个纤维弹簧单元内力
 			force_yield_dire2 = K_dire2*(L_dire2-L0_dire2)  # 2方向各个纤维弹簧单元内力
 
@@ -504,6 +503,7 @@ def func_main_cable_net(input_kargs):
 			energy_yield_dire1 =  K_dire1*(L_dire1-L0_dire1)**2/2  # 临界屈服状态1方向各个纤维弹簧单元吸收能量
 			energy_yield_dire2 =  K_dire2*(L_dire2-L0_dire2)**2/2  # 临界屈服状态2方向各个纤维弹簧单元吸收能量
 			energy_yield = np.sum(energy_yield_dire1) + np.sum(energy_yield_dire2)  # 临界屈服状态各个纤维弹簧单元吸收总能量，标量直接相加
+			print('The', np.where(abs(L_all-Ly_all)<step_H), 'th', 'fibre yielded when','Height=',Height,'force_yield',force_yield)
 		else:
 			pass
 		
@@ -514,7 +514,7 @@ def func_main_cable_net(input_kargs):
 		energy_ultimate_dire2 = np.zeros_like(L_dire2)
 
 		if np.amin(abs(L_all-Lu_all))<step_H:
-			print('The', np.where(abs(L_all-Lu_all)<=step_H), 'th', 'fibre failed when','Height=',Height)
+			#print('The', np.where(abs(L_all-Lu_all)<=step_H), 'th', 'fibre failed when','Height=',Height)
 			for i_dire1 in range(len(L_dire1)):
 				if L_dire1[i_dire1]<Ly_dire1[i_dire1]:
 					force_ultimate_dire1[i_dire1] = K_dire1[i_dire1]*(L_dire1[i_dire1]-L0_dire1[i_dire1])
@@ -542,7 +542,7 @@ def func_main_cable_net(input_kargs):
 
 		n_loop = n_loop+1
 		Height = Height+step_H
-	
+
 	#sigma_y = E_young*(sigma_u-E_tangent*epsilon_u)/(E_young-E_tangent)
 	breaking_force = sigma_u*A_fibre
 	epsilon_u = sigma_y/E_young + (sigma_u-sigma_y)/E_tangent
