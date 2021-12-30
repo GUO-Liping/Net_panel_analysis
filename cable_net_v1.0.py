@@ -393,16 +393,16 @@ if __name__ == '__main__':
 	l0_spring2_plus = func_CN1_sort_ks_ls0(l0_spring_m2, xQ2_m2, yQ2_m2, xQ2_plus, yQ2_plus)
 	l0_spring2_minu = func_CN1_sort_ks_ls0(l0_spring_m2, xQ2_m2, yQ2_m2, xQ2_minu, yQ2_minu)
 
-	print('xQ1_plus=',xQ1_plus)
-	print('yQ1_plus=',yQ1_plus)
-	print('xQ1_minu=',xQ1_minu)
-	print('yQ1_minu=',yQ1_minu)
-	
+	#print('xQ1_plus=',xQ1_plus)
+	#print('yQ1_plus=',yQ1_plus)
+	#print('xQ1_minu=',xQ1_minu)
+	#print('yQ1_minu=',yQ1_minu)
+	#
 #
-	print('xQ2_plus=',xQ2_plus)
-	print('yQ2_plus=',yQ2_plus)
-	print('xQ2_minu=',xQ2_minu)
-	print('yQ2_minu=',yQ2_minu)
+	#print('xQ2_plus=',xQ2_plus)
+	#print('yQ2_plus=',yQ2_plus)
+	#print('xQ2_minu=',xQ2_minu)
+	#print('yQ2_minu=',yQ2_minu)
 
 
 	length_PQ1_plus = np.sqrt((xP1_plus-xQ1_plus)**2+(yP1_plus-yQ1_plus)**2+(zP1_plus-zQ1_plus)**2)
@@ -466,7 +466,7 @@ if __name__ == '__main__':
 		target_delta_Lu = np.amin(abs(L_all-Lu_all))
 
 		if np.amin(abs(L_all-Ly_all))<step_H:
-			print('The', np.where(abs(L_all-Ly_all)<step_H), 'th', 'fibre yielded when','Height=',Height)
+			#print('The', np.where(abs(L_all-Ly_all)<step_H), 'th', 'fibre yielded when','Height=',Height)
 			force_yield_dire1 = K_dire1*(L_dire1-L0_dire1)  # 1方向各个纤维弹簧单元内力
 			force_yield_dire2 = K_dire2*(L_dire2-L0_dire2)  # 2方向各个纤维弹簧单元内力
 
@@ -489,7 +489,7 @@ if __name__ == '__main__':
 		energy_ultimate_dire2 = np.zeros_like(L_dire2)
 
 		if np.amin(abs(L_all-Lu_all))<step_H:
-			print('The', np.where(abs(L_all-Lu_all)<=step_H), 'th', 'fibre failed when','Height=',Height)
+			#print('The', np.where(abs(L_all-Lu_all)<=step_H), 'th', 'fibre failed when','Height=',Height)
 			for i_dire1 in range(len(L_dire1)):
 				if L_dire1[i_dire1]<Ly_dire1[i_dire1]:
 					force_ultimate_dire1[i_dire1] = K_dire1[i_dire1]*(L_dire1[i_dire1]-L0_dire1[i_dire1])
