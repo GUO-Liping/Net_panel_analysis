@@ -16,7 +16,8 @@ Remark: 尚未解决的问题：
 '''
 
 import numpy as np
-#from userfunc_NPA import *
+import matplotlib.pyplot as plt
+
 
 # 本函数用于考虑更细致的情形：加载高度处于顶头自身高度之内，目前尚不完善
 #def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
@@ -68,7 +69,7 @@ def func_round(number):
     return int(number)
 
 
-# 本函数用于考虑粗略情形下的弧长计算：加载高度处于顶头自身高度之内，则认为圆平面加载
+# 本函数用于考虑粗略情形下的弧长计算：加载高度处于顶头自身高度之内，则认为圆平面加载与球面加载的折中
 def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 	i_DireX = np.arange(1,m_DireX+0.1,step=1)
 	i_DireY = np.arange(1,m_DireY+0.1,step=1)
@@ -76,8 +77,62 @@ def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 	d_DireY = abs(a_DireY/2*(2*i_DireY - m_DireY - 1))
 	minH = Rs-np.sqrt(Rs**2-Rp**2)
 	if H < minH:
-		arc_length_DireX = 2*np.sqrt(Rp**2 - d_DireX**2)
-		arc_length_DireY = 2*np.sqrt(Rp**2 - d_DireY**2)
+		Rp1 = np.sqrt(Rp**2-d_DireX**2)
+		Rs1 = np.sqrt(Rs**2-d_DireX**2)
+		minH1 = np.sqrt(Rs**2-d_DireX**2) - np.sqrt(Rs**2 - Rp**2)
+		H1 = H - (minH - minH1)
+		arc_line_factor1 = 1+(np.arcsin(Rp1/Rs1)*Rs1/Rp1 - 1)*H1/minH1
+
+		Rp2 = np.sqrt(Rp**2-d_DireY**2)
+		Rs2 = np.sqrt(Rs**2-d_DireY**2)
+		minH2 = np.sqrt(Rs**2-d_DireY**2) - np.sqrt(Rs**2 - Rp**2)
+		H2 = H - (minH - minH2)
+		arc_line_factor2 = 1+(np.arcsin(Rp2/Rs2)*Rs2/Rp2 - 1)*H2/minH2
+
+		print('arc_line_factor=',arc_line_factor2)
+		arc_length_DireX = 2*np.sqrt(Rp**2 - d_DireX**2)*arc_line_factor1
+		arc_length_DireY = 2*np.sqrt(Rp**2 - d_DireY**2)*arc_line_factor2
+	elif H >= minH:
+		alpha_DireX = 2*np.arctan(np.sqrt((Rp**2-d_DireX**2)/(Rs**2-Rp**2)))
+		alpha_DireY = 2*np.arctan(np.sqrt((Rp**2-d_DireY**2)/(Rs**2-Rp**2)))
+		arc_length_DireX = alpha_DireX*np.sqrt(Rs**2-d_DireX**2)
+		arc_length_DireY = alpha_DireY*np.sqrt(Rs**2-d_DireY**2)
+	else:
+		raise ValueError
+	return arc_length_DireX,arc_length_DireY
+
+# 本函数用于考虑精细情形下的弧长计算：加载高度处于顶头自身高度之内，则认为圆平面加载
+def func_CN1_lengthArc_fine(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
+	i_DireX = np.arange(1,m_DireX+0.1,step=1)
+	i_DireY = np.arange(1,m_DireY+0.1,step=1)
+	d_DireX = abs(a_DireX/2*(2*i_DireX - m_DireX - 1))
+	d_DireY = abs(a_DireY/2*(2*i_DireY - m_DireY - 1))
+	minH = Rs-np.sqrt(Rs**2-Rp**2)
+
+	alpha_DireX = np.empty_like(d_DireX)
+	alpha_DireY = np.empty_like(d_DireY)
+	arc_length_DireX = np.empty_like(d_DireX)
+	arc_length_DireY = np.empty_like(d_DireY)
+	lineX = np.empty_like(d_DireX)
+	lineY = np.empty_like(d_DireY)
+
+	if H < minH:
+		minRp = np.sqrt(Rs**2-(Rs-H)**2)
+		for iX in range(len(d_DireX)):
+			if d_DireX[iX]>minRp:
+				arc_length_DireX[iX] = 2*np.sqrt(Rp**2 - d_DireX[iX]**2)
+			else:
+				lineX[iX] = 2*np.sqrt(Rp**2 - d_DireX[iX]**2) - 2*np.sqrt(minRp**2 - d_DireX[iX]**2)
+				alpha_DireX[iX] = 2*np.arctan(np.sqrt(minRp**2-d_DireX[iX]**2)/(Rs-minH))
+				arc_length_DireX[iX] = alpha_DireX[iX]*np.sqrt(Rs**2-d_DireX[iX]**2) + lineX[iX]
+
+		for iY in range(len(d_DireY)):
+			if d_DireY[iY]>minRp:
+				arc_length_DireY[iY] = 2*np.sqrt(Rp**2 - d_DireY[iY]**2)
+			else:
+				lineY[iY] = 2*np.sqrt(Rp**2 - d_DireY[iY]**2) - 2*np.sqrt(minRp**2 - d_DireY[iY]**2)
+				alpha_DireY[iY] = 2*np.arctan(np.sqrt(minRp**2-d_DireY[iY]**2)/(Rs-minH))
+				arc_length_DireY[iY] = alpha_DireY[iY]*np.sqrt(Rs**2-d_DireY[iY]**2) + lineY[iY]
 	elif H >= minH:
 		alpha_DireX = 2*np.arctan(np.sqrt((Rp**2-d_DireX**2)/(Rs**2-Rp**2)))
 		alpha_DireY = 2*np.arctan(np.sqrt((Rp**2-d_DireY**2)/(Rs**2-Rp**2)))
@@ -284,20 +339,20 @@ def func_CN1_sort_ks_ls0(origin_k, origin_x, origin_y, target_x, target_y):
 if __name__ == '__main__':
 	# 参数输入----------------------------------------------------------------------------------- #
 	# 钢丝绳网材料参数输入
-	E_young = 91.304e9  # 钢丝绳网中的钢丝绳弹性模量（单位：Pa）
+	E_young = 90.304e9  # 钢丝绳网中的钢丝绳弹性模量（单位：Pa）
 	E_tangent = 25.0e9  # 钢丝绳网中的钢丝绳硬化段切线模量（单位：Pa）
 	sigma_y = 1050e6  # 钢丝绳网中的钢丝绳屈服强度（单位：Pa）
 	sigma_u = 1350e6  # 钢丝绳网中的钢丝绳极限强度（单位：Pa）
-	fail_force = 40700  # 钢丝绳网中的钢丝绳破断力（单位：N）
+	fail_force = 41782  # 钢丝绳网中的钢丝绳破断力（单位：N）
 
 	# 钢丝绳网几何参数输入
-	d1 = 0.28  # 1方向钢丝绳间距-网孔间距
-	d2 = 0.28  # 2方向钢丝绳间距-网孔间距
-	alpha1 = -45*np.pi/180  # 钢丝绳方向角1，取值范围为半闭半开区间[0,pi)
+	d1 = 0.283  # 1方向钢丝绳间距-网孔间距
+	d2 = 0.283  # 2方向钢丝绳间距-网孔间距
+	alpha1 = 135*np.pi/180  # 钢丝绳方向角1，取值范围为半闭半开区间[0,pi)
 	alpha2 = 45*np.pi/180 # 钢丝绳方向角2，取值范围为半闭半开区间[0,pi)
 	A_fibre = fail_force/sigma_u
-	print('A_fibre=',A_fibre)
-	initial_sag = 0.0  # 钢丝绳网在重力作用下初始垂度（初始高度)
+	#print('A_fibre=',A_fibre)
+	initial_sag = 0.05  # 钢丝绳网在重力作用下初始垂度（初始高度)
 
 	# 加载区域几何参数输入
 	ex = 0  # 加载区域中心沿x方向偏心距（单位：m）
@@ -445,7 +500,14 @@ if __name__ == '__main__':
 
 	target_delta_Lu = np.amin(abs(Lu_all-L0_all))
 
-	while(n_loop<=100000 and np.amin(target_delta_Lu>=step_H)):  # 判别条件是由一个不等式来确定的（该不等式证明：直角三角形的一个直角边恒定，则另一个直角边的增大程度始终大于斜边长度的增大程度）
+	Height_list = [0]
+	Force_list = [0]
+	Energy_list = [0]
+
+	while(n_loop<=10000 and np.amin(target_delta_Lu>=step_H)):  # 判别条件是由一个不等式来确定的（该不等式证明：直角三角形的一个直角边恒定，则另一个直角边的增大程度始终大于斜边长度的增大程度）
+
+		n_loop = n_loop+1
+		Height = Height+step_H
 
 		xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, Height, ex, ey)
 		xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_CN1_loaded_xPyP(m2, d2, alpha2, Rp, Height, ex, ey)
@@ -466,63 +528,45 @@ if __name__ == '__main__':
 		
 		target_delta_Lu = np.amin(abs(L_all-Lu_all))
 
-		if np.amin(abs(L_all-Ly_all))<step_H:
-			print('The', np.where(abs(L_all-Ly_all)<step_H), 'th', 'fibre yielded when','Height=',Height)
-			force_yield_dire1 = K_dire1*(L_dire1-L0_dire1)  # 1方向各个纤维弹簧单元内力
-			force_yield_dire2 = K_dire2*(L_dire2-L0_dire2)  # 2方向各个纤维弹簧单元内力
+		force_dire1 = np.zeros_like(L_dire1)
+		force_dire2 = np.zeros_like(L_dire2)
 
-			force_yield_proj1_plus = force_yield_dire1*Height/length_PQ1_plus  # 临界屈服状态1方向正侧端点各个纤维弹簧单元内力沿着加载方向的投影
-			force_yield_proj1_minu = force_yield_dire1*Height/length_PQ1_minu  # 临界屈服状态1方向负侧端点各个纤维弹簧单元内力沿着加载方向的投影
-			force_yield_proj2_plus = force_yield_dire2*Height/length_PQ2_plus  # 临界屈服状态2方向正侧端点各个纤维弹簧单元内力沿着加载方向的投影
-			force_yield_proj2_minu = force_yield_dire2*Height/length_PQ2_minu  # 临界屈服状态2方向负侧端点各个纤维弹簧单元内力沿着加载方向的投影
-			force_yield = np.sum(force_yield_proj1_plus) + np.sum(force_yield_proj1_minu) + np.sum(force_yield_proj2_plus) + np.sum(force_yield_proj2_minu)  # 各个纤维弹簧单元内力之和，矢量和运算
+		energy_dire1 = np.zeros_like(L_dire1)
+		energy_dire2 = np.zeros_like(L_dire2)
 
-			energy_yield_dire1 =  K_dire1*(L_dire1-L0_dire1)**2/2  # 临界屈服状态1方向各个纤维弹簧单元吸收能量
-			energy_yield_dire2 =  K_dire2*(L_dire2-L0_dire2)**2/2  # 临界屈服状态2方向各个纤维弹簧单元吸收能量
-			energy_yield = np.sum(energy_yield_dire1) + np.sum(energy_yield_dire2)  # 临界屈服状态各个纤维弹簧单元吸收总能量，标量直接相加
-			print('energy_yield=',energy_yield)
-		else:
-			pass
+		for i_dire1 in range(len(L_dire1)):
+			if L_dire1[i_dire1]<Ly_dire1[i_dire1]:
+				force_dire1[i_dire1] = K_dire1[i_dire1]*(L_dire1[i_dire1]-L0_dire1[i_dire1])
+				energy_dire1[i_dire1] = 0.5*K_dire1[i_dire1]*(L_dire1[i_dire1]-L0_dire1[i_dire1])**2
+			else:
+				#print('yield L_all=',L_all)
+				force_dire1[i_dire1] = K_dire1[i_dire1]*(Ly_dire1[i_dire1]-L0_dire1[i_dire1]) + K_T_dire1[i_dire1]*(L_dire1[i_dire1]-Ly_dire1[i_dire1])
+				energy_dire1[i_dire1] = 0.5*K_T_dire1[i_dire1]*(L_dire1[i_dire1]-Ly_dire1[i_dire1])**2 + 0.5*K_dire1[i_dire1]*(Ly_dire1[i_dire1]-L0_dire1[i_dire1])*(2*L_dire1[i_dire1]-Ly_dire1[i_dire1]-L0_dire1[i_dire1])
+
+		for i_dire2 in range(len(L_dire2)):
+			if L_dire2[i_dire2]<Ly_dire2[i_dire2]:
+				force_dire2[i_dire2] = K_dire2[i_dire2]*(L_dire2[i_dire2]-L0_dire2[i_dire2])
+				energy_dire2[i_dire2] = 0.5*K_dire2[i_dire2]*(L_dire2[i_dire2]-L0_dire2[i_dire2])**2
+			else:
+				#print('yield L_all=',L_all)
+				force_dire2[i_dire2] = K_dire2[i_dire2]*(Ly_dire2[i_dire2]-L0_dire2[i_dire2]) + K_T_dire2[i_dire2]*(L_dire2[i_dire2]-Ly_dire2[i_dire2])
+				energy_dire2[i_dire2] = 0.5*K_T_dire2[i_dire2]*(L_dire2[i_dire2]-Ly_dire2[i_dire2])**2 + 0.5*K_dire2[i_dire2]*(Ly_dire2[i_dire2]-L0_dire2[i_dire2])*(2*L_dire2[i_dire2]-Ly_dire2[i_dire2]-L0_dire2[i_dire2])
 		
-		force_ultimate_dire1 = np.zeros_like(L_dire1)
-		force_ultimate_dire2 = np.zeros_like(L_dire2)
+		force_proj1_plus = force_dire1*Height/length_PQ1_plus  # 极限破坏状态1方向正侧端点各个纤维弹簧单元内力沿着加载方向的投影
+		force_proj1_minu = force_dire1*Height/length_PQ1_minu  # 极限破坏状态1方向负侧端点各个纤维弹簧单元内力沿着加载方向的投影
+		force_proj2_plus = force_dire2*Height/length_PQ2_plus  # 极限破坏状态2方向正侧端点各个纤维弹簧单元内力沿着加载方向的投影
+		force_proj2_minu = force_dire2*Height/length_PQ2_minu  # 极限破坏状态2方向负侧端点各个纤维弹簧单元内力沿着加载方向的投影
 
-		energy_ultimate_dire1 = np.zeros_like(L_dire1)
-		energy_ultimate_dire2 = np.zeros_like(L_dire2)
+		force = np.sum(force_proj1_plus) + np.sum(force_proj1_minu) + np.sum(force_proj2_plus) + np.sum(force_proj2_minu)  # 极限破坏状态各个纤维弹簧单元内力之和，矢量和运算
+		energy = np.sum(energy_dire1) + np.sum(energy_dire2)  # 极限破坏状态各个纤维弹簧单元吸收总能量，标量直接相加
 
-		if np.amin(abs(L_all-Lu_all))<step_H:
-			#print('The', np.where(abs(L_all-Lu_all)<=step_H), 'th', 'fibre failed when','Height=',Height)
-			for i_dire1 in range(len(L_dire1)):
-				if L_dire1[i_dire1]<Ly_dire1[i_dire1]:
-					force_ultimate_dire1[i_dire1] = K_dire1[i_dire1]*(L_dire1[i_dire1]-L0_dire1[i_dire1])
-					energy_ultimate_dire1[i_dire1] = 0.5*K_dire1[i_dire1]*(L_dire1[i_dire1]-L0_dire1[i_dire1])**2
-				else:
-					force_ultimate_dire1[i_dire1] = K_dire1[i_dire1]*(Ly_dire1[i_dire1]-L0_dire1[i_dire1]) + K_T_dire1[i_dire1]*(L_dire1[i_dire1]-Ly_dire1[i_dire1])
-					energy_ultimate_dire1[i_dire1] = 0.5*K_T_dire1[i_dire1]*(L_dire1[i_dire1]-Ly_dire1[i_dire1])**2 + 0.5*K_dire1[i_dire1]*(Ly_dire1[i_dire1]-L0_dire1[i_dire1])*(2*L_dire1[i_dire1]-Ly_dire1[i_dire1]-L0_dire1[i_dire1])
+		Height_list.append(Height)
+		Force_list.append(force)
+		Energy_list.append(energy)
 
-			for i_dire2 in range(len(L_dire2)):
-				if L_dire2[i_dire2]<Ly_dire2[i_dire2]:
-					force_ultimate_dire2[i_dire2] = K_dire2[i_dire2]*(L_dire2[i_dire2]-L0_dire2[i_dire2])
-					energy_ultimate_dire2[i_dire2] = 0.5*K_dire2[i_dire2]*(L_dire2[i_dire2]-L0_dire2[i_dire2])**2
-				else:
-					force_ultimate_dire2[i_dire2] = K_dire2[i_dire2]*(Ly_dire2[i_dire2]-L0_dire2[i_dire2]) + K_T_dire2[i_dire2]*(L_dire2[i_dire2]-Ly_dire2[i_dire2])
-					energy_ultimate_dire2[i_dire2] = 0.5*K_T_dire2[i_dire2]*(L_dire2[i_dire2]-Ly_dire2[i_dire2])**2 + 0.5*K_dire2[i_dire2]*(Ly_dire2[i_dire2]-L0_dire2[i_dire2])*(2*L_dire2[i_dire2]-Ly_dire2[i_dire2]-L0_dire2[i_dire2])
-			
-			force_ultimate_proj1_plus = force_ultimate_dire1*Height/length_PQ1_plus  # 极限破坏状态1方向正侧端点各个纤维弹簧单元内力沿着加载方向的投影
-			force_ultimate_proj1_minu = force_ultimate_dire1*Height/length_PQ1_minu  # 极限破坏状态1方向负侧端点各个纤维弹簧单元内力沿着加载方向的投影
-			force_ultimate_proj2_plus = force_ultimate_dire2*Height/length_PQ2_plus  # 极限破坏状态2方向正侧端点各个纤维弹簧单元内力沿着加载方向的投影
-			force_ultimate_proj2_minu = force_ultimate_dire2*Height/length_PQ2_minu  # 极限破坏状态2方向负侧端点各个纤维弹簧单元内力沿着加载方向的投影
-
-			force_ultimate = np.sum(force_ultimate_proj1_plus) + np.sum(force_ultimate_proj1_minu) + np.sum(force_ultimate_proj2_plus) + np.sum(force_ultimate_proj2_minu)  # 极限破坏状态各个纤维弹簧单元内力之和，矢量和运算
-			energy_ultimate = np.sum(energy_ultimate_dire1) + np.sum(energy_ultimate_dire2)  # 极限破坏状态各个纤维弹簧单元吸收总能量，标量直接相加
-		else:
-			pass
-
-		n_loop = n_loop+1
-		Height = Height+step_H
-
-		print('It the',n_loop, 'th loop,','L_all=',np.around(L_all,3),'Height=',np.around(Height,3))
+		print('It the',n_loop, 'th loop,','Height=',np.around(Height,3),'Force=',np.around(force,3),'Energy=',np.around(energy,3))
 
 	epsilon_u = sigma_y/E_young + (sigma_u-sigma_y)/E_tangent  # 钢丝绳失效应变
-	print('epsilon_u=',np.around(epsilon_u,3),'Height=',np.around(Height,3),'Force=',np.around(force_ultimate,3),'Energy=',np.around(energy_ultimate,3))
-
+	print('Height=',np.around(Height,3),'Force=',np.around(force,3),'Energy=',np.around(energy,3))
+	plt.plot(np.array(Height_list),np.array(Force_list),'*-')
+	plt.show()

@@ -395,11 +395,12 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         input_kargs3_CN = {'ks12':self.ks12, 'ks23':self.ks23, 'ks34':self.ks34, 'ks41':self.ks41, 'initial_sag':self.initial_sag}
         input_kargs_CN = {**input_kargs1_CN,**input_kargs2_CN,**input_kargs3_CN}  # 合并字典
 
-        self.Breaking_force_CN = NPA_cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[0]
-        self.Failure_strain_CN = NPA_cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[1]
-        self.Height_CN = NPA_cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[2]
-        self.Force_CN = NPA_cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[3]
-        self.Energy_CN = NPA_cable_net_v1_POP.func_main_cable_net(input_kargs_CN)[4]
+        value_NPA_cable_net = NPA_cable_net_v1_POP.func_main_cable_net(input_kargs_CN)
+        self.Breaking_force_CN = value_NPA_cable_net[0]
+        self.Failure_strain_CN = value_NPA_cable_net[1]
+        self.Height_CN = value_NPA_cable_net[2]
+        self.Force_CN = value_NPA_cable_net[3]
+        self.Energy_CN = value_NPA_cable_net[4]
         self.func_outputCN()
 
     def func_outputCN(self):

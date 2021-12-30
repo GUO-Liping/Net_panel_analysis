@@ -460,7 +460,7 @@ def func_main_cable_net(input_kargs):
 	Lu_dire1 = L0_dire1 + sigma_y*A_fibre/K_dire1 + (sigma_u-sigma_y)*A_fibre/K_T_dire1  # 纤维单元发生失效时，1方向纤维弹簧单元总长度
 	Lu_dire2 = L0_dire2 + sigma_y*A_fibre/K_dire2 + (sigma_u-sigma_y)*A_fibre/K_T_dire2  # 纤维单元发生失效时，2方向纤维弹簧单元总长度
 
-	L0_all =  np.concatenate((L0_dire1,L0_dire1),axis=0)
+	L0_all =  np.concatenate((L0_dire1,L0_dire2),axis=0)
 	Ly_all = np.concatenate((Ly_dire1,Ly_dire2),axis=0)
 	Lu_all = np.concatenate((Lu_dire1,Lu_dire2),axis=0)
 
