@@ -138,6 +138,7 @@ def func_CN1_sigma(epsilon, sigma_y, E1, E2):
 
 
 def func_CN1_loaded_xPyP(m, d, alpha, Rp, H, ex, ey):
+	alpha = alpha - (alpha//np.pi)*np.pi
 	i1_arr = np.arange(1,m+0.1,step=1)  # 第一方向上与加载区域相交的钢丝绳序列（从1开始）
 
 	yP_plus_origin = d/2*(2*i1_arr - m - 1)
