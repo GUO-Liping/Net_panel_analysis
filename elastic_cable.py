@@ -56,9 +56,9 @@ diff_f1_phi = diff(expr_f1,phi)
 diff_f2_chi = diff(expr_f2,chi)
 diff_f2_phi = diff(expr_f2,phi)
 
-dict_F = {F_1:1, F_2:1, F_3: 1}
-dict_s = {s_1:1, s_2:1, s_3: 1}
-dict_const = {W:1, L_0:1, beta:1, delta:0.1, gamma:0.5}
+dict_F = {F_1:100, F_2:100, F_3: 1000}
+dict_s = {s_1:0.25, s_2:0.25, s_3: 0.65}
+dict_const = {W:1, L_0:1, beta:1e-7, delta:0.1, gamma:1/1.15}
 dict_values = {**dict_F, **dict_s, **dict_const}
 
 a_11 = diff_f1_chi.evalf(subs=dict_values)  # 这种是精确计算方法，仅用subs只能获得近似值
@@ -69,27 +69,42 @@ a_22 = diff_f2_phi.evalf(subs=dict_values)
 value_f1 = expr_f1.evalf(subs=dict_values)
 value_f2 = expr_f2.evalf(subs=dict_values)
 
-dict_init = {chi:1, phi:0}
-n_loop = 0
-while n_loop<10:
+chi0 = 100
+phi0 = 100
 
-	print('dict_init=',dict_init)
-	n_loop = n_loop + 1
+n_loop = 0
+max_loop = 1000
+
+condi_chi = np.empty(max_loop)
+condi_phi = np.empty(max_loop)
+condi_chi[0] = chi0
+condi_phi[0] = phi0
+condi = 1
+while n_loop<max_loop and condi>1e-8:
+
+	dict_init = {chi:chi0, phi:phi0}
+
+	a11 = a_11.evalf(subs=dict_init)  # 这种是精确计算方法，仅用subs只能获得近似值
+	a12 = a_12.evalf(subs=dict_init)
+	a21 = a_21.evalf(subs=dict_init)
+	a22 = a_22.evalf(subs=dict_init)
 	
-	a_11 = a_11.evalf(subs=dict_init)  # 这种是精确计算方法，仅用subs只能获得近似值
-	a_12 = a_12.evalf(subs=dict_init)
-	a_21 = a_21.evalf(subs=dict_init)
-	a_22 = a_22.evalf(subs=dict_init)
+	valuef1 = value_f1.evalf(subs=dict_init)
+	valuef2 = value_f2.evalf(subs=dict_init)
 	
-	value_f1 = value_f1.evalf(subs=dict_init)
-	value_f2 = value_f2.evalf(subs=dict_init)
-	
-	Jacobi_f1f2 = Array([[a_11, a_12],[a_21, a_22]])
+	Jacobi_f1f2 = Array([[a11, a12],[a21, a22]])
 	Jacobi_array = np.asarray(Jacobi_f1f2,dtype=float)
 	
 	Jacobi_f1f2_inv = np.linalg.inv(Jacobi_array)
-	Incre_array = np.asarray([value_f1,value_f2],dtype=float)
-	
-	iter_array = Jacobi_f1f2_inv.dot(Incre_array)
-	dict_init = {chi:iter_array[0], phi:iter_array[0]}
+	Incre_array = np.asarray([valuef1,valuef2],dtype=float)
+	iter_array = -Jacobi_f1f2_inv.dot(Incre_array)
 
+	chi0 = chi0 + iter_array[0]
+	phi0 = phi0 + iter_array[1]
+
+	print('This is the', n_loop+1, 'th loop, ', 'chi=', chi0, 'phi=', phi0, 'condi=',condi)
+	condi_chi[n_loop+1] = chi0
+	condi_phi[n_loop+1] = phi0
+	condi = np.amin([abs(condi_phi[n_loop+1]-condi_phi[n_loop]), abs(condi_phi[n_loop+1]-condi_phi[n_loop])])
+
+	n_loop = n_loop + 1
