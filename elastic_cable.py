@@ -50,20 +50,23 @@ Psi_i = Sum(F[j]/W, (j,-1,i))
 Psi_i_1 = Sum(F[j]/W, (j,-1,i-1))
 Psi_n = Sum(F[j]/W, (j,-1,n))
 
-f1_1 = gamma/chi - beta
-f1_2 = asinh(phi/chi) - asinh((phi-Psi_N-1)/chi)
-f1_3 = Sum(asinh((phi-Psi_i-sigma_i)/chi) - asinh((phi-Psi_i_1-sigma_i)/chi), (i,0,N))
-f1 = -f1_1 + f1_2 + f1_3
-expr_f1 = f1.doit()
-
+# 无量纲公式
 xi_1 = beta*sigma + asinh(phi/chi) - asinh((phi-Psi_n-sigma)/chi)
 xi_2 = Sum(asinh((phi-Psi_i-sigma_i)/chi) - asinh((phi-Psi_i_1-sigma_i)/chi), (i,0,n))
 xi = chi*(xi_1 + xi_2)
 expr_xi = xi.doit()
 
-#eta_1 = beta*sigma*(phi-sigma/2) + sqrt(phi**2+chi**2) - sqrt((phi-Psi_N-sigma)**2+chi**2)
-#eta_2 = 
+eta_1 = beta*sigma*(phi-sigma/2) + sqrt(phi**2+chi**2) - sqrt((phi-Psi_n-sigma)**2+chi**2)
+eta_2 = Sum(beta*psi_i*(sigma_i-sigma) + sqrt((phi-Psi_i-sigma_i)**2+chi**2) - sqrt((phi-Psi_i_1-sigma_i)**2+chi**2), (i,0,n))
+eta = eta_1 + eta_2
+expr_eta = eta.doit()
 
+# 牛顿法求解非线性方程组
+f1_1 = gamma/chi - beta
+f1_2 = asinh(phi/chi) - asinh((phi-Psi_N-1)/chi)
+f1_3 = Sum(asinh((phi-Psi_i-sigma_i)/chi) - asinh((phi-Psi_i_1-sigma_i)/chi), (i,0,N))
+f1 = -f1_1 + f1_2 + f1_3
+expr_f1 = f1.doit()
 
 f2_1 = delta
 f2_2 = beta*(phi-1/2) + sqrt(phi**2+chi**2) - sqrt((phi-Psi_N-1)**2+chi**2)
@@ -120,4 +123,4 @@ while n_loop<max_loop and error>1e-8:
 	print('This is the', n_loop+1, 'th loop, ', 'chi=', chi_value, 'phi=', phi_value, 'error=',error)
 
 	n_loop = n_loop + 1
-expr_xi
+print(expr_eta)
