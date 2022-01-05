@@ -23,43 +23,33 @@ xi, eta, sigma, delta, gamma, tau, chi, phi, beta = symbols('xi, eta, sigma, del
 i,j,n = symbols('i,j,n', integer=True)
 
 F_1, F_2, F_3, F_4, F_5, F_6, F_7 = symbols('F_1, F_2, F_3, F_4, F_5, F_6, F_7')
-s_1, s_2, s_3, s_4, s_5, s_6, s_7, s_8 = symbols('s_1, s_2, s_3, s_4, s_5, s_6, s_7, s_8')
+s, s_1, s_2, s_3, s_4, s_5, s_6, s_7, s_8 = symbols('s, s_1, s_2, s_3, s_4, s_5, s_6, s_7, s_8')
 L_0, W, E, A_0, l, h = symbols('L_0, W, E, A_0, l, h')
 
 dict_F = {F_1:100, F_2:100, F_3: 1000}
 dict_s = {s_1:0.25, s_2:0.25, s_3: 0.65}
 dict_const = {W:1, L_0:1, E:120e9, A_0:np.pi*0.01**2/4, l:1, h:0}
-dict_values = {**dict_F, **dict_s, **dict_const}
+dict_known = {**dict_F, **dict_s, **dict_const}
 
 chi_value = 100  # 牛顿法求解过程赋予chi的初始值
 phi_value = 100  # 牛顿法求解过程赋予phi的初始值
 
-F = Array([0, F_1, F_2, F_3, 0])  # 首位、末尾必须为0，保证F(i=0)=0,F(i=-1)=0
-s = Array([0, s_1, s_2, s_3, s_4])  # 首位必须为0，保证s(i=0)=0
+F_array = Array([0, F_1, F_2, F_3, 0])  # 首位、末尾必须为0，保证F(i=0)=0,F(i=-1)=0
+s_array = Array([0, s_1, s_2, s_3, s_4])  # 首位必须为0，保证s(i=0)=0
 
 n = 2  # 需要输入，目标钢丝绳分段（n至n+1段）
-N = len(F)-2  # N为集中荷载的数量，除去首位、末位
+sigma = s/L_0
+N = len(F_array)-2  # N为集中荷载的数量，除去首位、末位
 beta = W/(E*A_0)
 delta = h/L_0
 gamma = l/L_0
 
-sigma_i = s[i]/L_0
-psi_i = F[i]/W
-Psi_N = Sum(F[j]/W, (j,-1,N))
-Psi_i = Sum(F[j]/W, (j,-1,i))
-Psi_i_1 = Sum(F[j]/W, (j,-1,i-1))
-Psi_n = Sum(F[j]/W, (j,-1,n))
-
-# 无量纲公式
-xi_1 = beta*sigma + asinh(phi/chi) - asinh((phi-Psi_n-sigma)/chi)
-xi_2 = Sum(asinh((phi-Psi_i-sigma_i)/chi) - asinh((phi-Psi_i_1-sigma_i)/chi), (i,0,n))
-xi = chi*(xi_1 + xi_2)
-expr_xi = xi.doit()
-
-eta_1 = beta*sigma*(phi-sigma/2) + sqrt(phi**2+chi**2) - sqrt((phi-Psi_n-sigma)**2+chi**2)
-eta_2 = Sum(beta*psi_i*(sigma_i-sigma) + sqrt((phi-Psi_i-sigma_i)**2+chi**2) - sqrt((phi-Psi_i_1-sigma_i)**2+chi**2), (i,0,n))
-eta = eta_1 + eta_2
-expr_eta = eta.doit()
+sigma_i = s_array[i]/L_0
+psi_i = F_array[i]/W
+Psi_N = Sum(F_array[j]/W, (j,-1,N))
+Psi_i = Sum(F_array[j]/W, (j,-1,i))
+Psi_i_1 = Sum(F_array[j]/W, (j,-1,i-1))
+Psi_n = Sum(F_array[j]/W, (j,-1,n))
 
 # 牛顿法求解非线性方程组
 f1_1 = gamma/chi - beta
@@ -79,13 +69,13 @@ diff_f1_phi = diff(expr_f1,phi)
 diff_f2_chi = diff(expr_f2,chi)
 diff_f2_phi = diff(expr_f2,phi)
 
-a_11 = diff_f1_chi.evalf(subs=dict_values)  # 这种是精确计算方法，仅用subs只能获得近似值
-a_12 = diff_f1_phi.evalf(subs=dict_values)
-a_21 = diff_f2_chi.evalf(subs=dict_values)
-a_22 = diff_f2_phi.evalf(subs=dict_values)
+a_11 = diff_f1_chi.evalf(subs=dict_known)  # 这种是精确计算方法，仅用subs只能获得近似值
+a_12 = diff_f1_phi.evalf(subs=dict_known)
+a_21 = diff_f2_chi.evalf(subs=dict_known)
+a_22 = diff_f2_phi.evalf(subs=dict_known)
 
-value_f1 = expr_f1.evalf(subs=dict_values)
-value_f2 = expr_f2.evalf(subs=dict_values)
+value_f1 = expr_f1.evalf(subs=dict_known)
+value_f2 = expr_f2.evalf(subs=dict_known)
 
 n_loop = 0
 max_loop = 1000
@@ -123,4 +113,16 @@ while n_loop<max_loop and error>1e-8:
 	print('This is the', n_loop+1, 'th loop, ', 'chi=', chi_value, 'phi=', phi_value, 'error=',error)
 
 	n_loop = n_loop + 1
-print(expr_eta)
+
+
+# 无量纲公式
+xi_1 = beta*sigma + asinh(phi/chi) - asinh((phi-Psi_n-sigma)/chi)
+xi_2 = Sum(asinh((phi-Psi_i-sigma_i)/chi) - asinh((phi-Psi_i_1-sigma_i)/chi), (i,0,n))
+xi = chi*(xi_1 + xi_2)
+expr_xi = xi.doit().evalf(subs=dict_known)
+
+eta_1 = beta*sigma*(phi-sigma/2) + sqrt(phi**2+chi**2) - sqrt((phi-Psi_n-sigma)**2+chi**2)
+eta_2 = Sum(beta*psi_i*(sigma_i-sigma) + sqrt((phi-Psi_i-sigma_i)**2+chi**2) - sqrt((phi-Psi_i_1-sigma_i)**2+chi**2), (i,0,n))
+eta = eta_1 + eta_2
+expr_eta = eta.doit().evalf(subs=dict_known)
+expr_xi
