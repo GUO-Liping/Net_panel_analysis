@@ -6,7 +6,7 @@
 Name： sympy_elastic_cable
 Function1: 牛顿法解非线性方程组
 Function2: 计算柔性防护系统中钢丝绳柔性边界的等效边界刚度
-Method: 集中力作用下的柔性钢丝绳变形 cite: The suspended elastic cable under the action of concentrated vertical loads
+Method: 集中力与重力双重作用下的柔性钢丝绳变形及受力分析 cite: The suspended elastic cable under the action of concentrated vertical loads
 Note: 国际单位制
 Version: 0.0.1
 Author: Liping GUO
@@ -29,9 +29,9 @@ F_1, F_2, F_3, F_4, F_5, F_6, F_7 = symbols('F_1, F_2, F_3, F_4, F_5, F_6, F_7')
 s, s_1, s_2, s_3, s_4, s_5, s_6, s_7, s_8 = symbols('s, s_1, s_2, s_3, s_4, s_5, s_6, s_7, s_8')
 L_0, W, E, A_0, l, h = symbols('L_0, W, E, A_0, l, h')
 
-dict_F = {F_1:49.8, F_2:10, F_3: 15, F_4: 30, F_5: 15, F_6: 10, F_7: 10}
+dict_F = {F_1:0, F_2:0, F_3: 0, F_4: 0, F_5: 0, F_6: 0, F_7: 0}
 dict_s = {s_1:0.33, s_2:0.36, s_3: 0.42, s_4: 0.53, s_5: 0.60, s_6: 0.75, s_7: 0.88, s_8: 1.2}
-dict_const = {W:50, L_0:1.2, E:100e9, A_0:1.58e-6, l:1.0, h:0}
+dict_const = {W:0.000000001, L_0:1.2, E:100e9, A_0:1.58e-6, l:1.2, h:0}
 
 F_Array = Array([0, F_1, F_2, F_3, F_4, F_5, F_6, F_7, 0])  # 首位、末尾必须为0，保证F(i=0)=0,F(i=-1)=0
 s_Array = Array([0, s_1, s_2, s_3, s_4, s_5, s_6, s_7, s_8])  # 首位必须为0，保证s(i=0)=0
@@ -172,5 +172,5 @@ for ni in range(len(n_array)):
 		#expr_alpha = alpha.doit().evalf(subs=dict_known)
 		#alpha_value = expr_alpha.evalf(subs=dict_chi_phi)
 
-	plt.plot(xi_value_arr[ni,:],-eta_value_arr[ni,:])
+	plt.plot(xi_value_arr[ni,:], -eta_value_arr[ni,:], '-o')
 plt.show()
