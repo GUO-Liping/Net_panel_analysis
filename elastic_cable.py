@@ -29,9 +29,9 @@ F_1, F_2, F_3, F_4, F_5, F_6, F_7 = symbols('F_1, F_2, F_3, F_4, F_5, F_6, F_7')
 s, s_1, s_2, s_3, s_4, s_5, s_6, s_7, s_8 = symbols('s, s_1, s_2, s_3, s_4, s_5, s_6, s_7, s_8')
 L_0, W, E, A_0, l, h = symbols('L_0, W, E, A_0, l, h')
 
-dict_F = {F_1:0, F_2:0, F_3: 0, F_4: 0, F_5: 0, F_6: 0, F_7: 0}
+dict_F = {F_1:-20, F_2:0, F_3: -50, F_4: 0, F_5: -10, F_6: 0, F_7: 0}
 dict_s = {s_1:0.33, s_2:0.36, s_3: 0.42, s_4: 0.53, s_5: 0.60, s_6: 0.75, s_7: 0.88, s_8: 1.2}
-dict_const = {W:0.000000001, L_0:1.2, E:100e9, A_0:1.58e-6, l:1.2, h:0}
+dict_const = {W:20, L_0:1.2, E:100e9, A_0:1.58e-6, l:1.2, h:0}
 
 F_Array = Array([0, F_1, F_2, F_3, F_4, F_5, F_6, F_7, 0])  # 首位、末尾必须为0，保证F(i=0)=0,F(i=-1)=0
 s_Array = Array([0, s_1, s_2, s_3, s_4, s_5, s_6, s_7, s_8])  # 首位必须为0，保证s(i=0)=0
@@ -50,7 +50,7 @@ s_array = np.vstack((s01_array, s12_array, s23_array, s34_array, s45_array, s56_
 dict_known = {**dict_F, **dict_s, **dict_const}
 
 Y_0_guess = dict_const[W]+sum(dict_F.values())  # 根据荷载预估竖向（y方向）支反力的值，进而估计求解非线性方程组较为容易收敛的初始值
-chi_value = 0.5*Y_0_guess/dict_const[W]  # 牛顿法求解过程赋予chi的初始值
+chi_value = 0.5*abs(Y_0_guess/dict_const[W])  # 牛顿法求解过程赋予chi的初始值
 phi_value = 0.5*Y_0_guess/dict_const[W]  # 牛顿法求解过程赋予phi的初始值
 
 N = len(F_Array)-2  # N为集中荷载的数量，除去首位、末位
