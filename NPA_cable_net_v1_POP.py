@@ -17,7 +17,10 @@ Remark: 尚未解决的问题：
 
 import numpy as np
 #from userfunc_NPA import *
-
+def func_choose_Origin_xyz_coordinate():  # 判断计算模型采用的坐标原点位置为钢丝绳网片几何中心位置的网孔中心‘centre’，还是采用网孔角点'corner'
+	#Origin_xyz_coordinate = 'centre'
+	Origin_xyz_coordinate = 'corner'
+	return Origin_xyz_coordinate
 # 本函数用于考虑更细致的情形：加载高度处于顶头自身高度之内，目前尚不完善
 #def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 #	i_DireX = np.arange(1,m_DireX+0.1,step=1)
@@ -81,15 +84,15 @@ def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 		Rs1 = np.sqrt(Rs**2-d_DireX**2)
 		minH1 = np.sqrt(Rs**2-d_DireX**2) - np.sqrt(Rs**2 - Rp**2)
 		H1 = H - (minH - minH1)
-		arc_line_factor1 = 1+(np.arcsin(Rp1/Rs1)*Rs1/Rp1 - 1)*H1/minH1
+		arc_line_factor1 = 1+(np.arcsin(Rp1/Rs1)*Rs1/Rp1 - 1)*H1/minH1  # 圆平面加载与球面加载的折中系数
 
 		Rp2 = np.sqrt(Rp**2-d_DireY**2)
 		Rs2 = np.sqrt(Rs**2-d_DireY**2)
 		minH2 = np.sqrt(Rs**2-d_DireY**2) - np.sqrt(Rs**2 - Rp**2)
 		H2 = H - (minH - minH2)
-		arc_line_factor2 = 1+(np.arcsin(Rp2/Rs2)*Rs2/Rp2 - 1)*H2/minH2
+		arc_line_factor2 = 1+(np.arcsin(Rp2/Rs2)*Rs2/Rp2 - 1)*H2/minH2  # 圆平面加载与球面加载的折中系数
 
-		print('arc_line_factor=',arc_line_factor2)
+		#print('arc_line_factor=',arc_line_factor2)
 		arc_length_DireX = 2*np.sqrt(Rp**2 - d_DireX**2)*arc_line_factor1
 		arc_length_DireY = 2*np.sqrt(Rp**2 - d_DireY**2)*arc_line_factor2
 	elif H >= minH:
@@ -137,8 +140,8 @@ def func_CN1_sigma(epsilon, sigma_y, E1, E2):
 	return sigma_XY
 
 
-def func_CN1_loaded_xPyP(m, d, alpha, Rp, H, ex, ey):
-	alpha = alpha - (alpha//np.pi)*np.pi
+def func_CN1_loaded_xPyP(m, d, alpha, Rp, H, ex, ey):  # 该函数为考虑钢丝绳网几何中心为钢丝绳网孔的中心，同时为坐标原点
+	alpha = alpha - (alpha//np.pi)*np.pi  # 将alpha的值控制在0至pi之间
 	i1_arr = np.arange(1,m+0.1,step=1)  # 第一方向上与加载区域相交的钢丝绳序列（从1开始）
 
 	yP_plus_origin = d/2*(2*i1_arr - m - 1)
@@ -159,6 +162,7 @@ def func_CN1_loaded_xPyP(m, d, alpha, Rp, H, ex, ey):
 	zP_minu = zP_minu_origin
 
 	return xP_plus, yP_plus, zP_plus, xP_minu, yP_minu, zP_minu
+
 
 def func_CN1_solve_ABC(para_x1, para_y1, para_x2, para_y2):
 	if np.amin(abs(para_x2-para_x1))==0:
@@ -255,7 +259,7 @@ def func_CN1_sort_xQyQ(m, xQ, yQ, xP_plus, yP_plus, xP_minu, yP_minu):
 	xQ_minu = np.zeros(m)
 
 	for i in range(len(xP_plus)):
-		if abs(xP_plus[i] - xP_minu[i]) <= 1e-15:
+		if abs(xP_plus[i] - xP_minu[i]) <= 1e-15:  # 当钢丝绳基本为竖直方向时
 			for jP in range(len(xQ)):
 				if abs(xQ[jP] - xP_plus[i]) <= 1e-15:
 					if (yQ[jP] - yP_plus[i])>=1e-15:
@@ -272,14 +276,14 @@ def func_CN1_sort_xQyQ(m, xQ, yQ, xP_plus, yP_plus, xP_minu, yP_minu):
 			k_target = (yP_plus[i] - yP_minu[i])/(xP_plus[i] - xP_minu[i])
 			for jQ in range(len(xQ)):
 				k_search = (yQ[jQ] - yP_plus[i])/(xQ[jQ] - xP_plus[i])
-				if abs(k_search-k_target) <= 1e-8:  # 1e-8是通过求解tan(0.000001°)-tan(0°)获得的：当角度增长0.000001°时满足的精度要求
+				if abs(k_search-k_target) <= 1e-15:  # 1e-8是通过求解tan(0.000001°)-tan(0°)获得的：当角度增长0.000001°时满足的精度要求
 					if (yQ[jQ] - yP_plus[i])>=1e-15:
 						xQ_plus[i] = xQ[jQ]
 						yQ_plus[i] = yQ[jQ]
 					elif (yQ[jQ] - yP_plus[i])<=-1e-15:  # python对于数值的绝对相等判别存在非常非常小1e-15但是不可忽略的误差
 						xQ_minu[i] = xQ[jQ]
 						yQ_minu[i] = yQ[jQ]
-					elif abs(yQ[jQ] - yP_plus[i])<=1e-15:
+					elif abs(yQ[jQ] - yP_plus[i])<1e-15:
 						if xQ[jQ] > xP_plus[i]:
 							xQ_plus[i] = xQ[jQ]
 							yQ_plus[i] = yQ[jQ]
@@ -332,7 +336,7 @@ def func_main_cable_net(input_kargs):
 	alpha2 = np.pi/180*input_kargs['alpha2'] # 钢丝绳方向角2，取值范围为半闭半开区间[0,pi)
 
 	# 加载区域几何参数输入
-	Rp = input_kargs['Rp']  # 加载顶头水平投影半径（单位：m），若加载形状为多边形时考虑为等面积圆的半径
+	Rp = input_kargs['Rp']+(1e-6)*np.pi  # 加载顶头水平投影半径（单位：m），若加载形状为多边形时考虑为等面积圆的半径
 	ex = input_kargs['ex']  # 加载区域中心沿x方向偏心距（单位：m）
 	ey = input_kargs['ey']  # 加载区域中心沿y方向偏心距（单位：m）
 
@@ -394,14 +398,21 @@ def func_main_cable_net(input_kargs):
 
 	# 求解过程----------------------------------------------------------------------------------- #
 	Rs = Rp/(np.arcsin(5/12))  # 球罐形加载顶头半径（单位：m）
-
-	m1 = 2*func_round(Rp/d1)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
-	m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
+	##############################################################################################
+	Origin_xyz_coordinate = func_choose_Origin_xyz_coordinate()     # 判断采用哪种坐标原点
+	##############################################################################################
+	if Origin_xyz_coordinate == 'centre':
+		m1 = 2*func_round(Rp/d1)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
+		m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
+	elif  Origin_xyz_coordinate == 'corner':
+		m1 = 2*int(Rp/d1) + 1  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
+		m2 = 2*int(Rp/d2) + 1  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
+	else:
+		raise ValueError
 
 	# 初始时刻加载区域边缘力的作用点（P点）坐标，方向1与方向2，P点坐标随着加载位移的变换实时变化
 	xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, initial_sag, ex, ey)  # 1方向钢丝绳与加载区域边缘交点坐标
 	xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_CN1_loaded_xPyP(m2, d2, alpha2, Rp, initial_sag, ex, ey)  # 2方向钢丝绳与加载区域边缘交点坐标
-
 
 	# 求解计算过程中钢丝绳网片边界上力的作用点（Q点）坐标，方向1与方向2，Q点坐标不随加载位移的变换改变
 	A1_arr, B1_arr, C1_arr = func_CN1_solve_ABC(xP1_minu, yP1_minu, xP1_plus, yP1_plus)  # 与加载区域边缘相交的1方向的钢丝绳直线方程系数A1x+B1y+C1=0
@@ -569,7 +580,7 @@ def func_main_cable_net(input_kargs):
 		Force_list.append(force)
 		Energy_list.append(energy)
 
-		print('It the',n_loop, 'th loop,','Height=',np.around(Height,3),'Force=',np.around(force,3),'Energy=',np.around(energy,3))
+		print('It the',n_loop, '\tth loop,\t','Height=\t',np.around(Height,3),'\tForce=\t',np.around(force,3),'\tEnergy=\t',np.around(energy,3))
 
 	#sigma_y = E_young*(sigma_u-E_tangent*epsilon_u)/(E_young-E_tangent)
 	breaking_force = sigma_u*A_fibre

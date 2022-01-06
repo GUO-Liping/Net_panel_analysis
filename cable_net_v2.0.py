@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-
+# 与cable_net_v1.0版本相比，改进了计算过程，可以绘制全过程曲线
 
 '''
 Name： NetPanelAnalysis
@@ -18,7 +18,10 @@ Remark: 尚未解决的问题：
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+def func_choose_Origin_xyz_coordinate():  # 判断计算模型采用的坐标原点位置为钢丝绳网片几何中心位置的网孔中心‘centre’，还是采用网孔角点'corner'
+	Origin_xyz_coordinate = 'centre'
+	#Origin_xyz_coordinate = 'corner'
+	return Origin_xyz_coordinate
 # 本函数用于考虑更细致的情形：加载高度处于顶头自身高度之内，目前尚不完善
 #def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
 #	i_DireX = np.arange(1,m_DireX+0.1,step=1)
@@ -348,18 +351,19 @@ if __name__ == '__main__':
 	fail_force = 41782  # 钢丝绳网中的钢丝绳破断力（单位：N）
 
 	# 钢丝绳网几何参数输入
-	d1 = 0.283  # 1方向钢丝绳间距-网孔间距
-	d2 = 0.283  # 2方向钢丝绳间距-网孔间距
-	alpha1 = -45*np.pi/180  # 钢丝绳方向角1，取值范围为半闭半开区间[0,pi)
-	alpha2 = 675*np.pi/180 # 钢丝绳方向角2，取值范围为半闭半开区间[0,pi)
+	d1 = 0.3  # 1方向钢丝绳间距-网孔间距
+	d2 = 0.3  # 2方向钢丝绳间距-网孔间距
+	alpha1 = 0*np.pi/180  # 钢丝绳方向角1，取值范围为半闭半开区间[0,pi)
+	alpha2 = 90*np.pi/180 # 钢丝绳方向角2，取值范围为半闭半开区间[0,pi)
 	A_fibre = fail_force/sigma_u
 	#print('A_fibre=',A_fibre)
-	initial_sag = 0.55  # 钢丝绳网在重力作用下初始垂度（初始高度)
+	initial_sag = 0.00  # 钢丝绳网在重力作用下初始垂度（初始高度)
 
 	# 加载区域几何参数输入
 	ex = 0  # 加载区域中心沿x方向偏心距（单位：m）
 	ey = 0  # 加载区域中心沿y方向偏心距（单位：m）
-	Rp = 0.5  # 加载顶头水平投影半径（单位：m），若加载形状为多边形时考虑为等面积圆的半径
+	Rp = 0.75  # 加载顶头水平投影半径（单位：m），若加载形状为多边形时考虑为等面积圆的半径
+	Rp = 0.75 + (1e-6)*np.exp(1)  # 用于修复一个bug：即钢丝绳与加载区域边缘相切只有一个交点的情况
 	Rs = Rp*12/5  # 球罐形加载顶头半径（单位：m）
 
 	# 锚点坐标输入，可考虑任意四边形钢丝绳网片
@@ -391,14 +395,21 @@ if __name__ == '__main__':
 	#ls2_minu = 1e-1  # 方向2边界弹簧初始长度（单位：m），与方向2负方向纤维连接
 
 	# 求解过程----------------------------------------------------------------------------------- #
-
-	m1 = 2*func_round(Rp/d1)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
-	m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
+	##############################################################################################
+	Origin_xyz_coordinate = func_choose_Origin_xyz_coordinate()     # 判断采用哪种坐标原点
+	##############################################################################################
+	if Origin_xyz_coordinate == 'centre':
+		m1 = 2*func_round(Rp/d1)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
+		m2 = 2*func_round(Rp/d2)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
+	elif  Origin_xyz_coordinate == 'corner':
+		m1 = 2*int(Rp/d1) + 1  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
+		m2 = 2*int(Rp/d2) + 1  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
+	else:
+		raise ValueError
 
 	# 初始时刻加载区域边缘力的作用点（P点）坐标，方向1与方向2，P点坐标随着加载位移的变换实时变化
 	xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = func_CN1_loaded_xPyP(m1, d1, alpha1, Rp, initial_sag, ex, ey)  # 1方向钢丝绳与加载区域边缘交点坐标
 	xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = func_CN1_loaded_xPyP(m2, d2, alpha2, Rp, initial_sag, ex, ey)  # 2方向钢丝绳与加载区域边缘交点坐标
-
 
 	# 求解计算过程中钢丝绳网片边界上力的作用点（Q点）坐标，方向1与方向2，Q点坐标不随加载位移的变换改变
 	A1_arr, B1_arr, C1_arr = func_CN1_solve_ABC(xP1_minu, yP1_minu, xP1_plus, yP1_plus)  # 与加载区域边缘相交的1方向的钢丝绳直线方程系数A1x+B1y+C1=0
@@ -424,6 +435,11 @@ if __name__ == '__main__':
 
 	xQ1_plus, yQ1_plus, xQ1_minu, yQ1_minu = func_CN1_sort_xQyQ(m1, xQ1_pick, yQ1_pick, xP1_plus, yP1_plus, xP1_minu, yP1_minu)  # 对挑选出来的交点进行重新排序，使得边界线上的交点与加载边缘上的交点一一对应，与实际钢丝绳网中匹配关系一致，方向1
 	xQ2_plus, yQ2_plus, xQ2_minu, yQ2_minu = func_CN1_sort_xQyQ(m2, xQ2_pick, yQ2_pick, xP2_plus, yP2_plus, xP2_minu, yP2_minu)  # 对挑选出来的交点进行重新排序，使得边界线上的交点与加载边缘上的交点一一对应，与实际钢丝绳网中匹配关系一致，方向2
+	
+	print('xP1_plus=',xP1_plus)
+	print('yP1_plus=',yP1_plus)
+	print('xQ1_plus=',xQ2_plus)
+	print('yQ1_plus=',yQ2_plus)
 	
 	zQ1_plus, zQ1_minu = np.zeros_like(xQ1_plus), np.zeros_like(xQ1_plus)
 	zQ2_plus, zQ2_minu = np.zeros_like(xQ2_plus), np.zeros_like(xQ2_plus)

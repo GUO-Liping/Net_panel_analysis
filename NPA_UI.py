@@ -835,6 +835,7 @@ class PaintAreaCN(QtWidgets.QWidget):
 	def __init__(self):
 		super(PaintAreaCN, self).__init__()
 
+		###以下部分保持最佳的显示形式
 		self.boundary_x1 = 1
 		self.boundary_y1 = -1.5
 		self.boundary_x2 = 2
@@ -844,9 +845,14 @@ class PaintAreaCN(QtWidgets.QWidget):
 		self.boundary_x4 = -2
 		self.boundary_y4 = -1
 
-		self.Rp_CN_draw = 0.6
+		self.Rp_CN_draw = 0.6+(1e-6)*np.pi
 		self.ex_CN_draw = -0.2
 		self.ey_CN_draw = 0.3
+
+		self.alpha1_CN_draw = -30*np.pi/180
+		self.alpha2_CN_draw = 60*np.pi/180
+		self.d1_CN_draw = 0.3
+		self.d2_CN_draw = 0.3 
 
 		#self.x1_plus_draw = np.array([1.5,1.5,1.5,1.5])
 		#self.y1_plus_draw = np.array([-0.45,-0.15,0.15,0.45])
@@ -856,12 +862,6 @@ class PaintAreaCN(QtWidgets.QWidget):
 		#self.y2_plus_draw = np.array([1.5,1.5,1.5,1.5]) 
 		#self.x2_minu_draw = np.array([0.45,0.15,-0.15,-0.45])  
 		#self.y2_minu_draw = np.array([-1.5,-1.5,-1.5,-1.5])
-
-		self.alpha1_CN_draw = -30*np.pi/180
-		self.alpha2_CN_draw = 60*np.pi/180
-		self.d1_CN_draw = 0.3
-		self.d2_CN_draw = 0.3 
-
 		#self.penCN = QtGui.QPen()
 
 	def set_boundary_x1(self, value):
@@ -897,7 +897,7 @@ class PaintAreaCN(QtWidgets.QWidget):
 		self.update()
 
 	def set_Rp_CN_draw(self, value):
-		self.Rp_CN_draw = value
+		self.Rp_CN_draw = value+(1e-6)*np.pi
 		self.update()
 
 	def set_ex_CN_draw(self, value):
@@ -1016,7 +1016,7 @@ class PaintAreaCN(QtWidgets.QWidget):
 
 		max_abs_xy = max(abs(x_max),abs(x_min),abs(y_max),abs(y_min))
 		min_width_height = min(self.width(), self.height())
-		self.scale_xy = 0.45*min_width_height/max_abs_xy
+		self.scale_xy = 0.45*min_width_height/max_abs_xy  # 将实际坐标缩放至屏幕大小
 
 		x1_scale = self.scale_xy*x1_origin
 		y1_scale = self.scale_xy*y1_origin
@@ -1133,7 +1133,7 @@ class PaintAreaCN(QtWidgets.QWidget):
 		m1_lines = int(max(self.width(), self.height())/(self.d1_CN_draw*self.scale_xy))
 		m2_lines = int(max(self.width(), self.height())/(self.d2_CN_draw*self.scale_xy))
 
-		delta_max_draw = max(self.width(), self.height())/self.scale_xy
+		delta_max_draw = max(self.width(), self.height())/self.scale_xy  # 最大窗口尺寸对应的模型坐标尺寸
 		x1_plus_draw_grid = np.empty(2*m1_lines)
 		y1_plus_draw_grid = np.empty(2*m1_lines)
 		x1_minu_draw_grid = np.empty(2*m1_lines)
@@ -1143,41 +1143,80 @@ class PaintAreaCN(QtWidgets.QWidget):
 		y2_plus_draw_grid = np.empty(2*m2_lines)
 		x2_minu_draw_grid = np.empty(2*m2_lines)
 		y2_minu_draw_grid = np.empty(2*m2_lines)
+		
+		Origin_xyz_coordinate = NPA_cable_net_v1_POP.func_choose_Origin_xyz_coordinate()
+		if Origin_xyz_coordinate == 'centre':
+			if abs(np.sin(self.alpha1_CN_draw))<1e-8:
+				x1_plus_draw_grid = (self.ex_CN_draw + delta_max_draw)*np.ones(2*m1_lines)
+				y1_plus_draw_grid = self.ey_CN_draw + 0.5*self.d1_CN_draw + np.arange(-m1_lines,m1_lines)*self.d1_CN_draw
+				x1_minu_draw_grid = (self.ex_CN_draw - delta_max_draw)*np.ones(2*m1_lines)
+				y1_minu_draw_grid = self.ey_CN_draw + 0.5*self.d1_CN_draw + np.arange(-m1_lines,m1_lines)*self.d1_CN_draw
+			elif abs(np.cos(self.alpha1_CN_draw))<1e-8:
+				x1_plus_draw_grid = self.ex_CN_draw + 0.5*self.d1_CN_draw + np.arange(-m1_lines,m1_lines)*self.d1_CN_draw
+				y1_plus_draw_grid = (self.ey_CN_draw + delta_max_draw)*np.ones(2*m1_lines)
+				x1_minu_draw_grid = self.ex_CN_draw + 0.5*self.d1_CN_draw + np.arange(-m1_lines,m1_lines)*self.d1_CN_draw
+				y1_minu_draw_grid = (self.ey_CN_draw - delta_max_draw)*np.ones(2*m1_lines)
+			
+			else:
+				for i1_lines in range(-m1_lines,m1_lines):
+					x1_plus_draw_grid[i1_lines] = self.ex_CN_draw + self.d1_CN_draw*(0.5+i1_lines)/np.sin(self.alpha1_CN_draw) + delta_max_draw
+					y1_plus_draw_grid[i1_lines] = self.ey_CN_draw + np.tan(self.alpha1_CN_draw)*delta_max_draw
+					x1_minu_draw_grid[i1_lines] = self.ex_CN_draw + self.d1_CN_draw*(0.5+i1_lines)/np.sin(self.alpha1_CN_draw) - delta_max_draw
+					y1_minu_draw_grid[i1_lines] = self.ey_CN_draw - np.tan(self.alpha1_CN_draw)*delta_max_draw
 
-		if abs(np.sin(self.alpha1_CN_draw))<1e-8:
-			x1_plus_draw_grid = (self.ex_CN_draw + delta_max_draw)*np.ones(2*m1_lines)
-			y1_plus_draw_grid = self.ey_CN_draw + 0.5*self.d1_CN_draw + np.arange(-m1_lines,m1_lines)*self.d1_CN_draw
-			x1_minu_draw_grid = (self.ex_CN_draw - delta_max_draw)*np.ones(2*m1_lines)
-			y1_minu_draw_grid = self.ey_CN_draw + 0.5*self.d1_CN_draw + np.arange(-m1_lines,m1_lines)*self.d1_CN_draw
-		elif abs(np.cos(self.alpha1_CN_draw))<1e-8<1e-8:
-			x1_plus_draw_grid = self.ex_CN_draw + 0.5*self.d1_CN_draw + np.arange(-m1_lines,m1_lines)*self.d1_CN_draw
-			y1_plus_draw_grid = (self.ey_CN_draw + delta_max_draw)*np.ones(2*m1_lines)
-			x1_minu_draw_grid = self.ex_CN_draw + 0.5*self.d1_CN_draw + np.arange(-m1_lines,m1_lines)*self.d1_CN_draw
-			y1_minu_draw_grid = (self.ey_CN_draw - delta_max_draw)*np.ones(2*m1_lines)
+			if abs(np.sin(self.alpha2_CN_draw))<1e-8:
+				x2_plus_draw_grid = (self.ex_CN_draw + delta_max_draw)*np.ones(2*m2_lines)
+				y2_plus_draw_grid = self.ey_CN_draw + 0.5*self.d2_CN_draw + np.arange(-m2_lines,m2_lines)*self.d2_CN_draw
+				x2_minu_draw_grid = (self.ex_CN_draw - delta_max_draw)*np.ones(2*m2_lines)
+				y2_minu_draw_grid = self.ey_CN_draw + 0.5*self.d2_CN_draw + np.arange(-m2_lines,m2_lines)*self.d2_CN_draw
+			elif abs(np.cos(self.alpha2_CN_draw))<1e-8:
+				x2_plus_draw_grid = self.ex_CN_draw + 0.5*self.d2_CN_draw + np.arange(-m2_lines,m2_lines)*self.d2_CN_draw
+				y2_plus_draw_grid = (self.ey_CN_draw + delta_max_draw)*np.ones(2*m2_lines)
+				x2_minu_draw_grid = self.ex_CN_draw + 0.5*self.d2_CN_draw + np.arange(-m2_lines,m2_lines)*self.d2_CN_draw
+				y2_minu_draw_grid = (self.ey_CN_draw - delta_max_draw)*np.ones(2*m2_lines)
+			else:
+				for i2_lines in range(-m2_lines,m2_lines):
+					x2_plus_draw_grid[i2_lines] = self.ex_CN_draw + self.d2_CN_draw*(0.5+i2_lines)/np.sin(self.alpha2_CN_draw) + delta_max_draw
+					y2_plus_draw_grid[i2_lines] = self.ey_CN_draw + np.tan(self.alpha2_CN_draw)*delta_max_draw
+					x2_minu_draw_grid[i2_lines] = self.ex_CN_draw + self.d2_CN_draw*(0.5+i2_lines)/np.sin(self.alpha2_CN_draw) - delta_max_draw
+					y2_minu_draw_grid[i2_lines] = self.ey_CN_draw - np.tan(self.alpha2_CN_draw)*delta_max_draw
 
-		else:
-			for i1_lines in range(-m1_lines,m1_lines):
-				x1_plus_draw_grid[i1_lines] = self.ex_CN_draw + self.d1_CN_draw*(0.5+i1_lines)/np.sin(self.alpha1_CN_draw) + delta_max_draw
-				y1_plus_draw_grid[i1_lines] = self.ey_CN_draw + np.tan(self.alpha1_CN_draw)*delta_max_draw
-				x1_minu_draw_grid[i1_lines] = self.ex_CN_draw + self.d1_CN_draw*(0.5+i1_lines)/np.sin(self.alpha1_CN_draw) - delta_max_draw
-				y1_minu_draw_grid[i1_lines] = self.ey_CN_draw - np.tan(self.alpha1_CN_draw)*delta_max_draw
+		elif Origin_xyz_coordinate == 'corner':
+			if abs(np.sin(self.alpha1_CN_draw))<1e-8:
+				x1_plus_draw_grid = (self.ex_CN_draw + delta_max_draw)*np.ones(2*m1_lines)
+				y1_plus_draw_grid = self.ey_CN_draw + np.arange(-m1_lines,m1_lines)*self.d1_CN_draw
+				x1_minu_draw_grid = (self.ex_CN_draw - delta_max_draw)*np.ones(2*m1_lines)
+				y1_minu_draw_grid = self.ey_CN_draw + np.arange(-m1_lines,m1_lines)*self.d1_CN_draw
+			elif abs(np.cos(self.alpha1_CN_draw))<1e-8:
+				x1_plus_draw_grid = self.ex_CN_draw  + np.arange(-m1_lines,m1_lines)*self.d1_CN_draw
+				y1_plus_draw_grid = (self.ey_CN_draw + delta_max_draw)*np.ones(2*m1_lines)
+				x1_minu_draw_grid = self.ex_CN_draw + np.arange(-m1_lines,m1_lines)*self.d1_CN_draw
+				y1_minu_draw_grid = (self.ey_CN_draw - delta_max_draw)*np.ones(2*m1_lines)
+			
+			else:
+				for i1_lines in range(-m1_lines,m1_lines):
+					x1_plus_draw_grid[i1_lines] = self.ex_CN_draw + self.d1_CN_draw*(i1_lines)/np.sin(self.alpha1_CN_draw) + delta_max_draw
+					y1_plus_draw_grid[i1_lines] = self.ey_CN_draw + np.tan(self.alpha1_CN_draw)*delta_max_draw
+					x1_minu_draw_grid[i1_lines] = self.ex_CN_draw + self.d1_CN_draw*(i1_lines)/np.sin(self.alpha1_CN_draw) - delta_max_draw
+					y1_minu_draw_grid[i1_lines] = self.ey_CN_draw - np.tan(self.alpha1_CN_draw)*delta_max_draw
+			
+			if abs(np.sin(self.alpha2_CN_draw))<1e-8:
+				x2_plus_draw_grid = (self.ex_CN_draw + delta_max_draw)*np.ones(2*m2_lines)
+				y2_plus_draw_grid = self.ey_CN_draw + np.arange(-m2_lines,m2_lines)*self.d2_CN_draw
+				x2_minu_draw_grid = (self.ex_CN_draw - delta_max_draw)*np.ones(2*m2_lines)
+				y2_minu_draw_grid = self.ey_CN_draw + np.arange(-m2_lines,m2_lines)*self.d2_CN_draw
+			elif abs(np.cos(self.alpha2_CN_draw))<1e-8:
+				x2_plus_draw_grid = self.ex_CN_draw + np.arange(-m2_lines,m2_lines)*self.d2_CN_draw
+				y2_plus_draw_grid = (self.ey_CN_draw + delta_max_draw)*np.ones(2*m2_lines)
+				x2_minu_draw_grid = self.ex_CN_draw + np.arange(-m2_lines,m2_lines)*self.d2_CN_draw
+				y2_minu_draw_grid = (self.ey_CN_draw - delta_max_draw)*np.ones(2*m2_lines)
+			else:
+				for i2_lines in range(-m2_lines,m2_lines):
+					x2_plus_draw_grid[i2_lines] = self.ex_CN_draw + self.d2_CN_draw*(i2_lines)/np.sin(self.alpha2_CN_draw) + delta_max_draw
+					y2_plus_draw_grid[i2_lines] = self.ey_CN_draw + np.tan(self.alpha2_CN_draw)*delta_max_draw
+					x2_minu_draw_grid[i2_lines] = self.ex_CN_draw + self.d2_CN_draw*(i2_lines)/np.sin(self.alpha2_CN_draw) - delta_max_draw
+					y2_minu_draw_grid[i2_lines] = self.ey_CN_draw - np.tan(self.alpha2_CN_draw)*delta_max_draw
 
-		if abs(np.sin(self.alpha2_CN_draw))<1e-8:
-			x2_plus_draw_grid = (self.ex_CN_draw + delta_max_draw)*np.ones(2*m2_lines)
-			y2_plus_draw_grid = self.ey_CN_draw + 0.5*self.d2_CN_draw + np.arange(-m2_lines,m2_lines)*self.d2_CN_draw
-			x2_minu_draw_grid = (self.ex_CN_draw - delta_max_draw)*np.ones(2*m2_lines)
-			y2_minu_draw_grid = self.ey_CN_draw + 0.5*self.d2_CN_draw + np.arange(-m2_lines,m2_lines)*self.d2_CN_draw
-		elif abs(np.cos(self.alpha2_CN_draw))<1e-8:
-			x2_plus_draw_grid = self.ex_CN_draw + 0.5*self.d2_CN_draw + np.arange(-m2_lines,m2_lines)*self.d2_CN_draw
-			y2_plus_draw_grid = (self.ey_CN_draw + delta_max_draw)*np.ones(2*m2_lines)
-			x2_minu_draw_grid = self.ex_CN_draw + 0.5*self.d2_CN_draw + np.arange(-m2_lines,m2_lines)*self.d2_CN_draw
-			y2_minu_draw_grid = (self.ey_CN_draw - delta_max_draw)*np.ones(2*m2_lines)
-		else:
-			for i2_lines in range(-m2_lines,m2_lines):
-				x2_plus_draw_grid[i2_lines] = self.ex_CN_draw + self.d2_CN_draw*(0.5+i2_lines)/np.sin(self.alpha2_CN_draw) + delta_max_draw
-				y2_plus_draw_grid[i2_lines] = self.ey_CN_draw + np.tan(self.alpha2_CN_draw)*delta_max_draw
-				x2_minu_draw_grid[i2_lines] = self.ex_CN_draw + self.d2_CN_draw*(0.5+i2_lines)/np.sin(self.alpha2_CN_draw) - delta_max_draw
-				y2_minu_draw_grid[i2_lines] = self.ey_CN_draw - np.tan(self.alpha2_CN_draw)*delta_max_draw
 
 		x1_plus_draw_grid_scale = self.scale_xy*x1_plus_draw_grid
 		y1_plus_draw_grid_scale = self.scale_xy*y1_plus_draw_grid
@@ -1204,8 +1243,16 @@ class PaintAreaCN(QtWidgets.QWidget):
 			qp.drawLine(x2_plus_draw_grid_translate[j], y2_plus_draw_grid_translate[j], x2_minu_draw_grid_translate[j], y2_minu_draw_grid_translate[j])
 
 	def draw_load_lines(self, qp):
-		self.m1_draw = 2*NPA_cable_net_v1_POP.func_round(self.Rp_CN_draw/self.d1_CN_draw)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
-		self.m2_draw = 2*NPA_cable_net_v1_POP.func_round(self.Rp_CN_draw/self.d2_CN_draw)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
+
+		Origin_xyz_coordinate = NPA_cable_net_v1_POP.func_choose_Origin_xyz_coordinate()
+		if Origin_xyz_coordinate == 'centre':
+			self.m1_draw = 2*NPA_cable_net_v1_POP.func_round(self.Rp_CN_draw/self.d1_CN_draw)  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
+			self.m2_draw = 2*NPA_cable_net_v1_POP.func_round(self.Rp_CN_draw/self.d2_CN_draw)  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
+		elif Origin_xyz_coordinate == 'corner':
+			self.m1_draw = 2*int((self.Rp_CN_draw)/self.d1_CN_draw)+1  # 第1方向上与加载区域相交的钢丝绳数量（偶数）
+			self.m2_draw = 2*int((self.Rp_CN_draw)/self.d2_CN_draw)+1  # 第2方向上与加载区域相交的钢丝绳数量（偶数）
+		else:
+			raise ValueError
 		xP1_plus, yP1_plus, zP1_plus, xP1_minu, yP1_minu, zP1_minu = NPA_cable_net_v1_POP.func_CN1_loaded_xPyP(self.m1_draw, self.d1_CN_draw, self.alpha1_CN_draw, self.Rp_CN_draw, 0, self.ex_CN_draw, self.ey_CN_draw)  # 1方向钢丝绳与加载区域边缘交点坐标
 		xP2_plus, yP2_plus, zP2_plus, xP2_minu, yP2_minu, zP2_minu = NPA_cable_net_v1_POP.func_CN1_loaded_xPyP(self.m2_draw, self.d2_CN_draw, self.alpha2_CN_draw, self.Rp_CN_draw, 0, self.ex_CN_draw, self.ey_CN_draw)  # 2方向钢丝绳与加载区域边缘交点坐标
 
@@ -1233,7 +1280,7 @@ class PaintAreaCN(QtWidgets.QWidget):
 	
 		xQ1_plus, yQ1_plus, xQ1_minu, yQ1_minu = NPA_cable_net_v1_POP.func_CN1_sort_xQyQ(self.m1_draw, xQ1_pick, yQ1_pick, xP1_plus, yP1_plus, xP1_minu, yP1_minu)  # 对挑选出来的交点进行重新排序，使得边界线上的交点与加载边缘上的交点一一对应，与实际钢丝绳网中匹配关系一致，方向1
 		xQ2_plus, yQ2_plus, xQ2_minu, yQ2_minu = NPA_cable_net_v1_POP.func_CN1_sort_xQyQ(self.m2_draw, xQ2_pick, yQ2_pick, xP2_plus, yP2_plus, xP2_minu, yP2_minu)  # 对挑选出来的交点进行重新排序，使得边界线上的交点与加载边缘上的交点一一对应，与实际钢丝绳网中匹配关系一致，方向2
-	
+
 		self.x1_plus_draw = np.asarray(xQ1_plus,dtype='float')
 		self.y1_plus_draw = np.asarray(yQ1_plus,dtype='float')
 		self.x1_minu_draw = np.asarray(xQ1_minu,dtype='float')
