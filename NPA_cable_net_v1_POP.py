@@ -188,8 +188,8 @@ def func_CN1_xy_intersection(A1, B1, C1, A2, B2, C2):
 
 # 本函数用于删除钢丝绳网与锚固点之间边界线延长线上的交点
 def func_CN1_pick_xQyQ(m, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34, yQ_line34, xQ_line41, yQ_line41, x1, y1, x2, y2, x3, y3, x4, y4):
-	xQ = np.zeros(2*m)
-	yQ = np.zeros(2*m)
+	xQ = np.zeros(2*m+4)
+	yQ = np.zeros(2*m+4)
 	i1 = 0
 	for i12 in range(len(xQ_line12)):
 		if xQ_line12[i12]-x1<-1e-15 and xQ_line12[i12]-x2<-1e-15:  # 通过x坐标判别是否位于边界线上
@@ -249,14 +249,26 @@ def func_CN1_pick_xQyQ(m, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34,
 				xQ[i1] = xQ_line41[i41]
 				yQ[i1] = yQ_line41[i41]
 				i1 = i1 + 1
+	###########################################################################################
+	# 新添加代码， 用于对重复的坐标进行清理
+	xQyQ_all = np.vstack((xQ, yQ))
+	xQ_clean = np.unique(xQyQ_all, axis=1)[0,:]  # 对重复的坐标进行清理
+	yQ_clean = np.unique(xQyQ_all, axis=1)[1,:]  # 对重复的坐标进行清理
+	if len(xQ_clean) > (2*m):
+		xQ = xQ_clean[0:2*m]
+		yQ = yQ_clean[0:2*m]
+	else:
+		xQ = xQ_clean
+		yQ = yQ_clean
+	###########################################################################################
 	return xQ, yQ
 
 
 def func_CN1_sort_xQyQ(m, xQ, yQ, xP_plus, yP_plus, xP_minu, yP_minu):
-	xQ_plus = np.zeros(m)
-	yQ_plus = np.zeros(m)
-	yQ_minu = np.zeros(m)
-	xQ_minu = np.zeros(m)
+	xQ_plus = np.empty(m)
+	yQ_plus = np.empty(m)
+	yQ_minu = np.empty(m)
+	xQ_minu = np.empty(m)
 
 	for i in range(len(xP_plus)):
 		if abs(xP_plus[i] - xP_minu[i]) <= 1e-15:  # 当钢丝绳基本为竖直方向时
@@ -470,10 +482,10 @@ def func_main_cable_net(input_kargs):
 	#print('yQ1_minu=',yQ1_minu)
 	#
 #
-	#print('xQ2_plus=',xQ2_plus)
-	#print('yQ2_plus=',yQ2_plus)
-	#print('xQ2_minu=',xQ2_minu)
-	#print('yQ2_minu=',yQ2_minu)
+	print('xQ2_plus=',xQ2_plus)
+	print('yQ2_plus=',yQ2_plus)
+	print('xQ2_pick=',xQ2_pick)
+	print('yQ2_pick=',yQ2_pick)
 
 
 	length_PQ1_plus = np.sqrt((xP1_plus-xQ1_plus)**2+(yP1_plus-yQ1_plus)**2+(zP1_plus-zQ1_plus)**2)

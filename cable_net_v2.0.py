@@ -19,8 +19,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def func_choose_Origin_xyz_coordinate():  # 判断计算模型采用的坐标原点位置为钢丝绳网片几何中心位置的网孔中心‘centre’，还是采用网孔角点'corner'
-	Origin_xyz_coordinate = 'centre'
-	#Origin_xyz_coordinate = 'corner'
+	#Origin_xyz_coordinate = 'centre'
+	Origin_xyz_coordinate = 'corner'
 	return Origin_xyz_coordinate
 # 本函数用于考虑更细致的情形：加载高度处于顶头自身高度之内，目前尚不完善
 #def func_CN1_lengthArc(H,Rs,Rp,a_DireX,m_DireX,a_DireY,m_DireY):
@@ -209,8 +209,8 @@ def func_CN1_xy_intersection(A1, B1, C1, A2, B2, C2):
 
 # 本函数用于删除钢丝绳网与锚固点之间边界线延长线上的交点
 def func_CN1_pick_xQyQ(m, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34, yQ_line34, xQ_line41, yQ_line41, x1, y1, x2, y2, x3, y3, x4, y4):
-	xQ = np.zeros(2*m)
-	yQ = np.zeros(2*m)
+	xQ = np.zeros(2*m+4)
+	yQ = np.zeros(2*m+4)
 	i1 = 0
 	for i12 in range(len(xQ_line12)):
 		if xQ_line12[i12]-x1<-1e-15 and xQ_line12[i12]-x2<-1e-15:  # 通过x坐标判别是否位于边界线上
@@ -270,6 +270,18 @@ def func_CN1_pick_xQyQ(m, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34,
 				xQ[i1] = xQ_line41[i41]
 				yQ[i1] = yQ_line41[i41]
 				i1 = i1 + 1
+	###########################################################################################
+	# 新添加代码， 用于对重复的坐标进行清理
+	xQyQ_all = np.vstack((xQ, yQ))
+	xQ_clean = np.unique(xQyQ_all, axis=1)[0,:]  # 对重复的坐标进行清理
+	yQ_clean = np.unique(xQyQ_all, axis=1)[1,:]  # 对重复的坐标进行清理
+	if len(xQ_clean) > (2*m):
+		xQ = xQ_clean[0:2*m]
+		yQ = yQ_clean[0:2*m]
+	else:
+		xQ = xQ_clean
+		yQ = yQ_clean
+	###########################################################################################
 	return xQ, yQ
 
 
@@ -351,26 +363,26 @@ if __name__ == '__main__':
 	fail_force = 41782  # 钢丝绳网中的钢丝绳破断力（单位：N）
 
 	# 钢丝绳网几何参数输入
-	d1 = 0.3  # 1方向钢丝绳间距-网孔间距
-	d2 = 0.3  # 2方向钢丝绳间距-网孔间距
-	alpha1 = 0*np.pi/180  # 钢丝绳方向角1，取值范围为半闭半开区间[0,pi)
-	alpha2 = 90*np.pi/180 # 钢丝绳方向角2，取值范围为半闭半开区间[0,pi)
+	d1 = 0.283  # 1方向钢丝绳间距-网孔间距
+	d2 = 0.283  # 2方向钢丝绳间距-网孔间距
+	alpha1 = 45*np.pi/180  # 钢丝绳方向角1，取值范围为半闭半开区间[0,pi)
+	alpha2 = -45*np.pi/180 # 钢丝绳方向角2，取值范围为半闭半开区间[0,pi)
 	A_fibre = fail_force/sigma_u
 	#print('A_fibre=',A_fibre)
-	initial_sag = 0.00  # 钢丝绳网在重力作用下初始垂度（初始高度)
+	initial_sag = 0.20  # 钢丝绳网在重力作用下初始垂度（初始高度)
 
 	# 加载区域几何参数输入
 	ex = 0  # 加载区域中心沿x方向偏心距（单位：m）
 	ey = 0  # 加载区域中心沿y方向偏心距（单位：m）
-	Rp = 0.75  # 加载顶头水平投影半径（单位：m），若加载形状为多边形时考虑为等面积圆的半径
-	Rp = 0.75 + (1e-6)*np.exp(1)  # 用于修复一个bug：即钢丝绳与加载区域边缘相切只有一个交点的情况
+	Rp = 0.3  # 加载顶头水平投影半径（单位：m），若加载形状为多边形时考虑为等面积圆的半径
+	Rp = Rp + (1e-6)*np.exp(1)  # 用于修复一个bug：即钢丝绳与加载区域边缘相切只有一个交点的情况
 	Rs = Rp*12/5  # 球罐形加载顶头半径（单位：m）
 
 	# 锚点坐标输入，可考虑任意四边形钢丝绳网片
-	x1, y1 = 1.5, -1.5  # 四个锚点中锚点1的坐标
-	x2, y2 = 1.5, 1.5  # 四个锚点中锚点2的坐标
-	x3, y3 = -1.5, 1.5  # 四个锚点中锚点3的坐标
-	x4, y4 = -1.5, -1.5  # 四个锚点中锚点4的坐标
+	x1, y1 = 1, -1  # 四个锚点中锚点1的坐标
+	x2, y2 = 1, 1  # 四个锚点中锚点2的坐标
+	x3, y3 = -1, 1  # 四个锚点中锚点3的坐标
+	x4, y4 = -1, -1  # 四个锚点中锚点4的坐标
 
 	# 边界刚度输入，以下部分可考虑边界四周连接不同刚度的钢丝绳
 	ks12 = 1e15  # 锚点12之间的边界弹簧刚度（单位：N/m），与方向1正方向纤维连接，刚性边界取值为1e15N/m
@@ -436,10 +448,10 @@ if __name__ == '__main__':
 	xQ1_plus, yQ1_plus, xQ1_minu, yQ1_minu = func_CN1_sort_xQyQ(m1, xQ1_pick, yQ1_pick, xP1_plus, yP1_plus, xP1_minu, yP1_minu)  # 对挑选出来的交点进行重新排序，使得边界线上的交点与加载边缘上的交点一一对应，与实际钢丝绳网中匹配关系一致，方向1
 	xQ2_plus, yQ2_plus, xQ2_minu, yQ2_minu = func_CN1_sort_xQyQ(m2, xQ2_pick, yQ2_pick, xP2_plus, yP2_plus, xP2_minu, yP2_minu)  # 对挑选出来的交点进行重新排序，使得边界线上的交点与加载边缘上的交点一一对应，与实际钢丝绳网中匹配关系一致，方向2
 	
-	print('xP1_plus=',xP1_plus)
-	print('yP1_plus=',yP1_plus)
-	print('xQ1_plus=',xQ2_plus)
-	print('yQ1_plus=',yQ2_plus)
+	#print('xP1_plus=',xP1_plus)
+	#print('yP1_plus=',yP1_plus)
+	#print('xQ1_plus=',xQ2_plus)
+	#print('yQ1_plus=',yQ2_plus)
 	
 	zQ1_plus, zQ1_minu = np.zeros_like(xQ1_plus), np.zeros_like(xQ1_plus)
 	zQ2_plus, zQ2_minu = np.zeros_like(xQ2_plus), np.zeros_like(xQ2_plus)
