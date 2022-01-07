@@ -249,19 +249,14 @@ def func_CN1_pick_xQyQ(m, xQ_line12, yQ_line12, xQ_line23, yQ_line23, xQ_line34,
 				xQ[i1] = xQ_line41[i41]
 				yQ[i1] = yQ_line41[i41]
 				i1 = i1 + 1
+
 	###########################################################################################
 	# 新添加代码， 用于对重复的坐标进行清理
 	xQyQ_all = np.vstack((xQ, yQ))
 	xQ_clean = np.unique(xQyQ_all, axis=1)[0,:]  # 对重复的坐标进行清理
 	yQ_clean = np.unique(xQyQ_all, axis=1)[1,:]  # 对重复的坐标进行清理
-	if len(xQ_clean) > (2*m):
-		xQ = xQ_clean[0:2*m]
-		yQ = yQ_clean[0:2*m]
-	else:
-		xQ = xQ_clean
-		yQ = yQ_clean
 	###########################################################################################
-	return xQ, yQ
+	return xQ_clean[xQ_clean!=0], yQ_clean[yQ_clean!=0]
 
 
 def func_CN1_sort_xQyQ(m, xQ, yQ, xP_plus, yP_plus, xP_minu, yP_minu):
