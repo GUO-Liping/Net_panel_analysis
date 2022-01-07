@@ -247,50 +247,54 @@ class MyWindow(QMainWindow, Ui_MainWindow):
 # ------------------------------------------------------------------------------------------#
 # 将更改后的输入值在图像中更新
     def slot_boundary_x1y1_change(self):
-        value0 = np.asarray(self.value_input_x1y1_CN.text().split(','),dtype='float')[0]
-        value1 = np.asarray(self.value_input_x1y1_CN.text().split(','),dtype='float')[1]
         try:
-            float(value0)
-            float(value1)
+            value0 = np.asarray(self.value_input_x1y1_CN.text().split(','),dtype='float')[0]
+            value1 = np.asarray(self.value_input_x1y1_CN.text().split(','),dtype='float')[1]
             self.areaCN.set_boundary_x1(float(value0))
             self.areaCN.set_boundary_y1(float(value1))
         except ValueError:
             self.areaCN.set_boundary_x1(1.5)
             self.areaCN.set_boundary_y1(-1.5)
+        except IndexError:
+            self.areaCN.set_boundary_x1(1.5)
+            self.areaCN.set_boundary_y1(-1.5)
 
     def slot_boundary_x2y2_change(self):
-        value0 = np.asarray(self.value_input_x2y2_CN.text().split(','),dtype='float')[0]
-        value1 = np.asarray(self.value_input_x2y2_CN.text().split(','),dtype='float')[1]
         try:
-            float(value0)
-            float(value1)
+            value0 = np.asarray(self.value_input_x2y2_CN.text().split(','),dtype='float')[0]
+            value1 = np.asarray(self.value_input_x2y2_CN.text().split(','),dtype='float')[1]
             self.areaCN.set_boundary_x2(float(value0))
             self.areaCN.set_boundary_y2(float(value1))
         except ValueError:
             self.areaCN.set_boundary_x2(1.5)
             self.areaCN.set_boundary_y2(1.5)
+        except IndexError:
+            self.areaCN.set_boundary_x2(1.5)
+            self.areaCN.set_boundary_y2(1.5)
 
     def slot_boundary_x3y3_change(self):
-        value0 = np.asarray(self.value_input_x3y3_CN.text().split(','),dtype='float')[0]
-        value1 = np.asarray(self.value_input_x3y3_CN.text().split(','),dtype='float')[1]
         try:
-            float(value0)
-            float(value1)
+            value0 = np.asarray(self.value_input_x3y3_CN.text().split(','),dtype='float')[0]
+            value1 = np.asarray(self.value_input_x3y3_CN.text().split(','),dtype='float')[1]
             self.areaCN.set_boundary_x3(float(value0))
             self.areaCN.set_boundary_y3(float(value1))
         except ValueError:
             self.areaCN.set_boundary_x3(-1.5)
             self.areaCN.set_boundary_y3(1.5)
+        except IndexError:
+            self.areaCN.set_boundary_x3(-1.5)
+            self.areaCN.set_boundary_y3(1.5)
 
     def slot_boundary_x4y4_change(self):
-        value0 = np.asarray(self.value_input_x4y4_CN.text().split(','),dtype='float')[0]
-        value1 = np.asarray(self.value_input_x4y4_CN.text().split(','),dtype='float')[1]
         try:
-            float(value0)
-            float(value1)
+            value0 = np.asarray(self.value_input_x4y4_CN.text().split(','),dtype='float')[0]
+            value1 = np.asarray(self.value_input_x4y4_CN.text().split(','),dtype='float')[1]
             self.areaCN.set_boundary_x4(float(value0))
             self.areaCN.set_boundary_y4(float(value1))
         except ValueError:
+            self.areaCN.set_boundary_x4(-1.5)
+            self.areaCN.set_boundary_y4(-1.5)
+        except IndexError:
             self.areaCN.set_boundary_x4(-1.5)
             self.areaCN.set_boundary_y4(-1.5)
 
@@ -306,41 +310,36 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             self.areaCN.set_Rp_CN_draw(0.5)
 
     def slot_input_ex_CN_change(self):
-        value = self.value_input_ex_CN.text()
         try:
-            float(value)
+            value = self.value_input_ex_CN.text()
             self.areaCN.set_ex_CN_draw(float(value))
         except ValueError:
             self.areaCN.set_ex_CN_draw(0.0)
 
     def slot_input_ey_CN_change(self):
-        value = self.value_input_ey_CN.text()
         try:
-            float(value)
+            value = self.value_input_ey_CN.text()
             self.areaCN.set_ey_CN_draw(float(value))
         except ValueError:
             self.areaCN.set_ey_CN_draw(0.0)
 
     def slot_input_alpha1_CN_change(self):
-        value = self.value_input_alpha1_CN.text()
         try:
-            float(value)
+            value = self.value_input_alpha1_CN.text()
             self.areaCN.set_alpha1_CN_draw(float(value))
         except ValueError:
             self.areaCN.set_alpha1_CN_draw(0.0)
 
     def slot_input_alpha2_CN_change(self):
-        value = self.value_input_alpha2_CN.text()
         try:
-            float(value)
+            value = self.value_input_alpha2_CN.text()
             self.areaCN.set_alpha2_CN_draw(float(value))
         except ValueError:
             self.areaCN.set_alpha2_CN_draw(0.0)
 
     def slot_input_d1_CN_change(self):
-        value = self.value_input_d1_CN.text()
         try:
-            float(value)
+            value = self.value_input_d1_CN.text()
             if float(value)==0:
                 self.areaCN.set_d1_CN_draw(0.1)
             else:
@@ -349,9 +348,8 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             self.areaCN.set_d1_CN_draw(0.1)
 
     def slot_input_d2_CN_change(self):
-        value = self.value_input_d2_CN.text()
         try:
-            float(value)
+            value = self.value_input_d2_CN.text()
             if float(value)==0:
                 self.areaCN.set_d2_CN_draw(0.1)
             else:
