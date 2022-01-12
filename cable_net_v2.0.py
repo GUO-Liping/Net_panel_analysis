@@ -347,13 +347,20 @@ def func_CN1_sort_ks_ls0(origin_k, origin_x, origin_y, target_x, target_y):
 	#print('index_k=',index_k.astype('int'))
 	return ko[index_k.astype('int64')]
 
+def func_check_L0yu(L0_array, Ly_array, Lu_array):
+	n_L0yu = len(L0_array)
+	for i in range(n_L0yu):
+		if Ly_array[i]>=L0_array[i] and Ly_array[i]<=Lu_array[i]:
+			pass
+		else:
+			raise ValueError
 
 if __name__ == '__main__':
 	# 参数输入----------------------------------------------------------------------------------- #
 	# 钢丝绳网材料参数输入
 	E_young = 90.304e9  # 钢丝绳网中的钢丝绳弹性模量（单位：Pa）
 	E_tangent = 25.0e9  # 钢丝绳网中的钢丝绳硬化段切线模量（单位：Pa）
-	sigma_y = 1050e6  # 钢丝绳网中的钢丝绳屈服强度（单位：Pa）
+	sigma_y = 1350e6  # 钢丝绳网中的钢丝绳屈服强度（单位：Pa）
 	sigma_u = 1350e6  # 钢丝绳网中的钢丝绳极限强度（单位：Pa）
 	fail_force = 41782  # 钢丝绳网中的钢丝绳破断力（单位：N）
 
@@ -364,7 +371,7 @@ if __name__ == '__main__':
 	alpha2 = -45*np.pi/180 # 钢丝绳方向角2，取值范围为半闭半开区间[0,pi)
 	A_fibre = fail_force/sigma_u
 	#print('A_fibre=',A_fibre)
-	initial_sag = 0.20  # 钢丝绳网在重力作用下初始垂度（初始高度)
+	initial_sag = 0.05  # 钢丝绳网在重力作用下初始垂度（初始高度)
 
 	# 加载区域几何参数输入
 	ex = 0  # 加载区域中心沿x方向偏心距（单位：m）
@@ -519,6 +526,8 @@ if __name__ == '__main__':
 	Ly_all = np.concatenate((Ly_dire1,Ly_dire2),axis=0)
 	Lu_all = np.concatenate((Lu_dire1,Lu_dire2),axis=0)
 
+	func_check_L0yu(L0_all, Ly_all, Lu_all)  # 检查L0_all, Ly_all, Lu_all三者之间的大小关系，保证求解过程收敛
+
 	n_loop = 0 # 初始增量步数
 	Height = initial_sag  # 网片初始面外变形
 	step_H = 1e-3  # 位移加载增量步长，单位：m
@@ -528,9 +537,10 @@ if __name__ == '__main__':
 	Height_list = [0]
 	Force_list = [0]
 	Energy_list = [0]
+	epsilon_u = sigma_y/E_young + (sigma_u-sigma_y)/E_tangent  # 钢丝绳失效应变
 
-	while(n_loop<=10000 and np.amin(target_delta_Lu>=step_H)):  # 判别条件是由一个不等式来确定的（该不等式证明：直角三角形的一个直角边恒定，则另一个直角边的增大程度始终大于斜边长度的增大程度）
-
+	while(n_loop<=10000 and target_delta_Lu>=step_H):  # 判别条件是由一个不等式来确定的（该不等式证明：直角三角形的一个直角边恒定，则另一个直角边的增大程度始终大于斜边长度的增大程度）
+		
 		n_loop = n_loop+1
 		Height = Height+step_H
 
@@ -550,7 +560,7 @@ if __name__ == '__main__':
 		L_dire2 = length_PQ2_plus + length_PQ2_minu + length_Arc2
 
 		L_all = np.concatenate((L_dire1,L_dire2),axis=0)
-		
+
 		target_delta_Lu = np.amin(abs(L_all-Lu_all))
 
 		force_dire1 = np.zeros_like(L_dire1)
@@ -591,7 +601,6 @@ if __name__ == '__main__':
 
 		print('It the',n_loop, 'th loop,','Height=',np.around(Height,3),'Force=',np.around(force,3),'Energy=',np.around(energy,3))
 
-	epsilon_u = sigma_y/E_young + (sigma_u-sigma_y)/E_tangent  # 钢丝绳失效应变
 	print('Height=',np.around(Height,3),'Force=',np.around(force,3),'Energy=',np.around(energy,3))
 	plt.plot(np.array(Height_list),np.array(Force_list),'*-')
 	plt.show()

@@ -327,6 +327,14 @@ def func_CN1_sort_ks_ls0(origin_k, origin_x, origin_y, target_x, target_y):
 	return ko[index_k.astype('int64')]
 
 
+def func_check_L0yu(L0_array, Ly_array, Lu_array):
+	n_L0yu = len(L0_array)
+	for i in range(n_L0yu):
+		if Ly_array[i]>=L0_array[i] and Ly_array[i]<=Lu_array[i]:
+			pass
+		else:
+			raise ValueError
+
 # if __name__ == '__main__':
 def func_main_cable_net(input_kargs):
 	# 参数输入----------------------------------------------------------------------------------- #
@@ -516,6 +524,8 @@ def func_main_cable_net(input_kargs):
 	L0_all =  np.concatenate((L0_dire1,L0_dire2),axis=0)
 	Ly_all = np.concatenate((Ly_dire1,Ly_dire2),axis=0)
 	Lu_all = np.concatenate((Lu_dire1,Lu_dire2),axis=0)
+
+	func_check_L0yu(L0_all, Ly_all, Lu_all)  # 检查L0_all, Ly_all, Lu_all三者之间的大小关系，保证求解过程收敛
 
 	n_loop = 0 # 初始增量步数
 	Height = initial_sag  # 网片初始面外变形
