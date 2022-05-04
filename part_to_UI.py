@@ -512,15 +512,15 @@ class PaintArea(QtWidgets.QWidget):
             qp.setBrush(QtGui.QColor(255, 0, 0, 50))
             for j in range(number_of_height):
                 j = j + 1
-                qp.drawEllipse(offset_w + (i - 1) * 2.6 * ring_radius, offset_h + (j - 1) * 2.6 * ring_radius,
-                               2 * ring_radius, 2 * ring_radius)
+                qp.drawEllipse(int(offset_w + (i - 1) * 2.6 * ring_radius), int(offset_h + (j - 1) * 2.6 * ring_radius),
+                               int(2 * ring_radius), int(2 * ring_radius))
 
         for k in range(number_of_width - 1):
             k = k + 1
             qp.setBrush(QtGui.QColor(0, 0, 255, 50))
             for l in range(number_of_height - 1):
                 l = l + 1
-                qp.drawEllipse(offset_w + (k - 1) * 2.6 * ring_radius + 1.3 * ring_radius,
-                               offset_h + (l - 1) * 2.6 * ring_radius + 1.3 * ring_radius, 2 * ring_radius,
-                               2 * ring_radius)
+                qp.drawEllipse(int(offset_w + (k - 1) * 2.6 * ring_radius + 1.3 * ring_radius),
+                               int(offset_h + (l - 1) * 2.6 * ring_radius + 1.3 * ring_radius), int(2 * ring_radius),
+                               int(2 * ring_radius))
 
