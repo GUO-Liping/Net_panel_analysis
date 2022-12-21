@@ -174,7 +174,7 @@ if __name__ == '__main__':
 	for i in range(len(nw_array)):
 
 		# nw = nw_array[i]
-		nw = 7
+		nw = 5
 		#print('nw=', nw)
 
 		# dmin = dmin_array[i]
@@ -194,7 +194,7 @@ if __name__ == '__main__':
 		# print('kappa=', kappa)
 
 		# ks = ks_array[i]
-		ks = 500000000  # 弹簧刚度，指代卸扣边界（刚体）
+		ks = 50000000000000  # 弹簧刚度，指代卸扣边界（刚体）
 		# print('ks=', ks)
 
 		wx_origin = 3.0
